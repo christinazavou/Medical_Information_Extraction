@@ -8,7 +8,7 @@ from elasticsearch import Elasticsearch
 import json
 
 host = {"host" : "localhost", "port" : 9200}
-path_root="C:\\Users\\Christina\\Documents\\Ads_Ra\\fake patients\\fake patients\\"
+path_root="..\\data\\fake patients\\"
 directory_name="fake_patient1"
 index="fake_patient1"
 
@@ -32,6 +32,7 @@ def csv2dict(csv_filename):
             records.append(record_dict)
         return records
 
+
 def patient2jsondoc(path_root,directory_name):
     path=path_root+directory_name+"\\"
     patient_doc={}#dictionary for json file of a patient
@@ -41,14 +42,12 @@ def patient2jsondoc(path_root,directory_name):
                 toread = os.path.join(root, file)
                 field = file[:-4]
                 patient_doc[field]=csv2dict(toread)
-                bulk_data = []
 
     json_filename =  path_root+directory_name+".json"
     json_file = open(json_filename, 'w')
 
-    #data=json.dumps([row for row in reader], separators=[',',':'],indent=4, sort_keys=True)
-    #json_file.write(data)
+    data=json.dumps(patient_doc, separators=[',', ':'], indent=4, sort_keys=True)
+    json_file.write(data)
 
-    #data=json.dumps(records, separators=[',', ':'], indent=4, sort_keys=True)
-    #json_file.write(data)
+
 patient2jsondoc(path_root,directory_name)
