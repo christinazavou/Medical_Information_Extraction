@@ -1,0 +1,121 @@
+{
+    "dbc":[
+        {
+            "0327":"None",
+            "care_provider_code":"8324875",
+            "care_request":"Radicale behandeling",
+            "care_request_code":"11",
+            "care_type":"vervolg",
+            "care_type_code":"21",
+            "dbc_status":"A",
+            "diagnosis":"Gastro-enterologische tumoren",
+            "diagnosis_code":"102",
+            "end_date":"2011-12-14T00:00:00",
+            "specialty":"Radiotherapie",
+            "specialty_code":"0361",
+            "start_date":"2011-12-14T00:00:00",
+            "treatment":"Follow up consult =<4 | Radiotherapie",
+            "treatment_code":"990061029"
+        },
+        {
+            "0327":"None",
+            "care_provider_code":"7049205",
+            "care_request":"None",
+            "care_request_code":"None",
+            "care_type":"vervolg",
+            "care_type_code":"21",
+            "dbc_status":"B",
+            "diagnosis":"maligne neoplasma rectum",
+            "diagnosis_code":"325",
+            "end_date":"2013-02-11T00:00:00",
+            "specialty":"Chirurgie",
+            "specialty_code":"0303",
+            "start_date":"2013-02-13T00:00:00",
+            "treatment":"None",
+            "treatment_code":"None"
+        }
+    ],
+    "lab_result":[
+        {
+            "collection_date":"2011-07-01T11:40:00",
+            "description":"TSH",
+            "test_value_numeric":"1.8",
+            "test_value_unit":"mU/L"
+        },
+        {
+            "collection_date":"2011-05-01T09:33:00",
+            "description":"Erythrocyten",
+            "test_value_numeric":"3.2",
+            "test_value_unit":"10ex12/L"
+        },
+        {
+            "collection_date":"2014-02-03T19:13:00",
+            "description":"Hemoglobine",
+            "test_value_numeric":"7.7",
+            "test_value_unit":"mmol/L"
+        }
+    ],
+    "medication":[
+        {
+            "end_date":"2015-06-17T08:22:00",
+            "full_description":"AMOXICILLINE/CLAVUL 1000/200MG PDR V INJ, ANTIBACTERIELE MIDDELEN VOOR SYSTEMISCH GEBRUIK, COMBINATIEPREPARATEN, BETALACTAM-ANTIBIOTICA, PENICILLINES",
+            "prescription_date":"2015-06-17T08:22:35",
+            "start_date":"2014-05-16T15:50:00"
+        },
+        {
+            "end_date":"2015-11-11T13:43:00",
+            "full_description":"MACROGOL CITROEN PDR V DRANK  SACHET, LAXANTIA, OSMOTISCH WERKENDE LAXANTIA, LAXANTIA",
+            "prescription_date":"2015-07-07T14:17:59",
+            "start_date":"2015-07-07T14:17:00"
+        }
+    ],
+    "operation":[
+        {
+            "full_description":"Sigmoidresectie",
+            "operation_date":"2013-08-12T00:00:00",
+            "total_duration":"0"
+        },
+        {
+            "full_description":"Laparotomie (alg.Chir)",
+            "operation_date":"2016-11-01T00:00:00",
+            "total_duration":"0"
+        }
+    ],
+    "report":[
+        {
+            "date":"2009-10-23T09:26:59",
+            "description":"(%o_instelling%) NEWLINE (%o_aanhef%) NEWLINE (%o_naam_1%), (%o_beroep%)            (%o_postnummer%) NEWLINE (%o_adres%) NEWLINE (%o_postkode%) (%o_plaats%) NEWLINE [LOCATION] , 19 oktober 2009 NEWLINE (%o_kop_orig%) NEWLINE (%o_lyst%) NEWLINE Betreft:\t[PATIENTID] /rk NEWLINE Mevr. [PERSON] , geboren [ADRESS] ] [HUISNUMMER] , [LOCATION] Geachte collega, NEWLINE Uw bovengenoemde pati\u00ebnte was van 22-08-2011 tot 25-08-2011 opgenomen op de afdeling van de Isala, locatie blaat. NEWLINE Reden van opname: NEWLINE Stoornis en duizeligheid. NEWLINE Voorgeschiedenis: bypass en een meniscuslesie. NEWLINE Medicatie bij opname: NEWLINE Geen. NEWLINE Anamnese: NEWLINE Pati\u00ebnte is recentelijk moeilijker gaan lopen. Er zijn gehoorsveranderingen geweest, waardoor ze de tv wat harder zet. Looppatroon: pati\u00ebnte loop voorzichtig en heeft geen normale pasgrootte en stapt niet uit. Dr. Neurneberg, neuroloog",
+            "type":"None"
+        },
+        {
+            "date":"2015-06-26T15:53:00",
+            "description":"",
+            "type":"None"
+        },
+        {
+            "date":"2015-06-26T15:53:00",
+            "description":"",
+            "type":"None"
+        },
+        {
+            "date":"2015-07-02T14:26:00",
+            "description":"",
+            "type":"None"
+        },
+        {
+            "date":"2015-07-02T11:35:02",
+            "description":"",
+            "type":"None"
+        },
+        {
+            "date":"2015-07-02T12:50:02",
+            "description":"",
+            "type":"None"
+        },
+        {
+            "date":"2013-08-23T13:21:03.203",
+            "description":"-Anamnese -Algemeen form. MDL -Verwijzer -Huisarts Spanga, HA -Reden van komst -Moeite met ademhalen. -MDL Voorgeschiedenis -&gt; 2001 gastroscopie ivm passageklachten: geen endoscopische afwijkingen. -Overige voorgeschiedenis bypass en COPD. -Medicatie voorgeschiedenis -geen. -Allergie&#235;n en intoleranties -peniciline allergische reactie. -Intoxicatie -roken-, alcohol-. -Anamnese -sinds twee maanden last van duizeligheid. -tractus: goede conditie -Familieanamnese -1 zusje borstkanker, moeder mammacarcinoom -Sociaal - niet getrouwd -Uitslagen onderzoeken -echo abdomen: De blaas is goed gevuld, Normale uterus. -Conclusie -Geen verdenking maligniteit. -Beleid -Beleid + Aanvraag -Colonoscopie",
+            "type":"None"
+        }
+    ]
+}
