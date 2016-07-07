@@ -1,22 +1,7 @@
-#TODO
-#def changeNameDirectory():
-
 import os
 import csv
-import urllib2
-from elasticsearch import Elasticsearch
 import json
 
-host = {"host" : "localhost", "port" : 9200}
-index="fake_patient1"
-
-"""
-es = Elasticsearch(hosts = [host])
-if es.indices.exists(index):
-    print("deleting '%s' index..." % (index))
-    res = es.indices.delete(index = index)
-    print(" response: '%s'" % (res))
-"""
 
 def csv2dict(csv_filename):
     with open(csv_filename, mode='r') as csv_file:
