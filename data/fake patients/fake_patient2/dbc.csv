@@ -1,0 +1,3 @@
+care_request,care_provider_code,treatment_code,end_date,care_type,dbc_status,diagnosis_code,specialty,start_date,care_type_code,care_request_code,diagnosis,specialty_code,0327,treatment
+None,617134,2193849019,2011-13-13T00:00:00,vervolg,A,802,Cardiologie,2011-13-13T00:00:00,21,None,followup na CABG,0320,None,Cardiologie | Follow-up na hartoperatie  ablatie | Overig potentieel risico
+None,8690067,None,2011-13-13T00:00:00,reguliere zorg,A,610,Gastro-Enterologie                                ,2011-13-13T00:00:00,11,None,colorectale maligniteit,0328,None,None
