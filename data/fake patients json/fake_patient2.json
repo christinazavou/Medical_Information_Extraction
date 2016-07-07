@@ -93,11 +93,9 @@
             "total_duration":"0"
         }
     ],
-    "report":[
-        {
-            "date":"2009-10-29T10:57:46",
-            "description":"(%o_postnummer%) NEWLINE (%o_instelling%) NEWLINE (%o_aanhef%) NEWLINE (%o_titel%) (%o_naam_1%), (%o_beroep%) NEWLINE (%o_adres%) NEWLINE (%o_postkode%)  (%o_plaats%) NEWLINE Zwolle, 27 oktober 2009 NEWLINE Ref.: MB NEWLINE Betreft: NEWLINE Dhr. [BIRTHDATE] ([PATIENTID] ) NEWLINE [LOCATION] Geachte collega, NEWLINE Reden van verwijzing: arthritis of reuma? NEWLINE Anamnese: patient heeft veel pijn aan de polsen en uitslag op meerdere plaatse. Deze uitslag is onlangs op komen zetten. Familie-anamnese: geen reuma in familie. Met vriendelijke groet, NEWLINE Dr. Zallenga, reumatoloog",
-            "type":"None"
-        }
-    ]
+    "report":{
+        "date":"2009-10-29T10:57:46",
+        "description":"(%o_postnummer%) NEWLINE (%o_instelling%) NEWLINE (%o_aanhef%) NEWLINE (%o_titel%) (%o_naam_1%), (%o_beroep%) NEWLINE (%o_adres%) NEWLINE (%o_postkode%)  (%o_plaats%) NEWLINE Zwolle, 27 oktober 2009 NEWLINE Ref.: MB NEWLINE Betreft: NEWLINE Dhr. [BIRTHDATE] ([PATIENTID] ) NEWLINE [LOCATION] Geachte collega, NEWLINE Reden van verwijzing: arthritis of reuma? NEWLINE Anamnese: patient heeft veel pijn aan de polsen en uitslag op meerdere plaatse. Deze uitslag is onlangs op komen zetten. Familie-anamnese: geen reuma in familie. Met vriendelijke groet, NEWLINE Dr. Zallenga, reumatoloog",
+        "type":"None"
+    }
 }

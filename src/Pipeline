@@ -13,6 +13,8 @@ def csv2dict(csv_filename):
             for field_id in range(len(record)):#for each column
                 record_dict[header[field_id]]=record[field_id]
             records.append(record_dict)
+        if len(records)==1:
+            records=records[0]
         return records
 
 

@@ -1,7 +1,9 @@
 from elasticsearch import Elasticsearch
 import subprocess
+import time
 
 p = subprocess.Popen('runelastic.bat', creationflags=subprocess.CREATE_NEW_CONSOLE)
+time.sleep(50)
 print " ElasticSearch has started "
 
 
@@ -15,3 +17,5 @@ if es.indices.exists(index):
     print(" response: '%s'" % (res))
 
 
+with open("..\\data\\fake patients json\\fake_patient1.json",'r') as myfile:
+    print myfile.read()
