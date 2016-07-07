@@ -1,0 +1,79 @@
+#TODO
+#def changeNameDirectory():
+
+import os
+import csv
+import urllib2
+from elasticsearch import Elasticsearch
+import json
+
+"""
+host = {"host" : "localhost", "port" : 9200}
+directory="C:\\Users\\Christina\\Documents\\Ads_Ra\\fake patients\\fake patients\\fake_patient1\\"
+index="fake_patient1"
+
+# create ES client
+es = Elasticsearch(hosts = [host])
+
+if es.indices.exists(index):
+    print("deleting '%s' index..." % (index))
+    res = es.indices.delete(index = index)
+    print(" response: '%s'" % (res))
+
+for root, dirs, files in os.walk(directory):
+    for file in files:
+        if file.endswith(".csv"):
+            toread=os.path.join(root, file)
+            field=file[:-4]
+
+            csv_file_object = csv.reader(toread)
+            header = csv_file_object.next()
+            header = [item.lower() for item in header]
+            print "header ",header
+
+            bulk_data = []
+"""
+
+def csv2dict(csv_filename):
+    with open(csv_filename, mode='r') as csv_file:
+        csv_file_reader = csv.reader(csv_file, delimiter=',')
+        header = csv_file_reader.next()
+        records=[]
+        for record in csv_file_reader:#for each row
+            record_dict = {}
+            for field_id in range(len(record)):#for each column
+                record_dict[header[field_id]]=record[field_id]
+            records.append(record_dict)
+        return records
+
+
+def field2doc():
+    csv_filename1 = "C:\\Users\\Christina\\Documents\\Ads_Ra\\fake patients\\fake patients\\fake_patient1\\operation.csv"
+    csv_filename2 = "C:\\Users\\Christina\\Documents\\Ads_Ra\\fake patients\\fake patients\\fake_patient1\\lab_result.csv"
+
+    json_filename = csv_filename1.split(".")[0] + ".json"
+    json_file = open(json_filename, 'w')
+
+    csv_file = open(csv_filename1, 'r')
+    reader = csv.DictReader( csv_file)
+    print "dict ",reader
+    for key in reader:
+        print "key : ",key
+
+    #data=json.dumps([row for row in reader], separators=[',',':'],indent=4, sort_keys=True)
+    #json_file.write(data)
+    """
+    csv_file = open(csv_filename2, 'r')
+    fieldnames = csv.reader(csv_file, delimiter=',').next()
+    reader = csv.DictReader(csv_file, fieldnames)
+    data = json.dumps([row for row in reader], separators=[',', ':'], indent=4, sort_keys=True)
+    json_file.write(data)
+    """
+
+
+
+
+
+        data=json.dumps(records, separators=[',', ':'], indent=4, sort_keys=True)
+        json_file.write(data)
+field2doc()
