@@ -46,23 +46,27 @@ request_body = {
         "number_of_shards": 1,
         "number_of_replicas": 0
     },
-    "mapping":{
+    "mappings":{
         "patient_form":{
             "properties":{
                 "tumor_type":{
-                    "type":"string","index": "analyzed"
+                    "type":"string"
                 }
             }
         },
         "patient_report":{
             "properties":{
-                "report(s)":"prog_list"
+                "report(s)":{
+                    "type":"nested"
+                }
             }
         }
     }
 }
 print("creating '%s' index..." % (index_name))
 res = es.indices.create(index = index_name, body = request_body)
+print(" response: '%s'" % (res))
+res=es.indices.get_mapping(index = index_name)
 print(" response: '%s'" % (res))
 
 bulk_data=index_patient(1)
@@ -74,3 +78,5 @@ bulk_data=index_patient(2)
 
 print("bulk indexing...")
 res = es.bulk(index = index_name, body = bulk_data, refresh = True)
+res=es.indices.get_mapping(index = index_name)
+print(" response: '%s'" % (res))
