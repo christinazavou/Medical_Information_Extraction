@@ -1,0 +1,54 @@
+{
+        "properties": {
+            "dbc": {
+                "properties": {
+                    "care_request": {"type": "string", "index": "not_analyzed"},
+                    "care_provider_code": {"type": "string", "index": "not_analyzed"},
+                    "treatment_code": {"type": "string", "index": "not_analyzed"},
+                    "end_date": {"type": "string", "index": "not_analyzed"},
+                    "care_type": {"type": "string", "index": "not_analyzed"},
+                    "dbc_status": {"type": "string", "index": "not_analyzed"},
+                    "diagnosis_code": {"type": "string", "index": "not_analyzed"},
+                    "specialty": {"type": "string", "index": "not_analyzed"},
+                    "start_date": {"type": "string", "index": "not_analyzed"},
+                    "care_type_code": {"type": "string", "index": "not_analyzed"},
+                    "care_request_code": {"type": "string", "index": "not_analyzed"},
+                    "diagnosis": {"type": "string", "index": "not_analyzed"},
+                    "specialty_code": {"type": "string", "index": "not_analyzed"},
+                    "327": {"type": "string", "index": "not_analyzed"},
+                    "treatment": {"type": "string", "index": "not_analyzed"},
+                    "texttobeindexed":{"type": "string", "index": "not_analyzed"}
+                }
+            },
+            "lab_result": {
+                "properties": {
+                    "collection_date": {"type": "string", "index": "not_analyzed"},
+                    "description": {"type": "string", "index": "not_analyzed"},
+                    "test_value_numeric": {"type": "string", "index": "not_analyzed"},
+                    "test_value_unit": {"type": "string", "index": "not_analyzed"}
+                }
+            },
+            "medication": {
+                "properties": {
+                    "prescription_date": {"type": "date", "index": "not_analyzed"},
+                    "full_description": {"type": "string", "index": "not_analyzed"},
+                    "start_date": {"type": "date", "index": "not_analyzed"},
+                    "end_date": {"type": "date", "index": "not_analyzed"}
+                }
+            },
+            "operation": {
+                "properties": {
+                    "full_description": {"type": "string", "index": "not_analyzed"},
+                    "total_duration": {"type": "long", "index": "not_analyzed"},
+                    "operation_date": {"type": "string", "index": "not_analyzed"}
+                }
+            },
+            "report": {
+                "properties": {
+                    "date": {"type": "date"},
+                    "type": {"type": "string"},
+                    "description": {"type": "string"}
+                }
+            }
+        }
+    }

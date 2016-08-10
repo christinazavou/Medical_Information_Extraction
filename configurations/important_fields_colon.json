@@ -1,0 +1,323 @@
+{
+    "properties":{
+        "colon_form":{
+          "properties":{
+            "SCOPNUMB":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "LOCPRIM":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "LOCPRIM2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCOPDIST":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCOPDIST2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "klachten_klacht1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "klachten_klacht2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "klachten_klacht3":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "klachten_klacht4":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "klachten_klacht88":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "klachten_klacht99":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCORECT":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCORECT2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESTAG_SCORECT_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESTAG_SCORECT2_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESTAG_CT":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCORECN":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCORECN2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESTAG_SCORECN_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESTAG_SCORECN2_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCORECM":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "SCORECM2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESTAG_SCORECM_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESTAG_SCORECM2_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESECTIE":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "RESECTIE2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "mdo_chir":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORB":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORBCAR":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORBVAS":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORBDIA":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORBPUL":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORBNEU":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORBMDA":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             },
+            "COMORBURO":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "value": {
+                    "type": "string"
+                  }
+                }
+             }
+          }
+        }
+    }
+}

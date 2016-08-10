@@ -1,0 +1,19 @@
+
+# ---------------------------------- Program configuration -----------------------------------
+
+store_only_reports: False
+
+path_root_indossiers: "..\\data\\fake patients\\"
+path_root_outdossiers: "..\\data\\fake patients json\\"
+
+index_name: "medical_info_extraction"
+initmap_jfile: "..\\configurations\\mapping.json"
+type_name_p: "patient" # document type of ES index medical_info_extraction that contains all data of one patient
+
+json_patients_directory: "..\\data\\fake patients json\\"
+
+colon_fields: "..\\configurations\\important_fields_colon.json"
+colon_path: "..\\data\\forms\\selection_colon.csv"
+
+mamma_fields: "..\\configurations\\important_fields_mamma.json"
+mamma_path: "..\\data\\forms\\selection_mamma.csv"
