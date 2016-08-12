@@ -1,0 +1,66 @@
+partial search and analysis:
+http://stackoverflow.com/questions/17940026/partial-search-using-analyzer-in-elasticsearch
+
+to see analysis:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-analyze.html
+
+for amount of shards:
+"Elasticsearch provides the ability to subdivide your index into multiple pieces called shards. When you create an
+index, you can simply define the number of shards that you want. Each shard is in itself a fully-functional and
+independent “index” that can be hosted on any node in the cluster.
+The challenge is to figure out the right number of shards, because you only get to make the decision once per index.
+And it impacts both performance, storage and scale, since queries are sent to all shards.
+To decide how many shards to start with, you need to consider how big the index might grow — by size, by query volume,
+and by write load.
+The Elastic team recommends starting with one shard, sending “realistic” traffic, and seeing where it breaks. Then add
+more shards and retest until you find the right number.
+note: if you will need to reshard...then you need to copy all docs of old index to a new index...to be sure you are
+having evereything you need, keep track of a version (on which reshard) each document was created/saved."
+
+for scripts:
+Scripting is supported in many APIs including search, sorting, aggregations, and document updates. Scripts can be
+passed in as part of the request, retrieved from the special .scripts index, or loaded from disk.
+to see how to add in an array:
+https://www.elastic.co/guide/en/elasticsearch/guide/current/partial-updates.html
+
+
+
+def search(uri, term):
+    """Simple Elasticsearch Query"""
+    query = json.dumps({
+        "query": {
+            "match": {
+                "content": term
+            }
+        }
+    })
+    response = requests.get(uri, data=query)
+    results = json.loads(response.text)
+    return results
+
+
+r = requests.post(url, data = json.dumps({"text": ftext, "name": file}))
+
+
+to use try except :
+try:
+    print "something"
+except Exception as inst:
+    print type(inst)
+    print inst
+
+to raise an exception:
+raise Exception('some exception')
+
+
+search with wildcards:
+Ma?s — Will match Mars, Mass, and Maps
+Ma*s — Will match Mars, Matches, and Massachusetts
+
+
+analysis:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html
+tokenizers:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-tokenizers.html?__hstc=62641971.f3a72a737870c5077542439680586ddb.1470872193294.1470872193294.1470872193294.1&__hssc=62641971.1.1470872193296&__hsfp=2977536404?__hstc=62641971.f3a72a737870c5077542439680586ddb.1470872193294.1470872193294.1470872193294.1&__hssc=62641971.1.1470872193296&__hsfp=2977536404
+explanation:
+http://blog.tryolabs.com/2015/02/25/elasticsearch-analyzers-or-how-i-learned-to-stop-worrying-and-love-custom-filters/

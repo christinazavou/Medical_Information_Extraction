@@ -2,8 +2,10 @@
 import yaml
 
 
+global settings_dict
+
+
 def init(configFile):
-    global settings_dict
     settings_dict = {}
     with open(configFile, 'r') as f:
         doc = yaml.load(f)
