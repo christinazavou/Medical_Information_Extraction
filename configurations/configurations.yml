@@ -1,6 +1,8 @@
 
 # ---------------------------------- Program configuration -----------------------------------
 
+host: {"host": "localhost", "port": 9200}
+
 store_only_reports: False
 
 path_root_indossiers: "..\\data\\fake patients\\"
@@ -13,9 +15,9 @@ type_name_f: "form"
 
 json_patients_directory: "..\\data\\fake patients json\\"
 json_forms_directory: "..\\configurations\\"
+csv_forms_directory: "..\\data\\forms\\"
 
-colon_fields: "..\\configurations\\important_fields_colon.json"
-colon_path: "..\\data\\forms\\selection_colon.csv"
-
-mamma_fields: "..\\configurations\\important_fields_mamma.json"
-mamma_path: "..\\data\\forms\\selection_mamma.csv"
+#colon_fields: "..\\configurations\\important_fields_colon.json"
+#colon_path: "..\\data\\forms\\selection_colon.csv"
+#mamma_fields: "..\\configurations\\important_fields_mamma.json"
+#mamma_path: "..\\data\\forms\\selection_mamma.csv"

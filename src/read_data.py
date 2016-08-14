@@ -24,9 +24,9 @@ def csv2dict(csv_filename):
 """
 Makes a json file with all information (dictionaries) coming from all of a patient's files.
 """
-def patient2jsondoc(path_root_in,path_root_out,directory_name):
+def patient2jsondoc(path_root_in,path_root_out,directory_name,patient_id):
     path=path_root_in+directory_name+"\\"
-    patient_doc={}#dictionary for json file of a patient
+    patient_doc={"patient_nr":patient_id}#dictionary for json file of a patient
     for root, _, files in os.walk(path):
         for file in files:
             if file.endswith(".csv"):
@@ -45,9 +45,12 @@ def patient2jsondoc(path_root_in,path_root_out,directory_name):
 Read all files-patients and converts them to json files.
 """
 def readPatients(path_root_in,path_root_out):
+    patient_id=0
+    print "in read_data in readPatients...i set what's the nr of each patient."
     for root, dirs, files in os.walk(path_root_in):
         for dir in dirs:
-            patient2jsondoc(path_root_in,path_root_out,dir)
+            patient_id+=1
+            patient2jsondoc(path_root_in,path_root_out,dir,patient_id)
 
 
 if __name__ == '__main__':

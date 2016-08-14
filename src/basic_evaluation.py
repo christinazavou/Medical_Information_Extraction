@@ -9,67 +9,76 @@ import json
 import random
 import os
 
-from baseline_algorithm import randomly_assign_patient_form, store_possible_values
-from ESutils import get_doc_source, connect_to_ES, start_ES
-import settings
+from baseline_algorithm import Algorithm,randomAlgorithm
+from ESutils import start_ES,ES_connection
+from settings import *
 
 
-#should set these somewhere!!!
-patient_ids=[1,2]
-forms_ids=["colon_form","mamma_form"]
+global_info = pickle.load(open("global_info.p", "rb"))
+patient_ids = global_info['medical_info_extraction patient ids']
+forms_ids = global_info['medical_info_extraction form ids']
+labels_possible_values = global_info['labels_possible_values']
+
 labels_correct_values = {} # for one patient!!
 
-global es, index_name,type_name_p,type_name_f
+
+class Evaluation():
+
+    def __init__(self, con, index_name, type_name_p, type_name_f,algo):
+        self.con = con
+        self.index_name = index_name
+        self.type_name_p = type_name_p
+        self.type_name_f = type_name_f
+        self.accuracy = 0.0
+        self.scores={'TP':0,'FP':0,'TN':0,'FN':0}
+        self.algo=algo
+        print "entaxi"
 
 
-"""
-Evaluates an algorithm.
-"""
-def eval(results_jfile):
-    print "way 1: read prediciton file and compare."
-    print "way 2: continuously make predictions for patients with forms and compare. "
-    score=0.0
-    num=0
-    store_possible_values("..\\configurations\\") #2
-    with open(results_jfile) as jfile:
-        predictions=json.load(jfile, encoding='utf-8')
-    for patient_id in patient_ids:
-        doc=es.get_source(index_name,type_name_p,patient_id)
-        for form_id in forms_ids:
-            if form_id in doc.keys():
-                num+=1
-                patient_form_predictions=randomly_assign_patient_form(patient_id, form_id)#2
-                patient_form_predictions=predictions[str(patient_id)][form_id]#1
-                patient_form_targets=doc[form_id]
-                score+=get_score(patient_form_predictions,patient_form_targets)
-    if num>0:
-        score=score/num
-    print("score %d"%score)
+    def eval(self,results_jfile):
+        print "way 1: read prediciton file and compare."
+        print "way 2: continuously make predictions for patients with forms and compare. "
+        num=0
+        with open(results_jfile) as jfile:
+            predictions=json.load(jfile, encoding='utf-8')
+        for patient_id in patient_ids:
+            doc=self.con.get_doc_source(self.index_name,self.type_name_p,patient_id)
+            for form_id in forms_ids:
+                if form_id in doc.keys():
+                    num+=1
+                    patient_form_predictions=self.algo.assign_patient_form(patient_id, form_id)#2
+                    patient_form_predictions=predictions[str(patient_id)][form_id]#1
+                    patient_form_targets=doc[form_id]
+                    self.accuracy+=self.get_score(patient_form_predictions,patient_form_targets)
+        if num>0:
+            self.accuracy=self.accuracy/num
+        print("score %d"%self.accuracy)
 
 
-"""
-both predictions and targets re of the form: {"label1":"value1","label2":"value2"}
-"""
-def get_score(predictions,targets):
-    if len(predictions)==0:
-        print "no predictions"
-        return
-    score=0.0
-    for field in predictions:
-        if predictions[field]==targets[field]:
-            score+=1.0
-    score=score/len(predictions)
-    return score
-
-def run():
-    # something=settings.settings_dict['something']
-    pass
+    """
+    both predictions and targets are of the form: {"label1":"value1","label2":"value2"}
+    """
+    def get_score(self,predictions,targets):
+        if len(predictions)==0:
+            print "no predictions"
+            return
+        score=0.0
+        for field in predictions:
+            if predictions[field]==targets[field]:
+                score+=1.0
+        score=score/len(predictions)
+        return score
 
 
 if __name__ == '__main__':
     # start_ES()
-    es = connect_to_ES()
-    type_name_p = "patient"
-    type_name_f = "form"
-    index_name = "medical_info_extraction"
-    eval("..\\exampleData.json")
+    host = {"host": "localhost", "port": 9200}
+    con=ES_connection(host)
+    type_name_p="patient"
+    type_name_f="form"
+    index_name="medical_info_extraction"
+    r=randomAlgorithm(con,index_name,type_name_p,type_name_f)
+    ass=r.assign("results_baseline.json")
+    ev=Evaluation(con,index_name,type_name_p,type_name_f,r)
+    ev.eval("results_baseline.json")
+    

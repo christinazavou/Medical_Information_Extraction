@@ -1,56 +1,58 @@
 
 import sys
-import settings
+from ESutils import ES_connection, start_ES
+from settings import global_settings,init,global_info,update
+from read_data import readPatients
+from store_data import index_es_patients,index_es_forms,put_forms_in_patients
+
+"""
 import baseline_algorithm
-from ESutils import get_doc_source, update_es_doc, index_doc, start_ES, createIndex, connect_to_ES, put_map
-from store_data import index_es_patients, set_forms_ids, index_es_forms, put_forms_in_patients
 import basic_evaluation
-import read_data
+"""
 
 if __name__=='__main__':
 
-    if len(sys.argv) != 4:
+    print sys.argv
+    if len(sys.argv) != 5:
         print "Invalid number of arguments passed, please see README for usage"
         sys.exit(1)
 
     configFilePath = sys.argv[1] #"..\configurations\configurations.yml"
     algo= sys.argv[2] #"baseline"
     start_es=sys.argv[3] #"False"
+    read_dossiers=sys.argv[4] #"True"
+    #if read_dossiers is set to True then we read and store as well.
 
-    #Get the global settings
-    settings.init(configFilePath) # Call only once
+    init("..\configurations\configurations.yml") #read configuration settings
+    print "remember to change the settings.py globalinfo thingy"
 
-    #Read all the patient's data and store them into an index of ElasticSearch
-    read_data.readPatients(settings.settings_dict['path_root_indossiers'], settings.settings_dict['path_root_outdossiers'])
     if start_es=="True":
         start_ES()
 
-    initmap_jfile=settings.settings_dict['initmap_jfile']
-    index_name = settings.settings_dict['index_name']
-    type_name_p = settings.settings_dict['type_name_p']
-    directory_p=settings.settings_dict['json_patients_directory']
-    form_fields_path = settings.settings_dict['colon_fields']
-    form_path = settings.settings_dict['colon_path']
-    form_fields_path = settings.settings_dict['mamma_fields']
-    form_path = settings.settings_dict['mamma_path']
+    con=ES_connection(global_settings['host'])
 
-    es=connect_to_ES()
-    createIndex(es,index_name)
-    put_map(initmap_jfile,es,index_name,type_name_p)
-    set_forms_ids("..\\data\\forms\\")
-    index_es_patients(es, index_name, type_name_p, directory_p)#put all patients into the index
+    index_name=global_settings['index_name']
+    type_name_p=global_settings['type_name_p']
+    type_name_f=global_settings['type_name_f']
 
-    type_name_f="form"
-    directory_f = "..\\configurations\\"
-    index_es_forms(es, index_name, type_name_f, directory_f)
+    if read_dossiers:
+        #convert all csv dossiers into json files (one for each patient)
+        readPatients(global_settings['path_root_indossiers'], global_settings['path_root_outdossiers'])
+        #store dossiers into an index of ES
+        con.createIndex(index_name,if_exist="discard")
+        con.put_map(global_settings['initmap_jfile'],index_name,type_name_p)
+        index_es_patients(con, index_name, type_name_p, global_settings['json_patients_directory'])
+        index_es_forms(con, index_name, type_name_f,  global_settings['json_forms_directory'])
+        put_forms_in_patients(global_settings['csv_forms_directory'], con, index_name, type_name_f, type_name_p)
+        print "Finished importing data."
 
-    directory = "..\\data\\forms\\"
-    put_forms_in_patients(directory, es, index_name, type_name_f, type_name_p)
+    con.get_type_ids(index_name,type_name_p,1500)
+    print global_info
 
-    print"finish with data. start with algo."
-
+    """
     #Run the basic algorithm
     if sys.argv[1] == "baseline":
         baseline_algorithm.run()
     #Evaluate the algorithm's results
     basic_evaluation.run()
+    """

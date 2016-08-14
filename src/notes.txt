@@ -64,3 +64,112 @@ tokenizers:
 https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-tokenizers.html?__hstc=62641971.f3a72a737870c5077542439680586ddb.1470872193294.1470872193294.1470872193294.1&__hssc=62641971.1.1470872193296&__hsfp=2977536404?__hstc=62641971.f3a72a737870c5077542439680586ddb.1470872193294.1470872193294.1470872193294.1&__hssc=62641971.1.1470872193296&__hsfp=2977536404
 explanation:
 http://blog.tryolabs.com/2015/02/25/elasticsearch-analyzers-or-how-i-learned-to-stop-worrying-and-love-custom-filters/
+
+to run it as a windows service and shut it down:
+http://www.howtogeek.com/50786/using-srvstart-to-run-any-application-as-a-windows-service/
+https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup.html#setup-installation-pid
+
+to check cluster health( not red! ):
+https://www.elastic.co/guide/en/elasticsearch/guide/current/_cluster_health.html
+
+how to query with many parameters!!:only some fields and so on!:
+https://www.elastic.co/guide/en/elasticsearch/reference/0.90/query-dsl-query-string-query.html
+(also field query)
+
+
+GET /medical_info_extraction/patient/_search?pretty=true"
+{
+    "fields" : ["title"],
+    "query" : {
+        "term" : {"lab_result.description" : "TSH"}
+    }
+}
+
+this works!!:
+PUT /neoindex
+{
+    "settings": {
+        "analysis": {
+            "char_filter":{
+                "&_to_and": {
+                    "type":"mapping",
+                    "mappings": [ "&=> and "]
+                }
+            },
+            "filter": {
+                "my_stopwords": {
+                    "type":"stop",
+                    "stopwords": [ "the", "a" ]
+                }
+            },
+            "analyzer": {
+                "my_analyzer": {
+                    "type": "custom",
+                    "char_filter":  [ "html_strip", "&_to_and" ],
+                    "tokenizer":"standard",
+                    "filter":  [ "lowercase", "my_stopwords" ]
+                }
+            }
+        }
+    }
+}
+GET /neoindex/_analyze?analyzer=my_analyzer&text='The quick & brown fox'
+
+
+
+for dutch:
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "dutch_stop": {
+          "type":       "stop",
+          "stopwords":  "_dutch_"
+        },
+        "dutch_keywords": {
+          "type":       "keyword_marker",
+          "keywords":   []
+        },
+        "dutch_stemmer": {
+          "type":       "stemmer",
+          "language":   "dutch"
+        },
+        "dutch_override": {
+          "type":       "stemmer_override",
+          "rules": [
+            "fiets=>fiets",
+            "bromfiets=>bromfiets",
+            "ei=>eier",
+            "kind=>kinder"
+          ]
+        }
+      },
+      "analyzer": {
+        "dutch": {
+          "tokenizer":  "standard",
+          "filter": [
+            "lowercase",
+            "dutch_stop",
+            "dutch_keywords",
+            "dutch_override",
+            "dutch_stemmer"
+          ]
+        }
+      }
+    }
+  }
+}
+
+https://www.compose.com/articles/how-scoring-works-in-elasticsearch/
+(deixnei pos ipologizetai to score sto ES)
+
+how to search in ES:
+https://compose.com/articles/elasticsearch-query-time-strategies-and-techniques-for-relevance-part-i/
+
+to find tf-idf from es:
+http://dharmicdata.com/the-tf-idf-score-in-elastic-search/
+or
+https://gist.github.com/konradkonrad/2f66dc46e324feec706b
+
+the scroll api( to get huge amount of results...reindex..):
+https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html
