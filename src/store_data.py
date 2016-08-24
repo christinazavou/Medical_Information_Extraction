@@ -2,9 +2,11 @@ import json
 import csv
 import os
 import pickle
+from nltk import tokenize
 
 from ESutils import ES_connection, start_ES
-from settings import global_info, update
+#from settings import global_info, update
+import settings2
 
 """
 Accepts a json file and returns its data as a dictionary
@@ -32,8 +34,10 @@ def body_form(jfile,directory):
     for field in fields:
         values = fields_dict[field]['properties']['possible_values']
         values_dict[field] = values
-    global_info['labels_possible_values'][form_name] = values_dict
-    update("")
+    #global_info['labels_possible_values'][form_name] = values_dict
+    #update("")
+    settings2.labels_possible_values[form_name]=values_dict
+    settings2.update_values()
     return body_data
 
 
@@ -90,6 +94,41 @@ def index_es_forms(con,index_name,type_name,directory):
     return ind
 
 
+"""
+Read all patient's documents and index (as documents) all of their reports' sentences.
+"""
+def index_sentences(con,index_name,type_name_p,type_name_s):
+    sentence_id=0
+    patients_ids=con.get_type_ids( index_name, type_name_p, 1500)
+    for patient_id in patients_ids:
+        patient_reports=con.get_doc_source(index_name,type_name_p,patient_id)['report']
+
+        if type(patient_reports)==type([]): #for a list
+            for report in patient_reports:
+                report_sentences=split_into_sentences(report['description'])
+                date=report['date']
+                for i, sentence in enumerate(report_sentences):
+                    sentence_id += 1
+                    body_data = {"text": sentence, "patient": patient_id, "date": date}
+                    con.index_doc( index_name, type_name_s, sentence_id, body_data)
+
+        elif type(patient_reports)==type({}): #for a dict
+            report_sentences=split_into_sentences(patient_reports['description'])
+            date = patient_reports['date']
+            for i, sentence in enumerate(report_sentences):
+                sentence_id += 1
+                body_data = {"text": sentence, "patient": patient_id, "date": date}
+                con.index_doc(index_name, type_name_s, sentence_id, body_data)
+
+"""
+Split a text into sentences.
+TODO: use regexp to split it in any other way we want.
+"""
+def split_into_sentences(source_text):
+    list_of_sententces=tokenize.sent_tokenize(source_text)
+    return list_of_sententces
+
+
 if __name__ == '__main__':
 
     #start_es()
@@ -101,6 +140,9 @@ if __name__ == '__main__':
     host={"host": "localhost", "port": 9200}
 
     con=ES_connection(host)
+    settings2.init("..\\configurations\\configurations.yml")
+    print settings2.labels_possible_values
+
     con.createIndex(index_name)
     con.put_map(map_jfile,index_name,type_name_p)
 
@@ -112,5 +154,8 @@ if __name__ == '__main__':
     directory="..\\data\\forms\\"
     put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p)
 
-    #con.es.indices.refresh(index=index_name)
-    #con.update_es_doc( index_name, type_name_p, 1, "script",script_name="myscript",params_dict={"y":"5"})
+    con.es.indices.refresh(index=index_name)
+    con.update_es_doc( index_name, type_name_p, 1, "script",script_name="myscript",params_dict={"y":"5"})
+
+    type_name_s="report_description_sentence"
+    index_sentences(con,index_name,type_name_p,type_name_s)

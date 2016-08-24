@@ -11,13 +11,14 @@ import os
 
 from baseline_algorithm import Algorithm,randomAlgorithm
 from ESutils import start_ES,ES_connection
-from settings import *
+#from settings import *
+import settings2
 
 
-global_info = pickle.load(open("global_info.p", "rb"))
-patient_ids = global_info['medical_info_extraction patient ids']
-forms_ids = global_info['medical_info_extraction form ids']
-labels_possible_values = global_info['labels_possible_values']
+#global_info = pickle.load(open("global_info.p", "rb"))
+#patient_ids = global_info['medical_info_extraction patient ids']
+#forms_ids = global_info['medical_info_extraction form ids']
+#labels_possible_values = global_info['labels_possible_values']
 
 labels_correct_values = {} # for one patient!!
 
@@ -41,9 +42,11 @@ class Evaluation():
         num=0
         with open(results_jfile) as jfile:
             predictions=json.load(jfile, encoding='utf-8')
-        for patient_id in patient_ids:
+        #for patient_id in patient_ids:
+        for patient_id in settings2.ids['medical_info_extraction patient ids']:
             doc=self.con.get_doc_source(self.index_name,self.type_name_p,patient_id)
-            for form_id in forms_ids:
+            #for form_id in forms_ids:
+            for form_id in settings2.ids['medical_info_extraction form ids']:
                 if form_id in doc.keys():
                     num+=1
                     patient_form_predictions=self.algo.assign_patient_form(patient_id, form_id)#2
@@ -77,8 +80,11 @@ if __name__ == '__main__':
     type_name_p="patient"
     type_name_f="form"
     index_name="medical_info_extraction"
+
+    settings2.init("..\\configurations\\configurations.yml","values.json","ids.json")
+
     r=randomAlgorithm(con,index_name,type_name_p,type_name_f)
     ass=r.assign("results_baseline.json")
+
     ev=Evaluation(con,index_name,type_name_p,type_name_f,r)
     ev.eval("results_baseline.json")
-    

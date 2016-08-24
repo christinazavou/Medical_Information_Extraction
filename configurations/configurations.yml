@@ -12,6 +12,7 @@ index_name: "medical_info_extraction"
 initmap_jfile: "..\\configurations\\mapping.json"
 type_name_p: "patient" # document type of ES index medical_info_extraction that contains all data of one patient
 type_name_f: "form"
+type_name_s: "report_description_sentence"
 
 json_patients_directory: "..\\data\\fake patients json\\"
 json_forms_directory: "..\\configurations\\"

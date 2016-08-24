@@ -5,8 +5,8 @@ from elasticsearch import Elasticsearch
 from elasticsearch import ImproperlyConfigured,ElasticsearchException, TransportError, SSLError
 import pickle
 
-from settings import global_info, update
-
+#from settings import global_info, update
+import settings2
 
 """
 Start Elastic Search
@@ -36,13 +36,16 @@ class ES_connection():
     def get_type_ids(self,index_name,type_name,max_docs):
         print "should be called whenever a document has been removed/added."
         res = self.es.search(index=index_name, doc_type=type_name,
-                            body={"query": {"match_all": {}}, "fields": [],"from" : 0, "size" : max_docs})
+                            body={"sort":"_doc","query": {"match_all": {}}, "fields": [],"from" : 0, "size" : max_docs})
         hits=res['hits']['hits']
         docs_ids=[hit['_id'] for hit in hits]
         name=index_name+" "+type_name+" ids"
-        global_info[name]=docs_ids
+        #global_info[name]=docs_ids
         #print "name ",name,"docs_ids ",docs_ids
-        update("")
+        #update("")
+        settings2.ids[name]=docs_ids
+        settings2.update_ids()
+
         return docs_ids
 
 
@@ -60,7 +63,7 @@ class ES_connection():
     if_exist="discard" or "keep"
     shards and replicas should be given in case of Big Data
     """
-    def createIndex(self,index_name,if_exist="discard",shards=1,replicas=0):
+    def createIndex(self,index_name,if_exist="discard",shards=5,replicas=1): #shards=1,replicas=0
         if if_exist=="discard":
             if self.es.indices.exists(index_name):
                 print("deleting '%s' index..." % (index_name))
@@ -87,7 +90,8 @@ class ES_connection():
 
 
     """
-    Index a document in ES
+    Index a document in ES.
+    TODO: should ask if the doc already exists if we want to update it
     """
     def index_doc(self,index_name,type_name,id_doc,body_data):
         bulk_data = []
@@ -159,6 +163,10 @@ class ES_connection():
         print(" map: %s" %(map))
 
 
+    def search(self,index,body):
+        res=self.es.search(index=index, body=body)
+        return res
+
 if __name__=="__main__":
     #start_ES()
     host={"host": "localhost", "port": 9200}
@@ -166,6 +174,10 @@ if __name__=="__main__":
     #con.createIndex("medical_info_extraction","discard")
     #con.put_map("..\\configurations\\mapping.json","medical_info_extraction","patient")
 
+    settings2.init("..\\configurations\\configurations.yml")
+
     con.get_type_ids("medical_info_extraction","patient",1500)
     con.get_type_ids("medical_info_extraction", "form", 1500)
+    con.get_type_ids("medical_info_extraction", "report_description_sentence", 1500)
 
+    #print con.search(index="medical_info_extraction",body={"query" : { "term" : {"lab_result.description" : "TSH"}}})

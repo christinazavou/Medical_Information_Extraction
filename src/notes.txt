@@ -1,8 +1,21 @@
+to make a cluster...with client,server,master nodes...need virtual machine...
+You'll need each machine to have it's own copy of ElasticSearch (simply copy the one you have now) -- the reason is
+that each machine / node whatever is going to keep it's own files that are sharded accross the cluster.
+The only thing you really need to do is edit the config file to include the name of the cluster.
+If all machines have the same cluster name elasticsearch will do the rest automatically (as long as the machines
+are all on the same network)
+http://techieroop.com/add-new-node-in-elasticsearch-cluster/
+http://devopscube.com/how-to-setup-an-elasticsearch-cluster/
+or
+http://stackoverflow.com/questions/13477303/multiple-nodes-in-elasticsearch
+
+
 partial search and analysis:
 http://stackoverflow.com/questions/17940026/partial-search-using-analyzer-in-elasticsearch
 
 to see analysis:
 https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-analyze.html
+
 
 for amount of shards:
 "Elasticsearch provides the ability to subdivide your index into multiple pieces called shards. When you create an
@@ -17,45 +30,28 @@ more shards and retest until you find the right number.
 note: if you will need to reshard...then you need to copy all docs of old index to a new index...to be sure you are
 having evereything you need, keep track of a version (on which reshard) each document was created/saved."
 
-for scripts:
-Scripting is supported in many APIs including search, sorting, aggregations, and document updates. Scripts can be
-passed in as part of the request, retrieved from the special .scripts index, or loaded from disk.
-to see how to add in an array:
+
+add in an array using script:
 https://www.elastic.co/guide/en/elasticsearch/guide/current/partial-updates.html
-
-
-
-def search(uri, term):
-    """Simple Elasticsearch Query"""
-    query = json.dumps({
-        "query": {
-            "match": {
-                "content": term
-            }
-        }
-    })
-    response = requests.get(uri, data=query)
-    results = json.loads(response.text)
-    return results
-
-
-r = requests.post(url, data = json.dumps({"text": ftext, "name": file}))
-
-
-to use try except :
-try:
-    print "something"
-except Exception as inst:
-    print type(inst)
-    print inst
-
-to raise an exception:
-raise Exception('some exception')
 
 
 search with wildcards:
 Ma?s — Will match Mars, Mass, and Maps
 Ma*s — Will match Mars, Matches, and Massachusetts
+
+
+to run it as a windows service and shut it down:
+http://www.howtogeek.com/50786/using-srvstart-to-run-any-application-as-a-windows-service/
+https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup.html#setup-installation-pid
+
+
+how to query with many parameters!!:only some fields and so on!:
+https://www.elastic.co/guide/en/elasticsearch/reference/0.90/query-dsl-query-string-query.html
+(also field query)
+how to search in ES:
+https://compose.com/articles/elasticsearch-query-time-strategies-and-techniques-for-relevance-part-i/
+the scroll api( to get huge amount of results...reindex..):
+https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html
 
 
 analysis:
@@ -65,27 +61,6 @@ https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-tokeniz
 explanation:
 http://blog.tryolabs.com/2015/02/25/elasticsearch-analyzers-or-how-i-learned-to-stop-worrying-and-love-custom-filters/
 
-to run it as a windows service and shut it down:
-http://www.howtogeek.com/50786/using-srvstart-to-run-any-application-as-a-windows-service/
-https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup.html#setup-installation-pid
-
-to check cluster health( not red! ):
-https://www.elastic.co/guide/en/elasticsearch/guide/current/_cluster_health.html
-
-how to query with many parameters!!:only some fields and so on!:
-https://www.elastic.co/guide/en/elasticsearch/reference/0.90/query-dsl-query-string-query.html
-(also field query)
-
-
-GET /medical_info_extraction/patient/_search?pretty=true"
-{
-    "fields" : ["title"],
-    "query" : {
-        "term" : {"lab_result.description" : "TSH"}
-    }
-}
-
-this works!!:
 PUT /neoindex
 {
     "settings": {
@@ -114,7 +89,6 @@ PUT /neoindex
     }
 }
 GET /neoindex/_analyze?analyzer=my_analyzer&text='The quick & brown fox'
-
 
 
 for dutch:
@@ -160,16 +134,13 @@ for dutch:
   }
 }
 
+
 https://www.compose.com/articles/how-scoring-works-in-elasticsearch/
 (deixnei pos ipologizetai to score sto ES)
 
-how to search in ES:
-https://compose.com/articles/elasticsearch-query-time-strategies-and-techniques-for-relevance-part-i/
 
 to find tf-idf from es:
 http://dharmicdata.com/the-tf-idf-score-in-elastic-search/
 or
 https://gist.github.com/konradkonrad/2f66dc46e324feec706b
 
-the scroll api( to get huge amount of results...reindex..):
-https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html
