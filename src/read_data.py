@@ -1,6 +1,7 @@
 import os
 import csv
 import json
+import settings2
 
 
 """
@@ -45,15 +46,17 @@ def patient2jsondoc(path_root_in,path_root_out,directory_name,patient_id):
 Read all files-patients and converts them to json files.
 """
 def readPatients(path_root_in,path_root_out):
-    patient_id=0
+    #patient_id=0
     print "in read_data in readPatients...i set what's the nr of each patient."
     for root, dirs, files in os.walk(path_root_in):
         for dir in dirs:
-            patient_id+=1
+            patient_id=dir
+            #patient_id+=1
             patient2jsondoc(path_root_in,path_root_out,dir,patient_id)
 
 
 if __name__ == '__main__':
-    path_root_indossiers= "..\\data\\fake patients\\"
-    path_root_outdossiers= "..\\data\\fake patients json\\"
+    settings2.init("..\configurations\configurations.yml")
+    path_root_indossiers= settings2.global_settings['path_root_indossiers']
+    path_root_outdossiers= settings2.global_settings['path_root_outdossiers']
     readPatients(path_root_indossiers, path_root_outdossiers)

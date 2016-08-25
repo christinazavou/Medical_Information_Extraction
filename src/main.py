@@ -1,7 +1,6 @@
 
 import sys
 from ESutils import ES_connection, start_ES
-#from settings import global_settings,init,global_info,update
 from read_data import readPatients
 from store_data import index_es_patients,index_es_forms,put_forms_in_patients,index_sentences
 
@@ -21,7 +20,7 @@ if __name__=='__main__':
 
     configFilePath = sys.argv[1] #"..\configurations\configurations.yml"
     algo= sys.argv[2] #"baseline"
-    start_es=sys.argv[3] #"False"
+    start_es="False" #sys.argv[3] #"False"
     read_dossiers=sys.argv[4] #"True"
     #if read_dossiers is set to True then we read and store as well.
 

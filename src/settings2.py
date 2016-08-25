@@ -1,7 +1,6 @@
 
 import json
 import yaml
-import pickle
 
 
 def init(configFile, fieldsconfigFile=None,idsconfigFile=None):
@@ -58,5 +57,3 @@ if __name__=="__main__":
     print global_settings
     print labels_possible_values
     print ids
-#    update()
-#    print ids

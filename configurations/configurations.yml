@@ -5,8 +5,8 @@ host: {"host": "localhost", "port": 9200}
 
 store_only_reports: False
 
-path_root_indossiers: "..\\data\\fake patients\\"
-path_root_outdossiers: "..\\data\\fake patients json\\"
+path_root_indossiers: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\patients_selection_colorectaal\\"
+path_root_outdossiers: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\patients_selection_colorectaal_json\\"
 
 index_name: "medical_info_extraction"
 initmap_jfile: "..\\configurations\\mapping.json"
@@ -14,11 +14,8 @@ type_name_p: "patient" # document type of ES index medical_info_extraction that 
 type_name_f: "form"
 type_name_s: "report_description_sentence"
 
-json_patients_directory: "..\\data\\fake patients json\\"
+json_patients_directory: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\patients_selection_colorectaal_json\\"
 json_forms_directory: "..\\configurations\\"
-csv_forms_directory: "..\\data\\forms\\"
+csv_forms_directory: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\"
 
-#colon_fields: "..\\configurations\\important_fields_colon.json"
-#colon_path: "..\\data\\forms\\selection_colon.csv"
-#mamma_fields: "..\\configurations\\important_fields_mamma.json"
-#mamma_path: "..\\data\\forms\\selection_mamma.csv"
+#note:now only does for colorectaal...

@@ -3,9 +3,8 @@ import time
 import json
 from elasticsearch import Elasticsearch
 from elasticsearch import ImproperlyConfigured,ElasticsearchException, TransportError, SSLError
-import pickle
 
-#from settings import global_info, update
+
 import settings2
 
 """
@@ -40,9 +39,6 @@ class ES_connection():
         hits=res['hits']['hits']
         docs_ids=[hit['_id'] for hit in hits]
         name=index_name+" "+type_name+" ids"
-        #global_info[name]=docs_ids
-        #print "name ",name,"docs_ids ",docs_ids
-        #update("")
         settings2.ids[name]=docs_ids
         settings2.update_ids()
 
@@ -129,7 +125,7 @@ class ES_connection():
             update_body = {"doc": update_dict}
         else:
             update_body={"script": {"file": script_name,"params":params_dict}}
-        print("updating doc %d" % id_doc)
+        print("updating doc %s" % id_doc)
         try:
             res = self.es.update(index=index_name, doc_type=type_name, id=id_doc, body=update_body,refresh=True)
         except TransportError as e:
@@ -171,13 +167,14 @@ if __name__=="__main__":
     #start_ES()
     host={"host": "localhost", "port": 9200}
     con=ES_connection(host)
-    #con.createIndex("medical_info_extraction","discard")
-    #con.put_map("..\\configurations\\mapping.json","medical_info_extraction","patient")
+    con.createIndex("medical_info_extraction","discard")
+    con.put_map("..\\configurations\\mapping.json","medical_info_extraction","patient")
 
+    """
     settings2.init("..\\configurations\\configurations.yml")
 
     con.get_type_ids("medical_info_extraction","patient",1500)
     con.get_type_ids("medical_info_extraction", "form", 1500)
     con.get_type_ids("medical_info_extraction", "report_description_sentence", 1500)
-
+    """
     #print con.search(index="medical_info_extraction",body={"query" : { "term" : {"lab_result.description" : "TSH"}}})

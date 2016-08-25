@@ -1,11 +1,9 @@
 import json
 import csv
 import os
-import pickle
 from nltk import tokenize
 
 from ESutils import ES_connection, start_ES
-#from settings import global_info, update
 import settings2
 
 """
@@ -34,8 +32,6 @@ def body_form(jfile,directory):
     for field in fields:
         values = fields_dict[field]['properties']['possible_values']
         values_dict[field] = values
-    #global_info['labels_possible_values'][form_name] = values_dict
-    #update("")
     settings2.labels_possible_values[form_name]=values_dict
     settings2.update_values()
     return body_data
@@ -48,6 +44,7 @@ the types of patients and forms ES docs.
 """
 def put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p):
     forms_ids = con.get_type_ids(index_name, type_name_f, 1500)
+    patient_ids = con.get_type_ids(index_name, type_name_p, 1500)
     for id_form in forms_ids:
         body_form=con.get_doc_source(index_name,type_name_f,id_form)
         form_name=body_form['name']
@@ -55,14 +52,16 @@ def put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p):
         file_name=(directory+"selection_"+form_name+".csv").replace("_form","")
         with open(file_name) as form_file:
             reader=csv.DictReader(form_file)
-            id_patient=0
+            #id_patient=0
             for row_dict in reader:
-                id_patient+=1
-                id_dict = {}  # to store the form's values
-                for field in fields:
-                    id_dict[field]=row_dict[field]
-                partial_dict={form_name:id_dict}
-                con.update_es_doc(index_name,type_name_p,id_patient,"doc",partial_dict)
+                #id_patient+=1
+                id_patient=row_dict['PatientNr']
+                if id_patient in patient_ids:
+                    id_dict = {}  # to store the form's values
+                    for field in fields:
+                        id_dict[field]=row_dict[field]
+                    partial_dict={form_name:id_dict}
+                    con.update_es_doc(index_name,type_name_p,id_patient,"doc",partial_dict)
         con.es.indices.refresh(index=index_name)
 
 """
@@ -133,29 +132,32 @@ if __name__ == '__main__':
 
     #start_es()
 
-    map_jfile="..\configurations\mapping.json"
-    index_name = "medical_info_extraction"
-    type_name_p = "patient"
-    type_name_f="form"
-    host={"host": "localhost", "port": 9200}
+    settings2.init("..\\configurations\\configurations.yml")
+    print "initially the values: ", settings2.labels_possible_values
+
+    map_jfile=settings2.global_settings['initmap_jfile']
+    host=settings2.global_settings['host']
+    index_name=settings2.global_settings['index_name']
+    type_name_p=settings2.global_settings['type_name_p']
+    type_name_f=settings2.global_settings['type_name_f']
+    type_name_s=settings2.global_settings['type_name_s']
 
     con=ES_connection(host)
-    settings2.init("..\\configurations\\configurations.yml")
-    print settings2.labels_possible_values
 
-    con.createIndex(index_name)
+    """
+    con.createIndex(index_name,"discard")
     con.put_map(map_jfile,index_name,type_name_p)
 
-    directory_p="..\\data\\fake patients json\\"
-    directory_f="..\\configurations\\"
+    directory_p=settings2.global_settings['path_root_outdossiers']
+    directory_f=settings2.global_settings['json_forms_directory']
     index_es_patients(con,index_name,type_name_p,directory_p)
     index_es_forms(con,index_name,type_name_f,directory_f)
 
-    directory="..\\data\\forms\\"
+    """
+    directory=settings2.global_settings['csv_forms_directory']
     put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p)
 
     con.es.indices.refresh(index=index_name)
     con.update_es_doc( index_name, type_name_p, 1, "script",script_name="myscript",params_dict={"y":"5"})
 
-    type_name_s="report_description_sentence"
     index_sentences(con,index_name,type_name_p,type_name_s)
