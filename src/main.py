@@ -2,7 +2,7 @@
 import sys,os
 from ESutils import ES_connection, start_ES
 from read_data import readPatients
-from store_data import index_es_patients,index_es_forms,put_forms_in_patients,index_sentences
+from store_data import store_deceases
 
 import settings2
 
@@ -37,37 +37,36 @@ if __name__=='__main__':
     #type_sentence=settings2.global_settings['type_name_s']
 
     if read_dossiers:
-        data_path = settings2.global_settings['data_path_root'] + "Data\\"
-        path_root_indossiers = data_path + settings2.global_settings['path_indossiers']
-        path_root_outdossiers = data_path + settings2.global_settings['path_outdossiers']
+        data_path = settings2.global_settings['data_path']
+        path_root_indossiers =  settings2.global_settings['path_root_indossiers']
+        path_root_outdossiers = settings2.global_settings['path_root_outdossiers']
+
         decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
+
         for decease in decease_folders:
-            path_indossiers = path_root_indossiers.replace('decease', decease)
-            path_outdossiers = path_root_outdossiers.replace('decease', decease)
-            # convert all csv dossiers into json files (one for each patient)
-            readPatients(path_indossiers, path_outdossiers)
+            if decease in settings2.global_settings['forms'] :
+                path_indossiers = path_root_indossiers.replace('decease', decease)
+                path_outdossiers = path_root_outdossiers.replace('decease', decease)
+                # convert all csv dossiers into json files (one for each patient)
+                readPatients(path_indossiers, path_outdossiers)
 
         #store dossiers into an index of ES
         con.createIndex(index_name, if_exist="discard")
-        map_jfile = settings2.global_settings['data_path_root'] + 'Configurations\\' + settings2.global_settings['initmap_jfile']
+        map_jfile = settings2.global_settings['map_jfile']
         con.put_map(map_jfile, index_name, type_patient)
 
-        directory_p = settings2.global_settings['data_path_root'] + 'Data\\' + settings2.global_settings['path_outdossiers']
-        directory_f = settings2.global_settings['data_path_root'] + 'Configurations\\' + settings2.global_settings['json_forms_directory']
+        directory_p = settings2.global_settings['directory_p']
+        directory_f = settings2.global_settings['directory_f']
+        data_path = settings2.global_settings['data_path']
 
-        index_es_forms(con, index_name, type_form, directory_f)  # index form for each decease
-        data_path = settings2.global_settings['data_path_root'] + 'Data\\'
-        for decease in decease_folders:
-            patients_directory = directory_p.replace('decease', decease)
-            index_es_patients(con, index_name, type_patient, patients_directory,decease)  # index patients of that decease training set
-        for decease in decease_folders:
-            directory = settings2.global_settings['data_path_root'] + 'Data\\' + decease + "\\"
-            put_forms_in_patients(directory, con, index_name, type_form, type_patient, decease)
-
+        MyDeceases=store_deceases(con, index_name, type_patient, type_form, data_path, directory_p, directory_f)
 #        index_sentences(con, index_name, type_patient, type_sentence)
         print "Finished importing Data."
 
-    con.get_type_ids(index_name,type_patient,1500)
+    for d in MyDeceases:
+        print d.name
+    print con.get_type_ids(index_name,type_patient)
+    print con.get_type_ids(index_name, type_form)
 #    print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
 
     """

@@ -5,6 +5,8 @@ host: {"host": "localhost", "port": 9200}
 
 store_only_reports: False
 
+forms: ["form1","colorectaal","mamma","mamma_carcinoom"]
+
 data_path_root: "..\\" #should be given from system arguments
 
 path_indossiers: "decease\\patients_selection_decease\\"

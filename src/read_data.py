@@ -54,9 +54,9 @@ def readPatients(path_root_in,path_root_out):
 
 if __name__ == '__main__':
     settings2.init('..\\Configurations\\Configurations.yml')
-    data_path= settings2.global_settings['data_path_root']+"Data\\"
-    path_root_indossiers=data_path+settings2.global_settings['path_indossiers']
-    path_root_outdossiers=data_path+settings2.global_settings['path_outdossiers']
+    data_path= settings2.global_settings['data_path']
+    path_root_indossiers=settings2.global_settings['path_root_indossiers']
+    path_root_outdossiers=settings2.global_settings['path_root_outdossiers']
 
     decease_folders= [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
 
