@@ -11,17 +11,17 @@ def init(configFile, fieldsconfigFile=None,idsconfigFile=None):
     global_settings={}
     with open(configFile, 'r') as f:
         doc = yaml.load(f)
+
     global_settings['host']=doc['host']
-    print "host",global_settings['host']
     global_settings['store_only_reports']=doc['store_only_reports']
-    global_settings['path_root_indossiers']=doc['path_root_indossiers']
-    global_settings['path_root_outdossiers']=doc['path_root_outdossiers']
+    global_settings['data_path_root']=doc['data_path_root']
+    global_settings['path_indossiers']=doc['path_indossiers']
+    global_settings['path_outdossiers']=doc['path_outdossiers']
     global_settings['index_name']=doc['index_name']
     global_settings['initmap_jfile']=doc['initmap_jfile']
     global_settings['type_name_p']=doc['type_name_p']
     global_settings['type_name_f']=doc['type_name_f']
     global_settings['type_name_s']=doc['type_name_s']
-    global_settings['json_patients_directory']=doc['json_patients_directory']
     global_settings['json_forms_directory']=doc['json_forms_directory']
     global_settings['csv_forms_directory']=doc['csv_forms_directory']
 
@@ -52,7 +52,7 @@ def update_ids():
 
 
 if __name__=="__main__":
-    configFile="..\\configurations\\configurations.yml"
+    configFile="..\\Configurations\\Configurations.yml"
     init(configFile)
     print global_settings
     print labels_possible_values

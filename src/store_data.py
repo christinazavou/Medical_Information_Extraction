@@ -7,7 +7,7 @@ from ESutils import ES_connection, start_ES
 import settings2
 
 """
-Accepts a json file and returns its data as a dictionary
+Accepts a json file and returns its Data as a dictionary
 """
 def body_patient(j_file):
     with open(j_file, 'r') as json_file:
@@ -42,38 +42,54 @@ Update ES patient docs with the values of their forms
 Accepts the directory of the forms(.csv) to be read, the ES connection, the index_name of ES,
 the types of patients and forms ES docs.
 """
-def put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p):
-    forms_ids = con.get_type_ids(index_name, type_name_f, 1500)
-    patient_ids = con.get_type_ids(index_name, type_name_p, 1500)
-    for id_form in forms_ids:
-        body_form=con.get_doc_source(index_name,type_name_f,id_form)
-        form_name=body_form['name']
-        fields=body_form['fields'].keys()
-        file_name=(directory+"selection_"+form_name+".csv").replace("_form","")
-        with open(file_name) as form_file:
-            reader=csv.DictReader(form_file)
-            #id_patient=0
-            for row_dict in reader:
-                #id_patient+=1
-                id_patient=row_dict['PatientNr']
-                if id_patient in patient_ids:
-                    id_dict = {}  # to store the form's values
-                    for field in fields:
-                        id_dict[field]=row_dict[field]
-                    partial_dict={form_name:id_dict}
-                    con.update_es_doc(index_name,type_name_p,id_patient,"doc",partial_dict)
-        con.es.indices.refresh(index=index_name)
+def put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p,decease):
+    #processing only one form
+    id_form=decease+"_form"
+    con.get_type_ids(index_name, type_name_p, 1500)
+    patient_ids_of_form=settings2.ids[index_name + " " + type_name_p + " ids in "+decease]
+    patient_ids_of_form=[str(id) for id in patient_ids_of_form] #with certainty the patients of this form are indexed
+
+    body_form=con.get_doc_source(index_name,type_name_f,id_form)
+    form_name=body_form['name']
+    fields=body_form['fields'].keys()
+    file_name=(directory+"selection_"+form_name+".csv").replace("_form","")
+    with open(file_name) as form_file:
+        reader=csv.DictReader(form_file)
+        for row_dict in reader:
+            id_patient=str(row_dict['PatientNr'])
+            if id_patient in patient_ids_of_form:
+                id_dict = {}  # to store the form's values
+                for field in fields:
+                    id_dict[field]=row_dict[field]
+                partial_dict={form_name:id_dict}
+                print "put form:"
+                con.update_es_doc(index_name,type_name_p,id_patient,"doc",partial_dict)
+            else:
+                print 'patient\'s id, ',id_patient,' not in ',decease,' form\'s data'
+
+    con.es.indices.refresh(index=index_name)
 
 """
 Reads all patient's json files and inserts them as patient docs in the ES index
 """
-def index_es_patients(con,index_name,type_name,directory):
+def index_es_patients(con,index_name,type_name,directory,decease):
+    patients_ids=con.get_type_ids(index_name,type_name,1500)#patients already in from different deceases
+    patients_ids=[str(id) for id in patients_ids]
+    name=index_name + " " + type_name + " ids in " + decease
+    ids=[]
     for _, _, files in os.walk(directory):
         for file in files:
             if file.endswith(".json"):
-                id_doc = int(filter(str.isdigit, file))
-                body_data=body_patient(directory+file)
-                con.index_doc(index_name,type_name,id_doc,body_data)
+                id_doc = str(filter(str.isdigit, file))
+                if id_doc in patients_ids:
+                    print "already exist"
+                else:
+                    print "creating"
+                    body_data=body_patient(directory+file)
+                    con.index_doc(index_name,type_name,id_doc,body_data)
+                ids.append(id_doc)
+    settings2.ids[name]=ids
+    settings2.update_ids()
     ind=con.es.indices.get(index_name)
     return ind
 
@@ -92,9 +108,15 @@ def index_es_forms(con,index_name,type_name,directory):
     ind=con.es.indices.get(index_name)
     return ind
 
+class Decease():
+    def __init__(self,name):
+        self.name=name
+        self.patients=[]
+    
 
 """
 Read all patient's documents and index (as documents) all of their reports' sentences.
+"""
 """
 def index_sentences(con,index_name,type_name_p,type_name_s):
     sentence_id=0
@@ -118,6 +140,7 @@ def index_sentences(con,index_name,type_name_p,type_name_s):
                 sentence_id += 1
                 body_data = {"text": sentence, "patient": patient_id, "date": date}
                 con.index_doc(index_name, type_name_s, sentence_id, body_data)
+"""
 
 """
 Split a text into sentences.
@@ -132,10 +155,9 @@ if __name__ == '__main__':
 
     #start_es()
 
-    settings2.init("..\\configurations\\configurations.yml")
-    print "initially the values: ", settings2.labels_possible_values
+    settings2.init("..\\Configurations\\Configurations.yml")
 
-    map_jfile=settings2.global_settings['initmap_jfile']
+    map_jfile=settings2.global_settings['data_path_root']+'Configurations\\'+settings2.global_settings['initmap_jfile']
     host=settings2.global_settings['host']
     index_name=settings2.global_settings['index_name']
     type_name_p=settings2.global_settings['type_name_p']
@@ -144,20 +166,24 @@ if __name__ == '__main__':
 
     con=ES_connection(host)
 
-    """
     con.createIndex(index_name,"discard")
     con.put_map(map_jfile,index_name,type_name_p)
 
-    directory_p=settings2.global_settings['path_root_outdossiers']
-    directory_f=settings2.global_settings['json_forms_directory']
-    index_es_patients(con,index_name,type_name_p,directory_p)
-    index_es_forms(con,index_name,type_name_f,directory_f)
+    directory_p=settings2.global_settings['data_path_root']+'Data\\'+settings2.global_settings['path_outdossiers']
+    directory_f=settings2.global_settings['data_path_root']+'Configurations\\'+settings2.global_settings['json_forms_directory']
 
-    """
-    directory=settings2.global_settings['csv_forms_directory']
-    put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p)
+    index_es_forms(con,index_name,type_name_f,directory_f)#index form for each decease
 
-    con.es.indices.refresh(index=index_name)
-    con.update_es_doc( index_name, type_name_p, 1, "script",script_name="myscript",params_dict={"y":"5"})
+    data_path=settings2.global_settings['data_path_root']+'Data\\'
+    decease_folders= [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
+    for decease in decease_folders:
+        patients_directory=directory_p.replace('decease',decease)
+        index_es_patients(con,index_name,type_name_p,patients_directory,decease)#index patients of that decease training set
 
-    index_sentences(con,index_name,type_name_p,type_name_s)
+    for decease in decease_folders:
+        directory=settings2.global_settings['data_path_root']+'Data\\'+decease+"\\"
+        put_forms_in_patients(directory,con,index_name,type_name_f,type_name_p,decease)
+
+    #con.update_es_doc( index_name, type_name_p, 1, "script",script_name="myscript",params_dict={"y":"5"})
+
+    #index_sentences(con,index_name,type_name_p,type_name_s)

@@ -1,0 +1,134 @@
+{
+    "properties":{
+        "mamma_carcinoom_form": {
+          "properties": {
+            "resec_pall_NO_reden": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_geenresectie_meta": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "anamn_TNMCM": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": "unknown"
+              }
+           },
+           "VOORGESCH_answer2": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": "unknown"
+              }
+           },
+           "VOORGESCH_answer1": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+          },
+           "VOORGESCH_answer0": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+          },
+           "anamn_TNMCN": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_pallther_RT": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_pallther_chemoRT": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "anamn_TNMCT": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": "unknown"
+              }
+           },
+           "resec_geenresectie_irres": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_pallther_chemoSTUDIE": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+          },
+           "resec_pallther_chemo": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_pallther_RTstudie": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_pallther_chemoRTstudie": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_pallther_startdatum": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_geenresec_palltherYN": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": ["value1","value2","value3","value4","value5"]
+              }
+           },
+           "resec_geenresectie_anders": {
+              "properties": {
+                "description": "to be filled",
+                "tag": "to be filled",
+                "possible_values": "unknown"
+              }
+           }
+          }
+        }
+    }
+}

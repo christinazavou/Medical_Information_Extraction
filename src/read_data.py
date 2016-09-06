@@ -46,17 +46,23 @@ def patient2jsondoc(path_root_in,path_root_out,directory_name,patient_id):
 Read all files-patients and converts them to json files.
 """
 def readPatients(path_root_in,path_root_out):
-    #patient_id=0
-    print "in read_data in readPatients...i set what's the nr of each patient."
     for root, dirs, files in os.walk(path_root_in):
         for dir in dirs:
             patient_id=dir
-            #patient_id+=1
             patient2jsondoc(path_root_in,path_root_out,dir,patient_id)
 
 
 if __name__ == '__main__':
-    settings2.init("..\configurations\configurations.yml")
-    path_root_indossiers= settings2.global_settings['path_root_indossiers']
-    path_root_outdossiers= settings2.global_settings['path_root_outdossiers']
-    readPatients(path_root_indossiers, path_root_outdossiers)
+    settings2.init('..\\Configurations\\Configurations.yml')
+    data_path= settings2.global_settings['data_path_root']+"Data\\"
+    path_root_indossiers=data_path+settings2.global_settings['path_indossiers']
+    path_root_outdossiers=data_path+settings2.global_settings['path_outdossiers']
+
+    decease_folders= [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
+
+    for decease in decease_folders:
+        path_indossiers=path_root_indossiers.replace('decease',decease)
+        path_outdossiers=path_root_outdossiers.replace('decease',decease)
+        readPatients(path_indossiers, path_outdossiers)
+
+    print 'should be for those deceases i want'

@@ -5,17 +5,16 @@ host: {"host": "localhost", "port": 9200}
 
 store_only_reports: False
 
-path_root_indossiers: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\patients_selection_colorectaal\\"
-path_root_outdossiers: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\patients_selection_colorectaal_json\\"
+data_path_root: "..\\" #should be given from system arguments
+
+path_indossiers: "decease\\patients_selection_decease\\"
+path_outdossiers: "decease\\patients_selection_decease_json\\"
 
 index_name: "medical_info_extraction"
-initmap_jfile: "..\\configurations\\mapping.json"
-type_name_p: "patient" # document type of ES index medical_info_extraction that contains all data of one patient
+initmap_jfile: "mapping.json"
+type_name_p: "patient" # document type of ES index medical_info_extraction that contains all Data of one patient
 type_name_f: "form"
 type_name_s: "report_description_sentence"
 
-json_patients_directory: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\patients_selection_colorectaal_json\\"
-json_forms_directory: "..\\configurations\\"
-csv_forms_directory: "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\"
-
-#note:now only does for colorectaal...
+json_forms_directory: "important_fields\\"
+csv_forms_directory: "decease\\"

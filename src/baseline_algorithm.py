@@ -1,7 +1,7 @@
 
 """
 Takes as Input: The fields of the form to be filled-in
-Algo_Output: Randomly assigns terms / randomly choose 1 out of k
+Algo_Output: Randomly assigns terms / randomly choose 4914 out of k
 """
 
 import json
@@ -55,8 +55,6 @@ class randomAlgorithm(Algorithm):
     def assign(self,results_jfile):
         self.algo_assignments = {}
         self.results_jfile = results_jfile
-    #    with open('..\\exampleData.json') as f:
-    #        data = json.load(f)
         for patient_id in settings2.ids['medical_info_extraction patient ids']:
             patient_forms={}
             doc=self.con.get_doc_source(self.index_name,self.type_name_p,patient_id)
@@ -65,9 +63,6 @@ class randomAlgorithm(Algorithm):
                     form_values=self.assign_patient_form(patient_id,form_id)
                 patient_forms[form_id]=form_values
             self.algo_assignments[patient_id]=patient_forms
-    #    data.update(algo_assignments)
-    #    with open('..\\exampleData.json', 'w') as f:
-    #        json.dump(data, f, indent=4)
         with open(results_jfile,'w') as f:
             json.dump(self.algo_assignments,f,indent=4)
         return self.algo_assignments
@@ -101,7 +96,7 @@ class baselineAlgorithm(Algorithm):
         self.algo_assignments = {}
         self.results_jfile = results_jfile
     #    with open('..\\exampleData.json') as f:
-    #        data = json.load(f)
+    #        Data = json.load(f)
         for patient_id in settings2.ids['medical_info_extraction patient ids']:
             patient_forms={}
             doc=self.con.get_doc_source(self.index_name,self.type_name_p,patient_id)
@@ -110,9 +105,9 @@ class baselineAlgorithm(Algorithm):
                     form_values=self.assign_patient_form(patient_id,form_id)
                 patient_forms[form_id]=form_values
             self.algo_assignments[patient_id]=patient_forms
-    #    data.update(algo_assignments)
+    #    Data.update(algo_assignments)
     #    with open('..\\exampleData.json', 'w') as f:
-    #        json.dump(data, f, indent=4)
+    #        json.dump(Data, f, indent=4)
         with open(results_jfile,'w') as f:
             json.dump(self.algo_assignments,f,indent=4)
         return self.algo_assignments
@@ -183,7 +178,7 @@ class baselineAlgorithm(Algorithm):
 if __name__=='__main__':
     #start_ES()
 
-    settings2.init("..\\configurations\\configurations.yml","values.json","ids.json")
+    settings2.init("..\\Configurations\\Configurations.yml","values.json","ids.json")
     print settings2.labels_possible_values
 
     map_jfile=settings2.global_settings['initmap_jfile']

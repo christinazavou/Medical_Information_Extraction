@@ -32,8 +32,8 @@ class Evaluation():
 
 
     def eval(self,results_jfile):
-        print "way 1: read prediciton file and compare."
-        print "way 2: continuously make predictions for patients with forms and compare. "
+        print "way 4914: read prediciton file and compare."
+        print "way 1504: continuously make predictions for patients with forms and compare. "
         num=0
         with open(results_jfile) as jfile:
             predictions=json.load(jfile, encoding='utf-8')
@@ -42,8 +42,8 @@ class Evaluation():
             for form_id in settings2.ids['medical_info_extraction form ids']:
                 if form_id in doc.keys():
                     num+=1
-                    patient_form_predictions=self.algo.assign_patient_form(patient_id, form_id)#2
-                    patient_form_predictions=predictions[str(patient_id)][form_id]#1
+                    patient_form_predictions=self.algo.assign_patient_form(patient_id, form_id)#1504
+                    patient_form_predictions=predictions[str(patient_id)][form_id]#4914
                     patient_form_targets=doc[form_id]
                     self.accuracy+=self.get_score(patient_form_predictions,patient_form_targets)
         if num>0:
@@ -68,7 +68,7 @@ class Evaluation():
 
 if __name__ == '__main__':
     # start_ES()
-    settings2.init("..\\configurations\\configurations.yml","values.json","ids.json")
+    settings2.init("..\\Configurations\\Configurations.yml","values.json","ids.json")
 
     map_jfile = settings2.global_settings['initmap_jfile']
     host = settings2.global_settings['host']
