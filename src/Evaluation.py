@@ -18,6 +18,7 @@ labels_correct_values = {}  # for one patient!!
 
 class Evaluation():
     def __init__(self, con, index_name, type_name_p, type_name_f, algo):
+        # type: (ES_connection, str, str, str, Algorithm) -> object
         self.con = con
         self.index_name = index_name
         self.type_name_p = type_name_p
