@@ -1,0 +1,57 @@
+{
+    "properties":{
+        "mamma":{
+          "properties":{
+            "anamn_MENOPSTATUS":{
+                "properties": {
+                  "description": "Menopausale status",
+                  "tag": "to be filled",
+                  "possible_values": ["Premenopausaal","Perimenopausaal","Postmenopausaal (door chemotherapie)","Postmenopausaal (natuurlijk)","n.v.t. (man)","Onbekend"]
+                }
+             },
+            "VOORGESCH_answer0":{
+                "properties": {
+                  "description": "Heeft er eerder chirurgie plaatsgevonden aan deze mamma Niet oncologisch: benigne exsicie, augmentatie etc.",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "VOORGESCH_answer1":{
+                "properties": {
+                  "description": "Heeft er eerder chirurgie plaatsgevonden aan deze mamma Niet oncologisch: benigne exsicie, augmentatie etc.",
+                  "tag": "to be filled",
+                  "possible_values": ["No"]
+                }
+             },
+            "VOORGESCH_answer1":{
+                "properties": {
+                  "description": "Heeft er eerder chirurgie plaatsgevonden aan deze mamma Niet oncologisch: benigne exsicie, augmentatie etc.",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "anamn_TNMCT":{
+                "properties": {
+                  "description": "TNM cT",
+                  "tag": "to be filled",
+                  "possible_values": ["cTX","cT0","cTis","cT1","cT1m","cT1a","cT1b","cT1c","cT2","cT3","cT4","cT4a","cT4b","cT4c","cT4d","Onbekend"]
+                }
+             },
+            "resec_pallther_chemo":{
+                "properties": {
+                  "description": "Chemoradiatie",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes","No"]
+                }
+             },
+            "resec_geenresectie_anders":{
+                "properties": {
+                  "description": "Reden: Anders",
+                  "tag": "to be filled",
+                  "possible_values": "unknown"
+                }
+             }
+          }
+        }
+    }
+}
