@@ -30,10 +30,10 @@
             },
             "medication": {
                 "properties": {
-                    "prescription_date": {"type": "date", "index": "not_analyzed"},
+                    "prescription_date": {"type": "string", "index": "not_analyzed"},
                     "full_description": {"type": "string", "index": "not_analyzed"},
-                    "start_date": {"type": "date", "index": "not_analyzed"},
-                    "end_date": {"type": "date", "index": "not_analyzed"}
+                    "start_date": {"type": "string", "index": "not_analyzed"},
+                    "end_date": {"type": "string", "index": "not_analyzed"}
                 }
             },
             "operation": {
@@ -45,7 +45,7 @@
             },
             "report": {
                 "properties": {
-                    "date": {"type": "date"},
+                    "date": {"type": "string"},
                     "type": {"type": "string"},
                     "description": {"type": "string"}
                 }

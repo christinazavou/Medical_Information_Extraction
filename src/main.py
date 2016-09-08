@@ -24,13 +24,14 @@ if __name__=='__main__':
     read_dossiers=sys.argv[3] # True = read and store as well.
     data_path_root = sys.argv[4]
 
-    settings2.init("..\Configurations\configurations.yml") #may give values and ids files
+    settings2.init1(configFilePath) #may give values and ids files
     settings2.global_settings['data_path_root']=data_path_root
+    settings2.global_settings['source_path_root']=os.path.dirname(os.path.realpath(__file__)).replace("src","")
+    settings2.init2()
     index_name = settings2.global_settings['index_name']
     type_patient = settings2.global_settings['type_name_p']
     type_form = settings2.global_settings['type_name_f']
     # type_sentence=settings2.global_settings['type_name_s']
-
 
     con=ES_connection(settings2.global_settings['host'])
 

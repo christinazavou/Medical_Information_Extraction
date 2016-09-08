@@ -110,10 +110,10 @@ class ES_connection():
         bulk_data.append(op_dict)
         bulk_data.append(body_data)
         print"bulk indexing...", id_doc
-        try:
-            res = self.es.bulk(index=index_name, body=bulk_data, refresh=True)
-        except:
-            raise Exception("some exception occurred while writing in an index")
+        #try:
+        res = self.es.bulk(index=index_name, body=bulk_data, refresh=True)
+        #except:
+        #    raise Exception("some exception occurred while writing in an index")
 
     """
     Returns the source of a given document, and print it if show==True
@@ -129,15 +129,11 @@ class ES_connection():
     Updates a doc of an ES index, given the partial dictionary to be updated and doc_or_script="doc" or "script"
     """
 
-    def update_es_doc(self, index_name, type_name, id_doc, doc_or_script, update_dict=None, script_name=None,
-                      params_dict=None, inlinescript=None):
+    def update_es_doc(self, index_name, type_name, id_doc, doc_or_script, update_dict=None, script_name=None,params_dict=None):
         if doc_or_script == "doc":
             update_body = {"doc": update_dict}
         else:
-            if inlinescript is None:
-                update_body = {"script": {"file": script_name, "params": params_dict}}
-            else:
-                update_body = inlinescript
+            update_body = {"script": {"file": script_name, "params": params_dict}}
         print("updating doc %s" % id_doc)
         #try:
         res = self.es.update(index=index_name, doc_type=type_name, id=id_doc, body=update_body, refresh=True)

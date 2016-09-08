@@ -7,8 +7,6 @@ store_only_reports: False
 
 forms: ["form1","colorectaal","mamma"]
 
-data_path_root: "..\\" #should be given from system arguments
-
 path_indossiers: "decease\\patients_selection_decease\\"
 path_outdossiers: "decease\\patients_selection_decease_json\\"
 

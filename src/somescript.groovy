@@ -1,9 +1,8 @@
-/*Represented here are the .groovy files in config/scripts/ folder of ElasticSearch*/
+/*Represented here are the .groovy files in config\scripts\ folder of ElasticSearch*/
+/*folder at isala: D:\elasticsearch-2.2.0\config\scripts*/
 
-
+/* content of put_form_name.groovy: ctx._source.forms+=decease*/
 /* "ctx._source.marks.remove(\"physics\")"*/
-/* "ctx._source.marks.physics = physics","params" : {"physics" : 49 }*/
-/* "ctx._source.marks.english = 41"*/
-/* ctx._source.awsomeness = "2" */
+
 
 

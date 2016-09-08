@@ -48,8 +48,8 @@ class Decease():
                 self.con.index_doc(self.index, self.patients_type, patient_id, body_data)
             return
         print "put form name"
-        update_script = {"script": "ctx._source.forms+=decease_name", "params": {"decease_name": self.name}}
-        self.con.update_es_doc(self.index, self.patients_type, patient_id, "script", inlinescript=update_script)
+        params = dict(decease=self.name)
+        self.con.update_es_doc(self.index, self.patients_type, patient_id, "script",script_name="put_form_name",params_dict=params)
         return
 
     def store_patients_ids(self):
