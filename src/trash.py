@@ -9,7 +9,7 @@ important_fields=[i for i in imp_fields['properties']]
 """
 
 """
-#I can add data to the index without first putting a mapping
+#I can add Data to the index without first putting a mapping
 with open("..\configurations\important_fields_colon.json","r") as map_file:
     map=json.load(map_file)
 print("putting a new (part) mapping...")

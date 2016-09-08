@@ -1,0 +1,22 @@
+
+# ---------------------------------- Program configuration -----------------------------------
+
+host: {"host": "localhost", "port": 9200}
+
+store_only_reports: False
+
+forms: ["form1","colorectaal","mamma"]
+
+data_path_root: "..\\" #should be given from system arguments
+
+path_indossiers: "decease\\patients_selection_decease\\"
+path_outdossiers: "decease\\patients_selection_decease_json\\"
+
+index_name: "medical_info_extraction"
+initmap_jfile: "mapping.json"
+type_name_p: "patient" # document type of ES index medical_info_extraction that contains all Data of one patient
+type_name_f: "form"
+type_name_s: "report_description_sentence"
+
+json_forms_directory: "important_fields\\"
+csv_forms_directory: "decease\\"
