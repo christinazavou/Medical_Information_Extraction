@@ -1,0 +1,332 @@
+{
+    "properties":{
+        "colorectaal":{
+          "properties":{
+            "SCOPNUMB":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["1","2","3"]
+                }
+             },
+            "LOCPRIM":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["Caecum","Appendix","Colon ascendens","Flexura hepatica","Colon transversum","Flexura splenica","Colon descendens","Colon sigmoideum","Rectum","Anders"]
+                }
+             },
+            "LOCPRIM2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["Caecum","Appendix","Colon ascendens","Flexura hepatica","Colon transversum","Flexura splenica","Colon descendens","Colon sigmoideum","Rectum","Anders"]
+                }
+             },
+            "SCOPDIST":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": "unknown"
+                }
+             },
+            "SCOPDIST2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": "unknown"
+                }
+             },
+            "klachten_klacht1":{
+                "properties": {
+                  "description": "Rectaal bloedverlies",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "klachten_klacht2":{
+                "properties": {
+                  "description": "Veranderde defaecatie",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "klachten_klacht3":{
+                "properties": {
+                  "description": "Urgente klachten",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "klachten_klacht4":{
+                "properties": {
+                  "description": "Anemie",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "klachten_klacht88":{
+                "properties": {
+                  "description": "Anders",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "klachten_klacht99":{
+                "properties": {
+                  "description": "Onbekend",
+                  "tag": "to be filled",
+                  "possible_values": ["Yes"]
+                }
+             },
+            "SCORECT":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
+                }
+             },
+            "SCORECT2":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
+                }
+             },
+            "RESTAG_SCORECT_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
+                }
+             },
+            "RESTAG_SCORECT2_1":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
+                }
+             },
+            "RESTAG_CT":{
+                "properties": {
+                  "description": "CT THORAX/ABDOMEN",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee"]
+                }
+             },
+            "SCORECN":{
+                "properties": {
+                  "description": "cN score",
+                  "tag": "to be filled",
+                  "possible_values": ["N0","N1","N2","Nx / onbekend"]
+                }
+             },
+            "SCORECN2":{
+                "properties": {
+                  "description": "cN score ('dubbel' tumor)",
+                  "tag": "to be filled",
+                  "possible_values": ["N0","N1","N2","Nx / onbekend"]
+                }
+             },
+            "RESTAG_SCORECN_1":{
+                "properties": {
+                  "description": "cN score",
+                  "tag": "to be filled",
+                  "possible_values": ["N0","N1","N2","Nx / onbekend"]
+                }
+             },
+            "RESTAG_SCORECN2_1":{
+                "properties": {
+                  "description": "cN score ('dubbel' tumor)",
+                  "tag": "to be filled",
+                  "possible_values": ["N0","N1","N2","Nx / onbekend"]
+                }
+             },
+            "SCORECM":{
+                "properties": {
+                  "description": "cM score",
+                  "tag": "to be filled",
+                  "possible_values": ["M0","M1","Mx / onbekend"]
+                }
+             },
+            "SCORECM2":{
+                "properties": {
+                  "description": "cM score ('dubbel' tumor)",
+                  "tag": "to be filled",
+                  "possible_values": ["M0","M1","Mx / onbekend"]
+                }
+             },
+            "RESTAG_SCORECM_1":{
+                "properties": {
+                  "description": "cM score",
+                  "tag": "to be filled",
+                  "possible_values": ["M0","M1","Mx / onbekend"]
+                }
+             },
+            "RESTAG_SCORECM2_1":{
+                "properties": {
+                  "description": "cM score ('dubbel' tumor)",
+                  "tag": "to be filled",
+                  "possible_values": ["M0","M1","Mx / onbekend"]
+                }
+             },
+            "PROCOK":{
+                "properties": {
+                  "description": "to be filled",
+                  "tag": "to be filled",
+                  "possible_values": ["Ileocoecaal (+appendectomie)","(Extended) Hemicolectomie rechts","Transversum resectie","(Extended) Hemicolectomie links","(Low) anteriorresectie/sigmoidresectie",
+                    "Subtotale colectomie (coecum totrectum)","Abdomino-perianaleresectie","Panproctocolectomie","Transanaal endoscopische procedure","Transanaal endoscopische procedure gevolgd door anterior resectie",
+                  "Transanaal endoscopische procedure gevolgd door abdomino-perinealeresectie","Overig (nietresectieve procedure)"]
+                }
+             },
+            "mdo_chir":{
+                "properties": {
+                  "description": "Patiënt zal chirurgisch worden behandeld",
+                  "tag": "to be filled",
+                  "possible_values": ["Ya","Nee"]
+                }
+             },
+            "geenresectie_irres":{
+                "properties": {
+                  "description": "Reden: Irresectabel",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "geenresectie_meta":{
+                "properties": {
+                  "description": "Reden: Gemetastaseerd",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "geenresectie_anders":{
+                "properties": {
+                  "description": "Reden: Anders",
+                  "tag": "to be filled",
+                  "possible_values": "unknown"
+                }
+             },
+            "geenresec_palltherYN":{
+                "properties": {
+                  "description": "Palliatieve therapie",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "pall_NO_reden":{
+                "properties": {
+                  "description": "Reden",
+                  "tag": "to be filled",
+                  "possible_values": ["Comorbiditeit","wens patient","overleden"]
+                }
+             },
+            "pallther_chemo":{
+                "properties": {
+                  "description": "Chemotherapie",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "pallther_chemoSTUDIE":{
+                "properties": {
+                  "description": "Chemotherapie in studieverband",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "pallther_RT":{
+                "properties": {
+                  "description": "Radiotherapie",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "pallther_RTstudie":{
+                "properties": {
+                  "description": "Radiotherapie in studieverband",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "pallther_chemoRT":{
+                "properties": {
+                  "description": "Chemoradiatie",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "pallther_chemoRTstudie":{
+                "properties": {
+                  "description": "Chemoradiatie in studieverband",
+                  "tag": "to be filled",
+                  "possible_values": ["No","Yes"]
+                }
+             },
+            "pallther_startdatum":{
+                "properties": {
+                  "description": "Startdatum: eerste palliatieve therapie",
+                  "tag": "to be filled",
+                  "possible_values": "unkown"
+                }
+             },
+            "COMORB":{
+                "properties": {
+                  "description": "Comorbiditeit aanwezig",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             },
+            "COMORBCAR":{
+                "properties": {
+                  "description": "Cardiaal",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             },
+            "COMORBVAS":{
+                "properties": {
+                  "description": "Vasculair",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             },
+            "COMORBDIA":{
+                "properties": {
+                  "description": "Diabetes",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             },
+            "COMORBPUL":{
+                "properties": {
+                  "description": "Pulmonaal",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             },
+            "COMORBNEU":{
+                "properties": {
+                  "description": "Neurologisch",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             },
+            "COMORBMDA":{
+                "properties": {
+                  "description": "Gastrointestinaal",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             },
+            "COMORBURO":{
+                "properties": {
+                  "description": "Urogenitaal",
+                  "tag": "to be filled",
+                  "possible_values": ["Ja","Nee","Onbekend"]
+                }
+             }
+          }
+        }
+    }
+}
