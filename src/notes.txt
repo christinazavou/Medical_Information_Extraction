@@ -144,3 +144,35 @@ http://dharmicdata.com/the-tf-idf-score-in-elastic-search/
 or
 https://gist.github.com/konradkonrad/2f66dc46e324feec706b
 
+
+filters:
+curl -XGET 'http://localhost:9200/festivals/music/_search?&pretty=true&size=3' -d '{
+"query": {
+   "filtered": {
+     "filter": {
+       "script": {
+         "script": "doc[\"entryCharge\"].value <cutoff",
+         "params" : {
+           "cutoff" : 1500
+         }
+       }
+     },
+     "query": {
+       "match_all": {}
+     }
+   }
+}'
+opou entrycharge ine leaf field,kato apo allo .. "k":{"entrycharge":"","kk":"ll"}
+"query": {
+    "filtered": {
+      "filter": {
+        "script": {
+          "script": "doc[\"startDate\"].value == doc[\"endDate\"].value"
+        }
+      }
+    }
+  }
+  excellent ocures more than twice
+  "script": {
+          "script": "_index['reviews']['excellent'].tf() > 2"
+  }

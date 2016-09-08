@@ -5,7 +5,7 @@ host: {"host": "localhost", "port": 9200}
 
 store_only_reports: False
 
-forms: ["form1","colorectaal","mamma","mamma_carcinoom"]
+forms: ["form1","colorectaal","mamma"]
 
 data_path_root: "..\\" #should be given from system arguments
 
