@@ -55,8 +55,10 @@ class randomAlgorithm(Algorithm):
         for patient_id in settings2.ids[self.index_name + " " + self.type_name_p + " ids"]:
             patient_forms = {}
             doc = self.con.get_doc_source(self.index_name, self.type_name_p, patient_id)
-            for form_id in settings2.ids[self.index_name + " " + self.type_name_f + " ids"]:
-                if (form_id in doc.keys()) and (form_id in assign_forms):
+            #for form_id in settings2.ids[self.index_name + " " + self.type_name_f + " ids"]:
+            for form_id in assign_forms:
+            #    if (form_id in doc.keys()) and (form_id in assign_forms):
+                if form_id in doc.keys():
                     form_values = self.assign_patient_form(patient_id, form_id)
                     patient_forms[form_id] = form_values
             self.algo_assignments[patient_id] = patient_forms

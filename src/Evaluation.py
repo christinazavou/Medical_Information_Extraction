@@ -35,8 +35,10 @@ class Evaluation():
             predictions = json.load(jfile, encoding='utf-8')
         for patient_id in settings2.ids[self.index_name+" "+self.type_name_p+" ids"]:
             doc = self.con.get_doc_source(self.index_name, self.type_name_p, patient_id)
-            for form_id in settings2.ids[self.index_name+" "+self.type_name_f+" ids"]:
-                if ( form_id in doc.keys() ) and ( form_id in eval_forms ):
+            #for form_id in settings2.ids[self.index_name+" "+self.type_name_f+" ids"]:
+            for form_id in eval_forms:
+                #if ( form_id in doc.keys() ) and ( form_id in eval_forms ):
+                if form_id in doc.keys():
                     num += 1
                     patient_form_predictions = self.algo.assign_patient_form(patient_id, form_id)  # 1
                     patient_form_predictions = predictions[str(patient_id)][form_id]  # 2

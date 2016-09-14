@@ -75,7 +75,10 @@ if __name__ == '__main__':
 
     print "problem with pickling the classes..."
     decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
-
+    consider_forms=[]
+    for decease in decease_folders:
+        if decease in settings2.global_settings['forms']:
+            consider_forms.append(decease)
     #    print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
 
     # Run the random algorithm
@@ -83,7 +86,7 @@ if __name__ == '__main__':
         settings2.init("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
     if sys.argv[2] == "random":
         r = Algorithm.randomAlgorithm(con, index_name, type_patient, type_form)
-        ass = r.assign("results_random.json", settings2.global_settings['forms'])
+        ass = r.assign("results_random.json",consider_forms)
     # Evaluate the algorithm's results
     ev = Evaluation.Evaluation(con, index_name, type_patient, type_form, r)
-    ev.eval("results_random.json", settings2.global_settings['forms'])
+    ev.eval("results_random.json",consider_forms)
