@@ -176,3 +176,6 @@ opou entrycharge ine leaf field,kato apo allo .. "k":{"entrycharge":"","kk":"ll"
   "script": {
           "script": "_index['reviews']['excellent'].tf() > 2"
   }
+
+
+https://qbox.io/blog/elasticsearch-scripting-filtering

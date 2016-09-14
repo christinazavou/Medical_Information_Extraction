@@ -15,6 +15,7 @@ initmap_jfile: "mapping.json"
 type_name_p: "patient" # document type of ES index medical_info_extraction that contains all Data of one patient
 type_name_f: "form"
 type_name_s: "report_description_sentence"
+type_name_pp: "report_description_sentence"
 
 json_forms_directory: "important_fields\\"
 csv_forms_directory: "decease\\"
