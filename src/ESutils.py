@@ -109,7 +109,6 @@ class ES_connection():
         }
         bulk_data.append(op_dict)
         bulk_data.append(body_data)
-        print"bulk indexing...", id_doc
         #try:
         res = self.es.bulk(index=index_name, body=bulk_data, refresh=True)
         #except:
@@ -167,8 +166,11 @@ class ES_connection():
         map = self.es.indices.get_mapping(index=index_name)
         print(" map: %s" % (map))
 
-    def search(self, index, body):
-        res = self.es.search(index=index, body=body)
+    def search(self, index, body, doc_type=None):
+        if doc_type:
+            res = self.es.search(index=index, doc_type=doc_type,body=body)
+        else:
+            res = self.es.search(index=index, body=body)
         return res
 
     def exists(self, index_name, type_name, id_doc):

@@ -5,39 +5,34 @@ i.e. compares outputs with what is on forms
 """
 
 import json
-import random
-import os
 
-from Algorithm import Algorithm, randomAlgorithm
+import Algorithm
 from ESutils import start_ES, ES_connection
-
 import settings2
+import pre_process
+from pre_process import MyPreprocessor
 
 labels_correct_values = {}  # for one patient!!
 
-
 class Evaluation():
-    def __init__(self, con, index_name, type_name_p, type_name_f, algo):
-        # type: (ES_connection, str, str, str, Algorithm) -> object
+    def __init__(self, con, index_name, type_name_p, type_name_f, algo, file):
         self.con = con
         self.index_name = index_name
         self.type_name_p = type_name_p
         self.type_name_f = type_name_f
         self.accuracy = 0.0
-#        self.scores = {'TP': 0, 'FP': 0, 'TN': 0, 'FN': 0}
         self.algo = algo
+        self.file=file
 
-    def eval(self, results_jfile, eval_forms):
+    def eval(self, patients_ids, eval_forms):
         print "way 1: read prediciton file and compare."
         print "way 2: continuously make predictions for patients with forms and compare. "
         num = 0
-        with open(results_jfile) as jfile:
+        with open(self.file) as jfile:
             predictions = json.load(jfile, encoding='utf-8')
-        for patient_id in settings2.ids[self.index_name+" "+self.type_name_p+" ids"]:
+        for patient_id in patients_ids:
             doc = self.con.get_doc_source(self.index_name, self.type_name_p, patient_id)
-            #for form_id in settings2.ids[self.index_name+" "+self.type_name_f+" ids"]:
             for form_id in eval_forms:
-                #if ( form_id in doc.keys() ) and ( form_id in eval_forms ):
                 if form_id in doc.keys():
                     num += 1
                     patient_form_predictions = self.algo.assign_patient_form(patient_id, form_id)  # 1
@@ -53,33 +48,44 @@ class Evaluation():
     """
 
     def get_score(self, predictions, targets):
+#        print "predictions ",predictions
+#        print "targets ",targets
         if len(predictions) == 0:
             print "no predictions"
             return
         score = 0.0
         for field in predictions:
-            if predictions[field] == targets[field]:
-                score += 1.0
+            if type(predictions[field])==dict:
+                if predictions[field]['value'] == targets[field]:
+                    score += 1.0
+            else:
+                if predictions[field] == targets[field]:
+                    score += 1.0
         score = score / len(predictions)
         return score
 
-
 if __name__ == '__main__':
     # start_ES()
-    settings2.init("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
+    settings2.init1("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
 
-    map_jfile = settings2.global_settings['map_jfile']
     host = settings2.global_settings['host']
-    used_forms=settings2.global_settings['forms']
     index_name = settings2.global_settings['index_name']
     type_name_p = settings2.global_settings['type_name_p']
     type_name_f = settings2.global_settings['type_name_f']
     type_name_s = settings2.global_settings['type_name_s']
+    type_name_pp = settings2.global_settings['type_name_pp']
+    labels_possible_values=settings2.labels_possible_values
+    patient_ids=settings2.ids['medical_info_extraction patient ids']
+    forms_ids=settings2.global_settings['forms']
 
     con = ES_connection(host)
 
-    r = randomAlgorithm(con, index_name, type_name_p, type_name_f)
-    ass = r.assign("results_random.json", used_forms)
+    r = Algorithm.randomAlgorithm(con, index_name, type_name_pp, "random_assignment.json",labels_possible_values)
+    ass = r.assign(patient_ids, forms_ids)
+    ev = Evaluation(con, index_name, type_name_p, type_name_f, r, "random_assignment.json")
+    ev.eval( patient_ids,forms_ids)
 
-    ev = Evaluation(con, index_name, type_name_p, type_name_f, r)
-    ev.eval("results_random.json", used_forms)
+    b2 = Algorithm.baselineAlgorithm(con, index_name, type_name_pp, "baseline_assignment_withdescription.json",labels_possible_values, 2, "Mypreprocessor.p")
+    ass = b2.assign(patient_ids, forms_ids)
+    ev = Evaluation(con, index_name, type_name_p, type_name_f, b2, "baseline_assignment_withdescription.json")
+    ev.eval(patient_ids, forms_ids)

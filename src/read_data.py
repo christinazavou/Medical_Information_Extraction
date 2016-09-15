@@ -53,8 +53,11 @@ def readPatients(path_root_in,path_root_out):
 
 
 if __name__ == '__main__':
-    settings2.init('..\\Configurations\\Configurations.yml')
+    settings2.init1('..\\Configurations\\Configurations.yml')
     data_path= settings2.global_settings['data_path']
+    settings2.global_settings['data_path_root'] = ".."
+    settings2.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
+    settings2.init2()
     path_root_indossiers=settings2.global_settings['path_root_indossiers']
     path_root_outdossiers=settings2.global_settings['path_root_outdossiers']
 
@@ -64,5 +67,3 @@ if __name__ == '__main__':
         path_indossiers=path_root_indossiers.replace('decease',decease)
         path_outdossiers=path_root_outdossiers.replace('decease',decease)
         readPatients(path_indossiers, path_outdossiers)
-
-    print 'should be for those deceases i want'

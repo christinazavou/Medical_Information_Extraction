@@ -3,189 +3,206 @@ Takes as Input: The fields of the form to be filled-in
 Algo_Output: Randomly assigns terms / randomly choose 4914 out of k
 """
 
-import json
-import random
-import os
+import json, random, pickle, os, operator, nltk
 from abc import ABCMeta, abstractmethod
-import operator
 
 from ESutils import ES_connection, start_ES
 import settings2
-
+import pre_process
+from pre_process import MyPreprocessor
 
 # cant initiate an abstract class instance
 class Algorithm():
     __metaclass__ = ABCMeta
 
-    def __init__(self, con, index_name, type_name_p, type_name_f):
+    def __init__(self, con, index_name, search_type,results_jfile,labels_possible_values):
         self.con = con
         self.index_name = index_name
-        self.type_name_p = type_name_p
-        self.type_name_f = type_name_f
+        self.search_type = search_type
         self.assignments = {}
+        self.results_jfile=results_jfile
+        self.labels_possible_values=labels_possible_values
+        self.algo_assignments = {}
 
-    @abstractmethod
-    def assign(self):
-        pass
+    def assign(self, assign_patients, assign_forms):
+        for patient_id in assign_patients:
+            patient_forms = {}
+            doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
+            for form_id in assign_forms:
+                if form_id in doc.keys():
+                    form_values = self.assign_patient_form(patient_id, form_id)
+                    patient_forms[form_id] = form_values
+            self.algo_assignments[patient_id] = patient_forms
+            if int(patient_id) % 100 == 0:
+                print "assign: ", self.algo_assignments[patient_id], " to patient: ", patient_id
+        with open(self.results_jfile, 'w') as f:
+            json.dump(self.algo_assignments, f, indent=4)
+        pickle.dump( self.algo_assignments, open( self.results_jfile.replace("json","p"), "wb" ) )
+        return self.algo_assignments
 
     @abstractmethod
     def assign_patient_form(self, data):
         pass
 
-    @abstractmethod
-    def train(self):
-        # should read all indexed patients documents and do something
-        pass
-
-    @abstractmethod
-    def predict(self, patient_id):
-        pass
-
-
 class randomAlgorithm(Algorithm):
-    def train(self):
-        print "todo"
-
-    def predict(self, patient_id):
-        print "todo"
-
-    def assign(self, results_jfile, assign_forms):
-        self.algo_assignments = {}
-        self.results_jfile = results_jfile
-        for patient_id in settings2.ids[self.index_name + " " + self.type_name_p + " ids"]:
-            patient_forms = {}
-            doc = self.con.get_doc_source(self.index_name, self.type_name_p, patient_id)
-            #for form_id in settings2.ids[self.index_name + " " + self.type_name_f + " ids"]:
-            for form_id in assign_forms:
-            #    if (form_id in doc.keys()) and (form_id in assign_forms):
-                if form_id in doc.keys():
-                    form_values = self.assign_patient_form(patient_id, form_id)
-                    patient_forms[form_id] = form_values
-            self.algo_assignments[patient_id] = patient_forms
-        with open(results_jfile, 'w') as f:
-            json.dump(self.algo_assignments, f, indent=4)
-        return self.algo_assignments
 
     # the patient_id and form_id as they appear on the ES index
     def assign_patient_form(self, patient_id, form_id):
         patient_form_assign = {}  # dictionary of assignments
-        for label in settings2.labels_possible_values[form_id]:
-            possibilities = len(settings2.labels_possible_values[form_id][label])
-            if settings2.labels_possible_values[form_id][label] != "unknown":
+        for label in self.labels_possible_values[form_id]:
+            possibilities = len(self.labels_possible_values[form_id][label]['values'])
+            if self.labels_possible_values[form_id][label]['values'] != "unknown":
                 chosen = random.randint(0, possibilities - 1)
-                assignment = settings2.labels_possible_values[form_id][label][chosen]
+                assignment = self.labels_possible_values[form_id][label]['values'][chosen]
             else:
-                print "should use something like do_source[report][0][description][0:10]"
-                assignment = "blah"
+                doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
+                reports=doc['report']
+                if type(reports)==list:
+                    chosen_description=reports[random.randint(0,len(reports)-1)]['description']
+                else:
+                    chosen_description=reports['description']
+                if chosen_description:
+                    tokens=nltk.word_tokenize(chosen_description.lower())
+                    assignment = tokens[random.randint(0,len(tokens)-1)]
+                else:
+                    assignment=""
             patient_form_assign[label] = assignment
         return patient_form_assign
-
 
 class baselineAlgorithm(Algorithm):
-    def train(self):
-        print "todo"
 
-    def predict(self, patient_id):
-        print "todo"
-
-    def assign(self, results_jfile, assigned_forms):
-        self.algo_assignments = {}
-        self.results_jfile = results_jfile
-        for patient_id in settings2.ids[self.index_name + " " + self.type_name_p + " ids"]:
-            patient_forms = {}
-            doc = self.con.get_doc_source(self.index_name, self.type_name_p, patient_id)
-            for form_id in settings2.ids[self.index_name + " " + self.type_name_f + " ids"]:
-                if ( form_id in doc.keys() ) and ( form_id in assigned_forms ):
-                    form_values = self.assign_patient_form(patient_id, form_id)
-                    patient_forms[form_id] = form_values
-            self.algo_assignments[patient_id] = patient_forms
-        with open(results_jfile, 'w') as f:
-            json.dump(self.algo_assignments, f, indent=4)
-        return self.algo_assignments
+    def __init__(self,con, index_name, search_type,results_jfile,labels_possible_values,fuzziness=0,preprocessorfile=None):
+        super(baselineAlgorithm, self).__init__( con, index_name, search_type,results_jfile,labels_possible_values)
+        self.fuzziness=fuzziness
+        if preprocessorfile:
+            self.with_description = True
+            self.MyPreprocessor = pickle.load(open(preprocessorfile, "rb"))
+        else:
+            self.with_description=False
 
     # the patient_id and form_id as they appear on the ES index
     def assign_patient_form(self, patient_id, form_id):
         patient_form_assign = {}  # dictionary of assignments
-        for label in settings2.labels_possible_values[form_id]:
-            values = settings2.labels_possible_values[form_id][label]
+        for label in self.labels_possible_values[form_id]:
+            values = self.labels_possible_values[form_id][label]['values']
             possibilities = len(values)
+
+            search_for = label
+            if self.with_description:
+                search_for += self.labels_possible_values[form_id][label]['description']
+                search_for = self.MyPreprocessor.preprocess(search_for) # will do the same preprocess as for indexing patients
+
             if values != "unknown":
                 # pick the label that has the most (synonyms) occurrences in the patient's reports' description (sentences)
-                assignment = self.pick_best(patient_id, values)
+                assignment = self.pick_best(patient_id, search_for, values)
             else:
                 # pick a word from the patient's reports' descriptions(sentences) that matches the field
-                assignment = self.pick_similar(patient_id, label)
+                assignment = self.pick_similar(patient_id, search_for)
             patient_form_assign[label] = assignment
         return patient_form_assign
 
-    """
-    Choose the answer (from i-k possible answers) that has the more occurrences in patient's reports.
-    TODO: should check for similar values
-    note:chooses first if equal..
-    """
-
-    def pick_best(self, patient_id, values):
-        occurrences = [0 for value in values]
+    def pick_best(self, patient_id, search_for, values):
+        scores = [0 for value in values]
+        evidences = [None for value in values]
         for i, value in enumerate(values):
-            body = {
+            v=search_for+value
+            highlight_search_body ={
                 "query": {
-                    "bool": {
-                        "must": [
-                            {"term": {"text": value}},
-                            {"term": {"patient": patient_id}}
-                        ]
+                    "match": {
+                        "report.description":{
+                            "query": str(v),
+                            "fuzziness": self.fuzziness
+                        }
+                    }
+                },
+                "highlight": {
+                    "order": "score",
+                    "fields": {"report.description": {}},
+                    "fragment_size": 100,
+                    "number_of_fragments": 10
+                }
+            }
+            res = self.con.search(index=self.index_name,body=highlight_search_body,doc_type =self.search_type)
+            correct_hit = None
+            if res['hits']['total'] > 0 :
+                hits=res['hits']['hits']
+                if type(hits) == list:
+                    for hit in hits:
+                        if hit['_id']==patient_id:
+                            correct_hit=hit
+                else:
+                    if hits['_id']==patient_id:
+                        correct_hit=hits
+            if correct_hit:
+                scores[i]=correct_hit['_score']
+                evidences[i]=correct_hit['highlight']['report.description']
+            else:
+                scores[i]=0
+        max_index, max_value = max(enumerate(scores), key=operator.itemgetter(1))
+        assignment={'value':values[max_index],'evidence':evidences[max_index]}
+        return assignment
+
+#TODO: could use offsets but i think they are not available in client...and how to use it?
+
+    def pick_similar(self, patient_id, search_for):
+        #body = {"query": {"bool": {"must": [{"term": {"text": label}},{"term": {"patient": patient_id}}]}}}
+        highlight_search_body = {
+            "query": {
+                "match": {
+                    "report.description":{
+                       "query": str(search_for),
+                       "fuzziness": self.fuzziness
                     }
                 }
-            }
-            res = self.con.search(index=index_name, body={"query": {"term": {"lab_result.description": "TSH"}}})
-            if res['hits']['total'] > 0 and int(patient_id) % 1000 == 1:
-                print "found something: ", res['hits']['total']
-            occurrences[i] = res['hits']['total']
-        max_index, max_value = max(enumerate(occurrences), key=operator.itemgetter(1))
-        return values[max_index]
-
-
-    """
-    Choose some word from similar text of patient's reports...
-    TODO..
-    """
-
-    def pick_similar(self, patient_id, label):
-        body = {
-            "query": {
-                "bool": {
-                    "must": [
-                        {"term": {"text": label}},
-                        {"term": {"patient": patient_id}}
-                    ]
-                }
+            },
+            "highlight": {
+                "order": "score",
+                "fields": {"report.description": {}},
+                "fragment_size": 100,
+                "number_of_fragments": 10
             }
         }
-        res = self.con.search(index=index_name, body={"query": {"term": {"lab_result.description": "TSH"}}})
+        res = self.con.search(index=self.index_name, body=highlight_search_body,doc_type =self.search_type)
+        correct_hit = None
         if res['hits']['total'] > 0:
-            print "found something: "
-        return "dunno"
-
+            hits = res['hits']['hits']
+            if len(hits) > 1:
+                for hit in hits:
+                    if hit['_id'] == patient_id:
+                        correct_hit = hit
+            else:
+                if hits['_id'] == patient_id:
+                    correct_hit = hits
+        if correct_hit:
+            assignment=correct_hit['highlight']['report.description'][1]
+        else:
+            assignment=""
+        return assignment
 
 if __name__ == '__main__':
     # start_ES()
 
-    settings2.init("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
-    print settings2.labels_possible_values
+    settings2.init1("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
 
-    map_jfile = settings2.global_settings['initmap_jfile']
     host = settings2.global_settings['host']
     used_forms = settings2.global_settings['forms']
     index_name = settings2.global_settings['index_name']
     type_name_p = settings2.global_settings['type_name_p']
-    type_name_f = settings2.global_settings['type_name_f']
     type_name_s = settings2.global_settings['type_name_s']
+    type_name_pp = settings2.global_settings['type_name_pp']
+
+    labels_possible_values=settings2.labels_possible_values
 
     con = ES_connection(host)
 
-    r = randomAlgorithm(con, index_name, type_name_p, type_name_f)
-    ass = r.assign("results_random.json", used_forms)
-    print "need to change pick_best cause in res it assigns always to value1 haha"
-#    b=baselineAlgorithm(con,index_name,type_name_p,type_name_f)
-#    ass=b.assign("results_baseline.json")
-    print " baseline work with sentences"
+    used_patients=settings2.ids['medical_info_extraction patient ids']
+    r = randomAlgorithm(con, index_name, type_name_pp, "random_assignment.json", labels_possible_values)
+    ass = r.assign(used_patients, used_forms)
+    b1=baselineAlgorithm(con, index_name, type_name_pp, "baseline_assignment_nodescription.json", labels_possible_values)
+    ass=b1.assign(used_patients, used_forms)
+
+    b2=baselineAlgorithm(con, index_name, type_name_pp, "baseline_assignment_withdescription.json", labels_possible_values,2,"Mypreprocessor.p")
+    ass=b2.assign(used_patients, used_forms)
+
+    #note: me to fuzziness apla vriskei kai lexeis pou ine paromies, diladi mispelled.
+    #alla genika an to query exei 20 lexeis kai mono mia ine mesa tha to vrei kai xoris fuzziness

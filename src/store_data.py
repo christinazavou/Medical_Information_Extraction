@@ -84,7 +84,8 @@ class Decease():
         self.possible_values = {}
         for field in fields:
             values = fields_dict[field]['properties']['possible_values']
-            self.possible_values[field] = values
+            description = fields_dict[field]['properties']['description']
+            self.possible_values[field] = {'values':values,'description':description}
         return body_data
 
     def store_possible_values(self, from_es=False):
@@ -143,8 +144,10 @@ def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directo
 if __name__ == '__main__':
     # start_es()
 
-    settings2.init("..\\Configurations\\Configurations.yml")
-
+    settings2.init1("..\\Configurations\\Configurations.yml")
+    settings2.global_settings['data_path_root'] = ".."
+    settings2.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
+    settings2.init2()
     map_jfile = settings2.global_settings['map_jfile']
     host = settings2.global_settings['host']
     index_name = settings2.global_settings['index_name']
@@ -162,7 +165,5 @@ if __name__ == '__main__':
 
     store_deceases(con, index_name, type_name_p, type_name_f, data_path, directory_p, directory_f)
     print "note that ids where stored from reading patients jsons and not forms csvs"
-
-    # con.update_es_doc( index_name, type_name_p, 1, "script",script_name="myscript",params_dict={"y":"5"})
 
     # index_sentences(con,index_name,type_name_p,type_name_s)

@@ -25,6 +25,7 @@ def init1(configFile, fieldsconfigFile=None,idsconfigFile=None):
     global_settings['type_name_pp']=doc['type_name_pp']
     global_settings['json_forms_directory']=doc['json_forms_directory']
     global_settings['csv_forms_directory']=doc['csv_forms_directory']
+    global_settings['to_remove']=doc['to_remove']
 
     if fieldsconfigFile != None:
         with open(fieldsconfigFile, 'r') as json_file:
@@ -64,7 +65,7 @@ def update_ids():
 
 if __name__=="__main__":
     configFile="..\\Configurations\\Configurations.yml"
-    init(configFile)
+    init1(configFile)
     print "empty ids and values , without saving them"
 #    print global_settings
 #    print labels_possible_values
