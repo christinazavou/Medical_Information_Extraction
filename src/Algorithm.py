@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Takes as Input: The fields of the form to be filled-in
 Algo_Output: Randomly assigns terms / randomly choose 4914 out of k
@@ -91,7 +93,6 @@ class baselineAlgorithm(Algorithm):
             if self.with_description:
                 search_for += self.labels_possible_values[form_id][label]['description']
                 search_for = self.MyPreprocessor.preprocess(search_for) # will do the same preprocess as for indexing patients
-
             if values != "unknown":
                 # pick the label that has the most (synonyms) occurrences in the patient's reports' description (sentences)
                 assignment = self.pick_best(patient_id, search_for, values)
@@ -139,7 +140,11 @@ class baselineAlgorithm(Algorithm):
             else:
                 scores[i]=0
         max_index, max_value = max(enumerate(scores), key=operator.itemgetter(1))
-        assignment={'value':values[max_index],'evidence':evidences[max_index]}
+        if max_value == 0:
+            rand=random.randint(0,len(scores)-1)
+            assignment = {'value': values[rand], 'evidence': "random assignment"}
+        else:
+            assignment={'value':values[max_index],'evidence':evidences[max_index]}
         return assignment
 
 #TODO: could use offsets but i think they are not available in client...and how to use it?

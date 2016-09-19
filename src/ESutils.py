@@ -176,6 +176,12 @@ class ES_connection():
     def exists(self, index_name, type_name, id_doc):
         return self.es.exists(index_name, type_name, id_doc)
 
+    def counter(self,type_doc,ids):
+        current = 0
+        while current <= len(ids) - 1:
+            yield self.get_doc_source('medical_info_extraction', type_doc, ids[current])
+            current += 1
+
 
 if __name__ == "__main__":
     # start_ES()

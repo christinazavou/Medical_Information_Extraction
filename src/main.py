@@ -6,7 +6,7 @@ from store_data import store_deceases
 import settings2
 import Algorithm
 import Evaluation
-from pre_process import annotate,MyPreprocessor
+from pre_process import annotate, MyPreprocessor
 
 if __name__ == '__main__':
 
@@ -19,8 +19,8 @@ if __name__ == '__main__':
     configFilePath = sys.argv[1]  # "..\Configurations\Configurations.yml"
     algo = sys.argv[2]  # "random"
     read_dossiers = sys.argv[3]  # True = read and store as well.
-    data_path_root = sys.argv[4] #".."
-    preprocess_patients = sys.argv[5] #True = preprocess and index
+    data_path_root = sys.argv[4]  # ".."
+    preprocess_patients = sys.argv[5]  # True = preprocess and index
 
     if read_dossiers:
         settings2.init1(configFilePath)  # may give values and ids files
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
-    labels_possible_values=settings2.labels_possible_values
+    labels_possible_values = settings2.labels_possible_values
 
     if read_dossiers or preprocess_patients:
         to_remove = settings2.global_settings['to_remove']
@@ -81,23 +81,27 @@ if __name__ == '__main__':
         preprocessor.save("Mypreprocessor.p")
 
     decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
-    consider_forms=[]
+    consider_forms = []
     for decease in decease_folders:
         if decease in settings2.global_settings['forms']:
             consider_forms.append(decease)
 
-    #    print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
+    # print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
 
     # Run the random algorithm
     if sys.argv[2] == "random":
-        r = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, "random_assignment.json", labels_possible_values)
+        r = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, "random_assignment.json",
+                                      labels_possible_values)
         ass = r.assign(patient_ids, forms_ids)
     else:
-        b1 = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, "baseline_assignment_nodescription.json",labels_possible_values)
+        b1 = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
+                                         "baseline_assignment_nodescription.json", labels_possible_values)
         ass = b1.assign(patient_ids, forms_ids)
-        b2 = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, "baseline_assignment_withdescription.json",labels_possible_values, 2, "Mypreprocessor.p")
+        b2 = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
+                                         "baseline_assignment_withdescription.json", labels_possible_values, 2,
+                                         "Mypreprocessor.p")
         ass = b2.assign(patient_ids, forms_ids)
 
     # Evaluate the algorithm's results
     ev = Evaluation.Evaluation(con, index_name, type_patient, type_form, r)
-    ev.eval("results_random.json",consider_forms)
+    ev.eval("results_random.json", consider_forms)

@@ -179,3 +179,6 @@ opou entrycharge ine leaf field,kato apo allo .. "k":{"entrycharge":"","kk":"ll"
 
 
 https://qbox.io/blog/elasticsearch-scripting-filtering
+
+term vectors:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-termvectors.html

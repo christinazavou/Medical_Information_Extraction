@@ -70,25 +70,25 @@
              },
             "SCORECT":{
                 "properties": {
-                  "description": "to be filled",
+                  "description": "cT score",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
             "SCORECT2":{
                 "properties": {
-                  "description": "to be filled",
+                  "description": "cT score ('dubbel' tumor)",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
             "RESTAG_SCORECT_1":{
                 "properties": {
-                  "description": "to be filled",
+                  "description": "cT score",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
             "RESTAG_SCORECT2_1":{
                 "properties": {
-                  "description": "to be filled",
+                  "description": "cT score ('dubbel' tumor)",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
@@ -148,7 +148,7 @@
              },
             "PROCOK":{
                 "properties": {
-                  "description": "to be filled",
+                  "description": "",
                   "possible_values": ["Ileocoecaal (+appendectomie)","(Extended) Hemicolectomie rechts","Transversum resectie","(Extended) Hemicolectomie links","(Low) anteriorresectie/sigmoidresectie",
                     "Subtotale colectomie (coecum totrectum)","Abdomino-perianaleresectie","Panproctocolectomie","Transanaal endoscopische procedure","Transanaal endoscopische procedure gevolgd door anterior resectie",
                   "Transanaal endoscopische procedure gevolgd door abdomino-perinealeresectie","Overig (nietresectieve procedure)"]
@@ -156,7 +156,7 @@
              },
             "mdo_chir":{
                 "properties": {
-                  "description": "Patient zal chirurgisch worden behandeld",
+                  "description": "Patiënt zal chirurgisch worden behandeld",
                   "possible_values": ["Ya","Nee"]
                 }
              },
@@ -187,7 +187,7 @@
             "pall_NO_reden":{
                 "properties": {
                   "description": "Reden",
-                  "possible_values": ["Comorbiditeit","wens patient","overleden"]
+                  "possible_values": ["Comorbiditeit","wens patiënt","overleden"]
                 }
              },
             "pallther_chemo":{
