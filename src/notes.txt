@@ -182,3 +182,19 @@ https://qbox.io/blog/elasticsearch-scripting-filtering
 
 term vectors:
 https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-termvectors.html
+
+to use filters ( the above is depricated so use: )
+
+GET /medical_info_extraction/patient/_search
+{
+    "query":{
+        "bool" : {
+            "should" : {
+                "term" : { "forms" : "mamma" }
+            },
+            "filter": {
+                "term" : { "patient_nr" : "1504" }
+            }
+        }
+    }
+}

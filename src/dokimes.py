@@ -1,3 +1,4 @@
+"""
 from ESutils import connect_to_ES
 
 if __name__=="__main__":
@@ -73,3 +74,5 @@ if __name__=="__main__":
             "katiallo": "dunno"
         }], index="neoindex", doc_type="proto")
     print("res %s"%res)
+"""
+
