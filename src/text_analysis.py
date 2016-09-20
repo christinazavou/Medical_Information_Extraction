@@ -4,6 +4,8 @@
 
 import json
 from rosette.api import API, DocumentParameters, MorphologyOutput
+import gensim
+import re
 #to specify dutch -> use 'nld' ... but where ?
 
 class RosetteApi():
@@ -29,6 +31,42 @@ class RosetteApi():
         result= self.api.entities(params)
         print(json.dumps(result['entities'], indent=2, ensure_ascii=False, sort_keys=True).encode("utf8"))
         return result
+
+
+class ReportSentences(object):
+    def __init__(self, report_text):
+        self.text = report_text
+
+    def __iter__(self):
+        for line in re.split("[?.:]", self.text):
+            yield line
+
+
+class WordEmbeddings:
+
+    def __init__(self):
+        self.model = gensim.models.Word2Vec(iter=1)
+        self.builded=False
+
+    def build(self,init_sentences):
+        self.model.build_vocab(init_sentences)
+        self.builded=True
+        return self
+
+    def train(self,sentences):
+        self.model.train(sentences)
+        return self
+
+    def get_vocab(self):
+        return self.model.vocab
+
+    def save(self,name):
+        self.model.save(name)
+
+    def load(self,name):
+        self.model=gensim.models.Word2Vec.load(name)
+        return self
+
 
 if __name__ == '__main__':
     myros=RosetteApi()

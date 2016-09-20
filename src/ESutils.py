@@ -176,12 +176,31 @@ class ES_connection():
     def exists(self, index_name, type_name, id_doc):
         return self.es.exists(index_name, type_name, id_doc)
 
-    def counter(self,type_doc,ids):
+    def documents(self,type_doc,ids):
         current = 0
         while current <= len(ids) - 1:
             yield self.get_doc_source('medical_info_extraction', type_doc, ids[current])
             current += 1
 
+    def reports(self, type_doc, ids):
+        current_doc=0
+        current_rep=0
+        while current_doc <= len(ids)-1 :
+            doc_source=self.get_doc_source('medical_info_extraction',type_doc,ids[current_doc])
+            report=doc_source['report']
+            if type(report) == dict:
+                doc_reports=1
+            else:
+                doc_reports=len(report)
+            if doc_reports == 1:
+                yield report['description']
+                current_doc+=1
+                current_rep=0
+            else:
+                yield report[current_rep]['description']
+                current_rep+=1
+                if current_rep==doc_reports:
+                    current_doc+=1
 
 if __name__ == "__main__":
     # start_ES()
@@ -200,3 +219,6 @@ if __name__ == "__main__":
     #print con.search(index="medical_info_extraction",body={"query" : { "term" : {"lab_result.description" : "TSH"}}})
     """
     print con.exists("medical_info_extraction", "form", "colorectaal_form")
+
+    for report in con.reports('patient',["4914","1504"]):
+        print "rep",report

@@ -9,7 +9,8 @@ import settings2
 from term_lookup import term_lookup
 import time
 from text_analysis import RosetteApi
-
+from text_analysis import ReportSentences,WordEmbeddings
+import gensim
 
 class Preprocessor():
     __metaclass__ = ABCMeta
@@ -81,9 +82,23 @@ class MyPreprocessor(Preprocessor):
         return " ".join(tok for tok in tokens)
 
 
+def make_word_embeddings(con,type_doc,id_docs,preprocessor=None):
+    word2vec = WordEmbeddings()
+    to_remove = ['newline','newlin']
+    to_remove += [i for i in string.punctuation if i not in ['.','?',',',':']]
+    some_preprocess = MyPreprocessor(extrastop=to_remove)
+    for report in con.reports(type_doc,id_docs):
+        rep = some_preprocess.preprocess(report)
+        if word2vec.builded:
+            word2vec = word2vec.train(ReportSentences(rep))
+        else:
+            word2vec = word2vec.build(ReportSentences(rep))
+    print "trained word2vec. voc size =",len(word2vec.model.vocab)
+
+
 def structure_sections(con,type_doc,id_docs):
     to_remove = ['newline','newlin']
-    to_remove += [i for i in string.punctuation if i not in ['.','?',',']]
+    to_remove += [i for i in string.punctuation if i not in ['.','?',',',':']]
     some_preprocess = MyPreprocessor(extrastop=to_remove)
     txt_analysis = RosetteApi()
     for source_text in con.counter(type_doc, id_docs):
@@ -155,4 +170,6 @@ if __name__ == '__main__':
 
 #    preprocessor.save("Mypreprocessor.p")
 
-    structure_sections(con,type_name_p,patient_ids)
+#    structure_sections(con,type_name_p,patient_ids)
+
+    make_word_embeddings(con,type_name_p,patient_ids)
