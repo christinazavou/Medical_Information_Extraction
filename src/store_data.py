@@ -75,6 +75,7 @@ class Decease():
         form_name = self.name
         with open(self.json_form) as field_file:
             f = json.load(field_file)
+        print "form name =",form_name," should be ",f['properties'].keys()[0]
         assert form_name == f['properties'].keys()[0], "form name is not valid"
         fields_dict = f['properties'][form_name]['properties']
         body_data = {"name": form_name, "fields": fields_dict}
@@ -117,7 +118,7 @@ class Decease():
                     print "put form values"
                     self.con.update_es_doc(self.index, self.patients_type, id_patient, "doc", partial_dict)
                 else:
-                    print 'patient\'s id, ', id_patient, ' not in ', self.name, ' form\'s data'
+                    print 'patient\'s id, ', id_patient, ' not in ', self.name, ' form\'s Data'
 
 
 def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directory_p, directory_f):

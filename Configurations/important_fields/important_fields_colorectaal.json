@@ -1,6 +1,6 @@
 {
     "properties":{
-        "colorectaal_form":{
+        "colorectaal":{
           "properties":{
             "SCOPNUMB":{
                 "properties": {
@@ -229,7 +229,7 @@
             "pallther_startdatum":{
                 "properties": {
                   "description": "Startdatum: eerste palliatieve therapie",
-                  "possible_values": "unkown"
+                  "possible_values": "unknown"
                 }
              },
             "COMORB":{

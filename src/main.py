@@ -17,11 +17,11 @@ if __name__ == '__main__':
         print "Invalid number of arguments passed, please see README for usage"
         sys.exit(1)
 
-    configFilePath = sys.argv[1]  # "..\Configurations\Configurations.yml"
-    algo = sys.argv[2]  # "random"
-    read_dossiers = sys.argv[3]  # True = read and store as well.
-    data_path_root = sys.argv[4]  # ".."
-    preprocess_patients = sys.argv[5]  # True = preprocess and index
+    configFilePath = "..\Configurations\Configurations.yml" #sys.argv[1]  # "..\Configurations\Configurations.yml"
+    algo = "random" #sys.argv[2]  # "random"
+    read_dossiers = False #sys.argv[3]  # True = read and store as well.
+    data_path_root = "C:\Users\Christina Zavou\Documents"#sys.argv[4]  # ".."
+    preprocess_patients = True #sys.argv[5]  # True = preprocess and index
 
     if read_dossiers:
         settings2.init1(configFilePath)  # may give values and ids files
@@ -71,8 +71,10 @@ if __name__ == '__main__':
 
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
+    settings2.update_values_used(True)
     labels_possible_values = settings2.lab_pos_val_used # settings2.labels_possible_values
 
+    """
     if read_dossiers or preprocess_patients:
         to_remove = settings2.global_settings['to_remove']
         if 'punctuation' in to_remove:
@@ -91,7 +93,7 @@ if __name__ == '__main__':
 
     # Run the random algorithm
     print "use ",labels_possible_values
-    """
+
     if sys.argv[2] == "random":
         r = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, "random_assignment.json",
                                       labels_possible_values)
