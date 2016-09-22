@@ -111,7 +111,7 @@ class baselineAlgorithm(Algorithm):
                 "query": {
                     "match": {
                         "report.description":{
-                            "query": str(v),
+                            "query": v,#str(v),
                             "fuzziness": self.fuzziness
                         }
                     }
@@ -187,7 +187,7 @@ class baselineAlgorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings2.init1("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
+    settings2.init1("..\\Configurations\\Configurations.yml", "values.json", "ids.json","values_used.json")
 
     host = settings2.global_settings['host']
     used_forms = settings2.global_settings['forms']
@@ -201,6 +201,7 @@ if __name__ == '__main__':
     con = ES_connection(host)
 
     used_patients=settings2.ids['medical_info_extraction patient ids']
+
     r = randomAlgorithm(con, index_name, type_name_pp, "random_assignment.json", labels_possible_values)
     ass = r.assign(used_patients, used_forms)
     b1=baselineAlgorithm(con, index_name, type_name_pp, "baseline_assignment_nodescription.json", labels_possible_values)

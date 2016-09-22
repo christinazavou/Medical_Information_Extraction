@@ -1,6 +1,6 @@
 import subprocess
 import time
-import json
+import json,string
 from elasticsearch import Elasticsearch
 from elasticsearch import ImproperlyConfigured, ElasticsearchException, TransportError, SSLError
 
@@ -25,6 +25,42 @@ class ES_index():
     def put_type(self,type_name):
         self.types.append(type)
 """
+
+class MyReports():
+    def __init__(self,esconn,type_doc,ids,preprocessor=None):
+        self.con=esconn
+        self.type_doc=type_doc
+        self.ids=ids
+        self.preprocessor=preprocessor
+
+    def __iter__(self):
+        current_doc = 0
+        current_rep = 0
+        while current_doc <= len(self.ids) - 1:
+            doc_source = self.con.get_doc_source('medical_info_extraction', self.type_doc, self.ids[current_doc])
+            report = doc_source['report']
+            if type(report) == dict:
+                doc_reports = 1
+            else:
+                doc_reports = len(report)
+            if doc_reports == 1:
+                if type(report) is list:
+                    print "OPA"
+                if self.preprocessor is None:
+                    yield report['description']
+                else:
+                    yield self.preprocessor.preprocess(report['description'])
+                current_doc += 1
+                current_rep = 0
+            else:
+                if self.preprocessor is None:
+                    yield report[current_rep]['description']
+                else:
+                    yield self.preprocessor.preprocess(report[current_rep]['description'])
+                current_rep += 1
+                if current_rep == doc_reports:
+                    current_doc += 1
+                    current_rep = 0
 
 
 class ES_connection():
@@ -182,7 +218,7 @@ class ES_connection():
             yield self.get_doc_source('medical_info_extraction', type_doc, ids[current])
             current += 1
 
-    def reports(self, type_doc, ids):
+    def reports(self, type_doc, ids, preprocessor=None):
         current_doc=0
         current_rep=0
         while current_doc <= len(ids)-1 :
@@ -193,11 +229,17 @@ class ES_connection():
             else:
                 doc_reports=len(report)
             if doc_reports == 1:
-                yield report['description']
+                if preprocessor is None:
+                    yield report['description']
+                else:
+                    yield preprocessor.preprocess(report['description'])
                 current_doc+=1
                 current_rep=0
             else:
-                yield report[current_rep]['description']
+                if preprocessor is None:
+                    yield report[current_rep]['description']
+                else:
+                    yield preprocessor.preprocess(report[current_rep]['description'])
                 current_rep+=1
                 if current_rep==doc_reports:
                     current_doc+=1
@@ -206,19 +248,28 @@ if __name__ == "__main__":
     # start_ES()
     host = {"host": "localhost", "port": 9200}
     con = ES_connection(host)
+    settings2.init1("..\\Configurations\\configurations.yml", "values.json", "ids.json","values_used.json")
+    patient_ids = settings2.ids['medical_info_extraction patient ids']
+    forms_ids = settings2.global_settings['forms']
     """
     #con.createIndex("medical_info_extraction","discard")
     #con.put_map("..\\Configurations\\mapping.json","medical_info_extraction","patient")
-
-    settings2.init("..\\Configurations\\Configurations.yml",idsconfigFile="ids.json")
-
-    print con.get_type_ids("medical_info_extraction","patient",1500)
-    print con.get_type_ids("medical_info_extraction", "form", 1500)
     #con.get_type_ids("medical_info_extraction", "report_description_sentence", 1500)
-
     #print con.search(index="medical_info_extraction",body={"query" : { "term" : {"lab_result.description" : "TSH"}}})
     """
     print con.exists("medical_info_extraction", "form", "colorectaal_form")
 
-    for report in con.reports('patient',["4914","1504"]):
-        print "rep",report
+    to_remove = ['newline', 'newlin']
+    to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
+    from pre_process import MyPreprocessor
+    preprocessor = MyPreprocessor(
+        extrastop=to_remove)  # no stemming or stopwords. only code removing and punctuation
+
+    import types
+    print isinstance(con.reports('patient',patient_ids[0:5],preprocessor), types.GeneratorType)
+
+    reps=MyReports(con,'patient',patient_ids[0:5],preprocessor)
+    import collections
+    print isinstance(reps, collections.Iterable)
+    for rr in reps:
+        print rr

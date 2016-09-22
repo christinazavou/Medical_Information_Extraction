@@ -7,6 +7,8 @@ import settings2
 import Algorithm
 import Evaluation
 from pre_process import annotate, MyPreprocessor
+import json
+import datetime
 
 
 if __name__ == '__main__':
@@ -18,10 +20,11 @@ if __name__ == '__main__':
         sys.exit(1)
 
     configFilePath = "..\Configurations\Configurations.yml" #sys.argv[1]  # "..\Configurations\Configurations.yml"
-    algo = "random" #sys.argv[2]  # "random"
+    algo = "baseline" #sys.argv[2]  # "random"
     read_dossiers = False #sys.argv[3]  # True = read and store as well.
     data_path_root = "C:\Users\Christina Zavou\Documents"#sys.argv[4]  # ".."
-    preprocess_patients = True #sys.argv[5]  # True = preprocess and index
+    preprocess_patients = False #sys.argv[5]  # True = preprocess and index
+    onlylabels=False
 
     if read_dossiers:
         settings2.init1(configFilePath)  # may give values and ids files
@@ -39,6 +42,8 @@ if __name__ == '__main__':
     data_path = settings2.global_settings['data_path']
 
     con = ES_connection(settings2.global_settings['host'])
+
+    """--------------------------------------------------------------------------------------------------------------"""
 
     if read_dossiers:
         path_root_indossiers = settings2.global_settings['path_root_indossiers']
@@ -69,19 +74,25 @@ if __name__ == '__main__':
     else:
         settings2.init1("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
 
+    """--------------------------------------------------------------------------------------------------------------"""
+
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
     settings2.update_values_used(True)
     labels_possible_values = settings2.lab_pos_val_used # settings2.labels_possible_values
 
-    """
+    """--------------------------------------------------------------------------------------------------------------"""
+
     if read_dossiers or preprocess_patients:
         to_remove = settings2.global_settings['to_remove']
         if 'punctuation' in to_remove:
-            to_remove += [i for i in string.punctuation]
+            to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
+
         preprocessor = MyPreprocessor(stem='dutch', stop=['dutch'], extrastop=to_remove)
         annotate(con, index_name, type_patient, type_processed_patient, patient_ids, forms_ids, preprocessor, True)
         preprocessor.save("Mypreprocessor.p")
+
+    """--------------------------------------------------------------------------------------------------------------"""
 
     decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
     consider_forms = []
@@ -91,23 +102,31 @@ if __name__ == '__main__':
 
     # print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
 
-    # Run the random algorithm
-    print "use ",labels_possible_values
+    with open('evaluations.json', 'r') as jfile:
+        evaluations_dict=json.load(jfile)
 
-    if sys.argv[2] == "random":
-        r = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, "random_assignment.json",
+    if algo == "random":
+        myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, "random_assignment.json",
                                       labels_possible_values)
-        ass = r.assign(patient_ids, forms_ids)
-    else:
-        b1 = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
+        myalgo.assign(patient_ids, forms_ids)
+        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, "random_assignment.json")
+        score = myeval.eval(patient_ids, forms_ids)
+        evaluations_dict['evaluation'] += [{'name': 'random_assignment', 'score': score, 'preprocess': 'none','time': datetime.date.today().strftime("%B %d, %Y")}]
+    if algo == "baseline" and onlylabels:
+        myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
                                          "baseline_assignment_nodescription.json", labels_possible_values)
-        ass = b1.assign(patient_ids, forms_ids)
-        b2 = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                         "baseline_assignment_withdescription.json", labels_possible_values, 2,
+        myalgo.assign(patient_ids, forms_ids)
+        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, "baseline_assignment_nodescription.json")
+        score = myeval.eval(patient_ids, forms_ids)
+        evaluations_dict['evaluation'] += [{'name': 'baseline_assignment_nodescription', 'score': score, 'preprocess': 'none','time': datetime.date.today().strftime("%B %d, %Y")}]
+    if algo == "baseline" and not onlylabels:
+        myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
+                                         "baseline_assignment_0_10_withdescription.json", labels_possible_values, 2,
                                          "Mypreprocessor.p")
-        ass = b2.assign(patient_ids, forms_ids)
+        myalgo.assign(patient_ids[0:4], forms_ids)
+        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, "baseline_assignment_0_10_withdescription.json")
+        score = myeval.eval(patient_ids, forms_ids)
+        evaluations_dict['evaluation'] += [{'name': 'baseline_assignment_0_10_withdescription', 'score': score, 'preprocess': 'full','time': datetime.date.today().strftime("%B %d, %Y")}]
 
-    # Evaluate the algorithm's results
-    ev = Evaluation.Evaluation(con, index_name, type_patient, type_form, r)
-    ev.eval("results_random.json", consider_forms)
-    """
+    with open('evaluations.json','w') as jfile:
+        json.dump(evaluations_dict, jfile, indent=4)

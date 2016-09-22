@@ -9,8 +9,9 @@ import settings2
 from term_lookup import term_lookup
 import time
 from text_analysis import RosetteApi
-from text_analysis import ReportSentences,WordEmbeddings
+from text_analysis import ReportSentences, WordEmbeddings
 import gensim
+
 
 class Preprocessor():
     __metaclass__ = ABCMeta
@@ -82,36 +83,37 @@ class MyPreprocessor(Preprocessor):
         return " ".join(tok for tok in tokens)
 
 
-def make_word_embeddings(con,type_doc,id_docs,preprocessor=None):
-    word2vec = WordEmbeddings()
-    to_remove = ['newline','newlin']
-    to_remove += [i for i in string.punctuation if i not in ['.','?',',',':']]
-    some_preprocess = MyPreprocessor(extrastop=to_remove)
-    for report in con.reports(type_doc,id_docs):
-        rep = some_preprocess.preprocess(report)
-        if word2vec.builded:
-            word2vec = word2vec.train(ReportSentences(rep))
-        else:
-            word2vec = word2vec.build(ReportSentences(rep))
-    print "trained word2vec. voc size =",len(word2vec.model.vocab)
+def make_word_embeddings(con, type_doc, id_docs, filename, preprocessor=None):
+    to_remove = ['newline', 'newlin']
+    to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
+    some_preprocess = MyPreprocessor(
+        extrastop=to_remove)  # no stemming or stopwords. only code removing and punctuation
+    # some_preprocess.add_synonyms = True  # with synonyms . or can i add them later like sentences with equals
+    # some_preprocess = pickle.load("Mypreprocessor.p")
+    from ESutils import MyReports
+    reps=MyReports(con,type_doc,id_docs,some_preprocess)
+    word2vec = WordEmbeddings(reps)
+    word2vec.save(filename)
+    print "trained word2vec. voc size =", len(word2vec.model.vocab)
+    return word2vec
 
 
-def structure_sections(con,type_doc,id_docs):
-    to_remove = ['newline','newlin']
-    to_remove += [i for i in string.punctuation if i not in ['.','?',',',':']]
+def structure_sections(con, type_doc, id_docs):
+    to_remove = ['newline', 'newlin']
+    to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
     some_preprocess = MyPreprocessor(extrastop=to_remove)
     txt_analysis = RosetteApi()
-    for source_text in con.counter(type_doc, id_docs):
-        report=source_text['report']
+    for source_text in con.documents(type_doc, id_docs):
+        report = source_text['report']
         if type(report) == dict:
-            rep=some_preprocess.preprocess(report['description'])
+            rep = some_preprocess.preprocess(report['description'])
             postags = txt_analysis.get_nouns(rep)
             print postags
-            entities=txt_analysis.get_entitiesnlinks(rep)
+            entities = txt_analysis.get_entitiesnlinks(rep)
             print "source=", rep
         else:
             for l in report:
-                rep=some_preprocess.preprocess(l['description'])
+                rep = some_preprocess.preprocess(l['description'])
                 postags = txt_analysis.get_nouns(rep)
                 print postags
                 entities = txt_analysis.get_entitiesnlinks(rep)
@@ -121,7 +123,7 @@ def structure_sections(con,type_doc,id_docs):
 def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor, add_synonyms=False):
     start_time = time.time()
     preprocessor.add_synonyms = add_synonyms
-    for source_text in con.counter(from_type, id_docs):
+    for source_text in con.documents(from_type, id_docs):
         preprocessed_text = {}
         for field in source_text:
             if field in (['report'] + id_forms):  # insert preprocessed report and filled forms
@@ -141,24 +143,27 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor, ad
                         rec[inner_field] = processed_text
                     preprocessed_text[field] = rec
             id_doc = int(source_text['patient_nr'])
-            if int(source_text['patient_nr']) % 100 == 0:
-                print "preprocessed_text: ", preprocessed_text, " for patient ", id_doc
-            con.index_doc(index, to_type, id_doc, preprocessed_text)
+        if int(source_text['patient_nr']) % 100 == 0:
+            print "preprocessed_text: ", preprocessed_text, " for patient ", id_doc
+        con.index_doc(index, to_type, id_doc, preprocessed_text)
     print("--- %s seconds for annotate method---" % (time.time() - start_time))
     # print "time clock ",time.clock()
 
 
 if __name__ == '__main__':
 
-    settings2.init1("..\\Configurations\\configurations.yml", "values.json", "ids.json")
+    settings2.init1("..\\Configurations\\configurations.yml", "values.json", "ids.json","values_used.json")
     host = settings2.global_settings['host']
     con = ES_connection(host)
 
+    """
     to_remove = settings2.global_settings['to_remove']
     if 'punctuation' in to_remove:
         to_remove += [i for i in string.punctuation]
-    preprocessor = MyPreprocessor(stem='dutch', stop=['dutch'], extrastop=to_remove)
+        # to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
 
+    preprocessor = MyPreprocessor(stem='dutch', stop=['dutch'], extrastop=to_remove)
+    """
     index_name = settings2.global_settings['index_name']
     type_name_p = settings2.global_settings['type_name_p']
     type_name_pp = settings2.global_settings['type_name_pp']
@@ -166,10 +171,15 @@ if __name__ == '__main__':
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
 
-#    annotate(con, index_name, type_name_p, type_name_pp, patient_ids, forms_ids, preprocessor, True)
+    #    annotate(con, index_name, type_name_p, type_name_pp, patient_ids, forms_ids, preprocessor, True)
 
-#    preprocessor.save("Mypreprocessor.p")
+    #    preprocessor.save("Mypreprocessor.p")
 
-#    structure_sections(con,type_name_p,patient_ids)
+    #    structure_sections(con,type_name_p,patient_ids)
 
-    make_word_embeddings(con,type_name_p,patient_ids)
+    make_word_embeddings(con, type_name_p, patient_ids[0:1],"W2V_punctuationremovefrompatient.p")
+
+    w2v=WordEmbeddings()
+    w2v.load("W2V_punctuationremovefrompatient.p")
+    for a,b in w2v.get_vocab().items():
+        print a,b

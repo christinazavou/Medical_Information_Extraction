@@ -3,7 +3,7 @@ import json
 import yaml
 
 
-def init1(configFile, fieldsconfigFile=None,idsconfigFile=None):
+def init1(configFile, fieldsconfigFile=None,idsconfigFile=None,valuesusedfile=None):
     global global_settings
     global labels_possible_values
     global ids
@@ -43,7 +43,11 @@ def init1(configFile, fieldsconfigFile=None,idsconfigFile=None):
             ids = json.load(json_file, encoding='utf-8')
     else:
         ids = {}
-    lab_pos_val_used = {}
+    if valuesusedfile:
+        with open(valuesusedfile, 'r') as json_file:
+            lab_pos_val_used = json.load(json_file, encoding='utf-8')
+    else:
+        lab_pos_val_used = {}
 
 
 def init2(no_unkowns=False):
