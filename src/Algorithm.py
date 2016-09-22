@@ -196,7 +196,7 @@ if __name__ == '__main__':
     type_name_s = settings2.global_settings['type_name_s']
     type_name_pp = settings2.global_settings['type_name_pp']
 
-    labels_possible_values=settings2.labels_possible_values
+    labels_possible_values= settings2.lab_pos_val_used #settings2.labels_possible_values
 
     con = ES_connection(host)
 

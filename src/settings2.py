@@ -7,6 +7,7 @@ def init1(configFile, fieldsconfigFile=None,idsconfigFile=None):
     global global_settings
     global labels_possible_values
     global ids
+    global lab_pos_val_used
 
     global_settings={}
     with open(configFile, 'r') as f:
@@ -26,7 +27,11 @@ def init1(configFile, fieldsconfigFile=None,idsconfigFile=None):
     global_settings['json_forms_directory']=doc['json_forms_directory']
     global_settings['csv_forms_directory']=doc['csv_forms_directory']
     global_settings['to_remove']=doc['to_remove']
-
+    for field in doc.keys():
+        if field.__contains__("fields"):
+            name=field.split("_")
+            name=name[1]
+            global_settings[name]=doc[field]
     if fieldsconfigFile != None:
         with open(fieldsconfigFile, 'r') as json_file:
             labels_possible_values = json.load(json_file, encoding='utf-8')
@@ -38,8 +43,10 @@ def init1(configFile, fieldsconfigFile=None,idsconfigFile=None):
             ids = json.load(json_file, encoding='utf-8')
     else:
         ids = {}
+    lab_pos_val_used = {}
 
-def init2():
+
+def init2(no_unkowns=False):
     global_settings['map_jfile'] = global_settings['source_path_root'] + 'Configurations\\' + global_settings['initmap_jfile']
 
     global_settings['directory_p']=global_settings['data_path_root']+'\\Data\\'+global_settings['path_outdossiers']
@@ -49,11 +56,21 @@ def init2():
     global_settings['path_root_indossiers'] = global_settings['data_path'] + global_settings['path_indossiers']
     global_settings['path_root_outdossiers'] = global_settings['data_path'] + global_settings['path_outdossiers']
 
+    # save an updated labels_possibles_values version that uses only chosen fields
+    for form in global_settings['forms']:
+        if form in global_settings.keys():
+            lab_pos_val_used = update_form_fields(labels_possible_values, form, global_settings[form], no_unkowns)
+            update_values()
+
 
 def update_values():
     file="values.json"
     with open(file,"w") as json_file:
         data = json.dumps(labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
+        json_file.write(data)
+    file = "values_used.json"
+    with open(file, "w") as json_file:
+        data = json.dumps(lab_pos_val_used, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 def update_ids():
@@ -63,10 +80,30 @@ def update_ids():
         json_file.write(data)
 
 
+def update_form_fields(given_values,form_id,field_ids,no_unkowns=False):
+    new_dict={}
+    if form_id not in given_values.keys():
+        print "no such form known"
+        return
+    for form_name in given_values:
+        if form_name == form_id:
+            if form_name not in new_dict.keys():
+                new_dict[form_name]={}
+            for field in given_values[form_id]:
+                if field in field_ids:
+                    if no_unkowns == False or ( no_unkowns and given_values[form_name][field]['values']!="unkown" ):
+                        new_dict[form_name][field]=given_values[form_name][field]
+        else:
+            new_dict[form_name]=given_values[form_name]
+    return new_dict
+
+
 if __name__=="__main__":
     configFile="..\\Configurations\\Configurations.yml"
-    init1(configFile)
+#    init1(configFile)
     print "empty ids and values , without saving them"
 #    print global_settings
 #    print labels_possible_values
 #    print ids
+
+    init1(configFile,"values.json","ids.json")

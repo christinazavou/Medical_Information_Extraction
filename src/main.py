@@ -8,6 +8,7 @@ import Algorithm
 import Evaluation
 from pre_process import annotate, MyPreprocessor
 
+
 if __name__ == '__main__':
 
     # start_ES()
@@ -66,11 +67,11 @@ if __name__ == '__main__':
         print "Finished importing Data."
 
     else:
-        settings2.init("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
+        settings2.init1("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
 
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
-    labels_possible_values = settings2.labels_possible_values
+    labels_possible_values = settings2.lab_pos_val_used # settings2.labels_possible_values
 
     if read_dossiers or preprocess_patients:
         to_remove = settings2.global_settings['to_remove']
@@ -89,6 +90,8 @@ if __name__ == '__main__':
     # print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
 
     # Run the random algorithm
+    print "use ",labels_possible_values
+    """
     if sys.argv[2] == "random":
         r = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, "random_assignment.json",
                                       labels_possible_values)
@@ -105,3 +108,4 @@ if __name__ == '__main__':
     # Evaluate the algorithm's results
     ev = Evaluation.Evaluation(con, index_name, type_patient, type_form, r)
     ev.eval("results_random.json", consider_forms)
+    """

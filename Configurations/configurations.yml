@@ -7,6 +7,15 @@ store_only_reports: False
 
 forms: ["form1","colorectaal","mamma"]
 
+fields_colorectaal: ['colorectaal_form','LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
+                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99','SCORECT','SCORECT2',
+                     'RESTAG_SCORECT_1','RESTAG_SCORECT2_1','RESTAG_CT','SCORECN','SCORECN2','RESTAG_SCORECN_1',
+                     'RESTAG_SCORECN2_1','SCORECM','SCORECM2','RESTAG_SCORECM_1','RESTAG_SCORECM2_1','PROCOK','mdo_chir',
+                     'geenresectie_irres','geenresectie_meta','geenresectie_anders','geenresec_palltherYN','pall_NO_reden',
+                     'pallther_chemo','pallther_chemoSTUDIE','pallther_RT','pallther_RTstudie','pallther_chemoRT',
+                     'pallther_chemoRTstudie','pallther_startdatum','COMORB','COMORBCAR','COMORBVAS','COMORBDIA','COMORBPUL',
+                     'COMORBNEU','COMORBMDA','COMORBURO']
+
 path_indossiers: "decease\\patients_selection_decease\\"
 path_outdossiers: "decease\\patients_selection_decease_json\\"
 

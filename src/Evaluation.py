@@ -74,7 +74,7 @@ if __name__ == '__main__':
     type_name_f = settings2.global_settings['type_name_f']
     type_name_s = settings2.global_settings['type_name_s']
     type_name_pp = settings2.global_settings['type_name_pp']
-    labels_possible_values=settings2.labels_possible_values
+    labels_possible_values= settings2.lab_pos_val_used #settings2.labels_possible_values
     patient_ids=settings2.ids['medical_info_extraction patient ids']
     forms_ids=settings2.global_settings['forms']
 
