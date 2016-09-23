@@ -46,6 +46,8 @@ def patient2jsondoc(path_root_in,path_root_out,directory_name,patient_id):
 Read all files-patients and converts them to json files.
 """
 def readPatients(path_root_in,path_root_out):
+    if not os.path.exists(path_root_out):
+        os.makedirs(path_root_out)
     for root, dirs, files in os.walk(path_root_in):
         for dir in dirs:
             patient_id=dir

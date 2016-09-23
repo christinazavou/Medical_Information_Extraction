@@ -17,13 +17,13 @@ from pre_process import MyPreprocessor
 class Algorithm():
     __metaclass__ = ABCMeta
 
-    def __init__(self, con, index_name, search_type,results_jfile,labels_possible_values):
+    def __init__(self, con, index_name, search_type, results_jfile, algo_labels_possible_values):
         self.con = con
         self.index_name = index_name
         self.search_type = search_type
         self.assignments = {}
         self.results_jfile=results_jfile
-        self.labels_possible_values=labels_possible_values
+        self.labels_possible_values=algo_labels_possible_values
         self.algo_assignments = {}
 
     def assign(self, assign_patients, assign_forms):
@@ -73,25 +73,24 @@ class randomAlgorithm(Algorithm):
 
 class baselineAlgorithm(Algorithm):
 
-    def __init__(self,con, index_name, search_type,results_jfile,labels_possible_values,fuzziness=0,preprocessorfile=None):
-        super(baselineAlgorithm, self).__init__( con, index_name, search_type,results_jfile,labels_possible_values)
+    def __init__(self,con, index_name, search_type,results_jfile,algo_labels_possible_values, when_no_preference, fuzziness=0,preprocessorfile=None):
+        super(baselineAlgorithm, self).__init__( con, index_name, search_type,results_jfile,algo_labels_possible_values)
         self.fuzziness=fuzziness
         if preprocessorfile:
             self.with_description = True
             self.MyPreprocessor = pickle.load(open(preprocessorfile, "rb"))
         else:
             self.with_description=False
+        self.when_no_preference=when_no_preference
 
     # the patient_id and form_id as they appear on the ES index
     def assign_patient_form(self, patient_id, form_id):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:
             values = self.labels_possible_values[form_id][label]['values']
-            possibilities = len(values)
-
             search_for = label
             if self.with_description:
-                search_for += self.labels_possible_values[form_id][label]['description']
+                search_for += " "+self.labels_possible_values[form_id][label]['description']
                 search_for = self.MyPreprocessor.preprocess(search_for) # will do the same preprocess as for indexing patients
             if values != "unknown":
                 # pick the label that has the most (synonyms) occurrences in the patient's reports' description (sentences)
@@ -99,6 +98,10 @@ class baselineAlgorithm(Algorithm):
             else:
                 # pick a word from the patient's reports' descriptions(sentences) that matches the field
                 assignment = self.pick_similar(patient_id, search_for)
+            #if type(assignment)== str:
+            #    assignment={label:assignment}
+            #    print "changed"
+            assignment['search_for']= search_for
             patient_form_assign[label] = assignment
         return patient_form_assign
 
@@ -106,7 +109,7 @@ class baselineAlgorithm(Algorithm):
         scores = [0 for value in values]
         evidences = [None for value in values]
         for i, value in enumerate(values):
-            v=search_for+value
+            v=search_for+" "+value
             highlight_search_body ={
                 "query": {
                     "match": {
@@ -141,8 +144,11 @@ class baselineAlgorithm(Algorithm):
                 scores[i]=0
         max_index, max_value = max(enumerate(scores), key=operator.itemgetter(1))
         if max_value == 0:
-            rand=random.randint(0,len(scores)-1)
-            assignment = {'value': values[rand], 'evidence': "random assignment"}
+            if self.when_no_preference == "random":
+                rand=random.randint(0,len(scores)-1)
+                assignment = {'value': values[rand], 'evidence': "no preference. random assignment"}
+            else:
+                assignment = {'value': "", 'evidence': "no preference. empty assignment"}
         else:
             assignment={'value':values[max_index],'evidence':evidences[max_index]}
         return assignment
@@ -150,7 +156,7 @@ class baselineAlgorithm(Algorithm):
 #TODO: could use offsets but i think they are not available in client...and how to use it?
 
     def pick_similar(self, patient_id, search_for):
-        #body = {"query": {"bool": {"must": [{"term": {"text": label}},{"term": {"patient": patient_id}}]}}}
+        #  body = {"query": {"bool": {"must": [{"term": {"text": label}},{"term": {"patient": patient_id}}]}}}
         highlight_search_body = {
             "query": {
                 "match": {
@@ -179,9 +185,9 @@ class baselineAlgorithm(Algorithm):
                 if hits['_id'] == patient_id:
                     correct_hit = hits
         if correct_hit:
-            assignment=correct_hit['highlight']['report.description'][1]
+            assignment={'value':correct_hit['highlight']['report.description'][1]}
         else:
-            assignment=""
+            assignment={'value':""}
         return assignment
 
 if __name__ == '__main__':

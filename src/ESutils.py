@@ -47,16 +47,16 @@ class MyReports():
                 if type(report) is list:
                     print "OPA"
                 if self.preprocessor is None:
-                    yield report['description']
+                    yield (report['description']).split()
                 else:
-                    yield self.preprocessor.preprocess(report['description'])
+                    yield (self.preprocessor.preprocess(report['description'])).split()
                 current_doc += 1
                 current_rep = 0
             else:
                 if self.preprocessor is None:
-                    yield report[current_rep]['description']
+                    yield (report[current_rep]['description']).split()
                 else:
-                    yield self.preprocessor.preprocess(report[current_rep]['description'])
+                    yield (self.preprocessor.preprocess(report[current_rep]['description'])).split()
                 current_rep += 1
                 if current_rep == doc_reports:
                     current_doc += 1
@@ -265,10 +265,9 @@ if __name__ == "__main__":
     preprocessor = MyPreprocessor(
         extrastop=to_remove)  # no stemming or stopwords. only code removing and punctuation
 
+    reps=MyReports(con,'patient',patient_ids,preprocessor)
     import types
-    print isinstance(con.reports('patient',patient_ids[0:5],preprocessor), types.GeneratorType)
-
-    reps=MyReports(con,'patient',patient_ids[0:5],preprocessor)
+    print isinstance(reps, types.GeneratorType)
     import collections
     print isinstance(reps, collections.Iterable)
     for rr in reps:

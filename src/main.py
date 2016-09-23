@@ -10,123 +10,102 @@ from pre_process import annotate, MyPreprocessor
 import json
 import datetime
 
-
 if __name__ == '__main__':
 
-    # start_ES()
+    configFilePath = "..\Configurations\Configurations.yml"
+    existing=True
 
-    if len(sys.argv) != 5:
-        print "Invalid number of arguments passed, please see README for usage"
-        sys.exit(1)
-
-    configFilePath = "..\Configurations\Configurations.yml" #sys.argv[1]  # "..\Configurations\Configurations.yml"
-    algo = "baseline" #sys.argv[2]  # "random"
-    read_dossiers = False #sys.argv[3]  # True = read and store as well.
-    data_path_root = "C:\Users\Christina Zavou\Documents"#sys.argv[4]  # ".."
-    preprocess_patients = False #sys.argv[5]  # True = preprocess and index
-    onlylabels=False
-
-    if read_dossiers:
-        settings2.init1(configFilePath)  # may give values and ids files
+    if not existing:
+        settings2.init(configFilePath)
     else:
-        settings2.init1(configFilePath, "values.json", "ids.json")
+        if os.path.isfile('values_used.json'):
+            settings2.init(configFilePath, "values.json", "ids.json","values_used.json")
+        else:
+            settings2.init(configFilePath, "values.json", "ids.json")
+            settings2.update_values_used()
 
-    settings2.global_settings['data_path_root'] = data_path_root
-    settings2.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
-    settings2.init2()
     index_name = settings2.global_settings['index_name']
     type_patient = settings2.global_settings['type_name_p']
     type_form = settings2.global_settings['type_name_f']
     # type_sentence=settings2.global_settings['type_name_s']
     type_processed_patient = settings2.global_settings['type_name_pp']
     data_path = settings2.global_settings['data_path']
-
     con = ES_connection(settings2.global_settings['host'])
-
     """--------------------------------------------------------------------------------------------------------------"""
 
-    if read_dossiers:
+    if settings2.global_settings['read_dossiers']:
         path_root_indossiers = settings2.global_settings['path_root_indossiers']
         path_root_outdossiers = settings2.global_settings['path_root_outdossiers']
-
-        decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
-
-        for decease in decease_folders:
-            if decease in settings2.global_settings['forms']:
-                path_indossiers = path_root_indossiers.replace('decease', decease)
-                path_outdossiers = path_root_outdossiers.replace('decease', decease)
-                # convert all csv dossiers into json files (one for each patient)
-                readPatients(path_indossiers, path_outdossiers)
-
+        for decease in settings2.global_settings['forms']:
+            path_indossiers = path_root_indossiers.replace('decease', decease)
+            path_outdossiers = path_root_outdossiers.replace('decease', decease)
+            # convert all csv dossiers into json files (one for each patient)
+            readPatients(path_indossiers, path_outdossiers)
         # store dossiers into an index of ES
         con.createIndex(index_name, if_exist="discard")
         map_jfile = settings2.global_settings['map_jfile']
         con.put_map(map_jfile, index_name, type_patient)
-
         directory_p = settings2.global_settings['directory_p']
         directory_f = settings2.global_settings['directory_f']
         data_path = settings2.global_settings['data_path']
-
         MyDeceases = store_deceases(con, index_name, type_patient, type_form, data_path, directory_p, directory_f)
         # index_sentences(con, index_name, type_patient, type_sentence)
+        # print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
         print "Finished importing Data."
-
-    else:
-        settings2.init1("..\\Configurations\\Configurations.yml", "values.json", "ids.json")
 
     """--------------------------------------------------------------------------------------------------------------"""
 
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
-    settings2.update_values_used(True)
-    labels_possible_values = settings2.lab_pos_val_used # settings2.labels_possible_values
+    settings2.update_values_used()
+    if settings2.global_settings['assign_all']:
+        labels_possible_values = settings2.labels_possible_values
+    else:
+        labels_possible_values = settings2.lab_pos_val_used
+    lab_pos_val=settings2.lab_pos_val_used # ONLY USED FIELDS
+
+    description, preprocessor_name, algoname = settings2.make_names_and_description()
+
+    if os.path.isfile('evaluations.json'):
+        with open('evaluations.json', 'r') as jfile:
+            evaluations_dict = json.load(jfile)
+    else:
+        evaluations_dict={'evaluation': []}
 
     """--------------------------------------------------------------------------------------------------------------"""
 
-    if read_dossiers or preprocess_patients:
+    if settings2.global_settings['read_dossiers'] or settings2.global_settings['preprocess'] != []:
         to_remove = settings2.global_settings['to_remove']
         if 'punctuation' in to_remove:
             to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
-
-        preprocessor = MyPreprocessor(stem='dutch', stop=['dutch'], extrastop=to_remove)
-        annotate(con, index_name, type_patient, type_processed_patient, patient_ids, forms_ids, preprocessor, True)
-        preprocessor.save("Mypreprocessor.p")
+        preprocessor = MyPreprocessor(settings2.global_settings['preprocess'])
+        annotate(con, index_name, type_patient, type_processed_patient, patient_ids, forms_ids, preprocessor)
+        preprocessor.save(preprocessor_name)
+        print "Finish annotating ",type_processed_patient," data (indexing preprocessed files)."
 
     """--------------------------------------------------------------------------------------------------------------"""
 
-    decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
-    consider_forms = []
-    for decease in decease_folders:
-        if decease in settings2.global_settings['forms']:
-            consider_forms.append(decease)
+    if settings2.global_settings['run_algo']:
+        if settings2.global_settings['algo'] == "random":
+            myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algoname, labels_possible_values)
+            myalgo.assign(patient_ids, forms_ids)
+        if settings2.global_settings['algo'] == "baseline":
+            if settings2.global_settings['with_description']:
+                myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, algoname, labels_possible_values,
+                                                     settings2.global_settings['when_no_preference'],
+                                                     settings2.global_settings['fuzziness'], preprocessor_name)
+            else:
+                myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, algoname,labels_possible_values,
+                                                     settings2.global_settings['when_no_preference'],
+                                                     settings2.global_settings['fuzziness'])
+            myalgo.assign(patient_ids, forms_ids)
+        print "Finish assigning values."
 
-    # print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
-
-    with open('evaluations.json', 'r') as jfile:
-        evaluations_dict=json.load(jfile)
-
-    if algo == "random":
-        myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, "random_assignment.json",
-                                      labels_possible_values)
-        myalgo.assign(patient_ids, forms_ids)
-        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, "random_assignment.json")
-        score = myeval.eval(patient_ids, forms_ids)
-        evaluations_dict['evaluation'] += [{'name': 'random_assignment', 'score': score, 'preprocess': 'none','time': datetime.date.today().strftime("%B %d, %Y")}]
-    if algo == "baseline" and onlylabels:
-        myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                         "baseline_assignment_nodescription.json", labels_possible_values)
-        myalgo.assign(patient_ids, forms_ids)
-        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, "baseline_assignment_nodescription.json")
-        score = myeval.eval(patient_ids, forms_ids)
-        evaluations_dict['evaluation'] += [{'name': 'baseline_assignment_nodescription', 'score': score, 'preprocess': 'none','time': datetime.date.today().strftime("%B %d, %Y")}]
-    if algo == "baseline" and not onlylabels:
-        myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                         "baseline_assignment_0_10_withdescription.json", labels_possible_values, 2,
-                                         "Mypreprocessor.p")
-        myalgo.assign(patient_ids[0:4], forms_ids)
-        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, "baseline_assignment_0_10_withdescription.json")
-        score = myeval.eval(patient_ids, forms_ids)
-        evaluations_dict['evaluation'] += [{'name': 'baseline_assignment_0_10_withdescription', 'score': score, 'preprocess': 'full','time': datetime.date.today().strftime("%B %d, %Y")}]
-
-    with open('evaluations.json','w') as jfile:
+    """--------------------------------------------------------------------------------------------------------------"""
+    myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, algoname, lab_pos_val)
+    score = myeval.eval(patient_ids, forms_ids)
+    evaluations_dict['evaluation'] += [{'description':description, 'score': score, 'algoname':algoname,
+                                            'time': datetime.date.today().strftime("%B %d, %Y")}]
+    with open('evaluations.json', 'w') as jfile:
         json.dump(evaluations_dict, jfile, indent=4)
+    print "Finish evaluating."

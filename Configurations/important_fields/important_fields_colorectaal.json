@@ -4,150 +4,175 @@
           "properties":{
             "SCOPNUMB":{
                 "properties": {
+                  "condition":"",
                   "description": "Aantal gevonden tumoren. Het betreft het totaal aantal gevonden primaire colorectale carcinomen.",
                   "possible_values": ["1","2","3"]
                 }
              },
             "LOCPRIM":{
                 "properties": {
+                  "condition":"",
                   "description": "Locatie van de ‘belangrijkste’ tumor. De tumor welke het meest bepalend is voor de prognose of behandeling.",
                   "possible_values": ["Caecum","Appendix","Colon ascendens","Flexura hepatica","Colon transversum","Flexura splenica","Colon descendens","Colon sigmoideum","Rectum","Anders"]
                 }
              },
             "LOCPRIM2":{
                 "properties": {
+                  "condition":"",
                   "description": "Locatie van de 'dubbel' tumor. Het gaat hier om de één na belangrijkste tumor wat betreft prognose of behandeling.",
                   "possible_values": ["Caecum","Appendix","Colon ascendens","Flexura hepatica","Colon transversum","Flexura splenica","Colon descendens","Colon sigmoideum","Rectum","Anders"]
                 }
              },
             "SCOPDIST":{
                 "properties": {
+                  "condition":"",
                   "description": "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters.nomen.",
                   "possible_values": "unknown"
                 }
              },
             "SCOPDIST2":{
                 "properties": {
+                  "condition":"",
                   "description": "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters",
                   "possible_values": "unknown"
                 }
              },
             "klachten_klacht1":{
                 "properties": {
+                  "condition":"",
                   "description": "Rectaal bloedverlies",
                   "possible_values": ["Yes"]
                 }
              },
             "klachten_klacht2":{
                 "properties": {
+                  "condition":"",
                   "description": "Veranderde defaecatie",
                   "possible_values": ["Yes"]
                 }
              },
             "klachten_klacht3":{
                 "properties": {
+                  "condition":"",
                   "description": "Urgente klachten",
                   "possible_values": ["Yes"]
                 }
              },
             "klachten_klacht4":{
                 "properties": {
+                  "condition":"",
                   "description": "Anemie",
                   "possible_values": ["Yes"]
                 }
              },
             "klachten_klacht88":{
                 "properties": {
+                  "condition":"",
                   "description": "Anders",
                   "possible_values": ["Yes"]
                 }
              },
             "klachten_klacht99":{
                 "properties": {
+                  "condition":"",
                   "description": "Onbekend",
                   "possible_values": ["Yes"]
                 }
              },
             "SCORECT":{
                 "properties": {
+                  "condition":"",
                   "description": "cT score",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
             "SCORECT2":{
                 "properties": {
+                  "condition":"",
                   "description": "cT score ('dubbel' tumor)",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
             "RESTAG_SCORECT_1":{
                 "properties": {
+                  "condition":"",
                   "description": "cT score",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
             "RESTAG_SCORECT2_1":{
                 "properties": {
+                  "condition":"",
                   "description": "cT score ('dubbel' tumor)",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
              },
             "RESTAG_CT":{
                 "properties": {
+                  "condition":"",
                   "description": "CT THORAX/ABDOMEN",
                   "possible_values": ["Ja","Nee"]
                 }
              },
             "SCORECN":{
                 "properties": {
+                  "condition":"",
                   "description": "cN score",
                   "possible_values": ["N0","N1","N2","Nx / onbekend"]
                 }
              },
             "SCORECN2":{
                 "properties": {
+                  "condition":"",
                   "description": "cN score ('dubbel' tumor)",
                   "possible_values": ["N0","N1","N2","Nx / onbekend"]
                 }
              },
             "RESTAG_SCORECN_1":{
                 "properties": {
+                  "condition":"",
                   "description": "cN score",
                   "possible_values": ["N0","N1","N2","Nx / onbekend"]
                 }
              },
             "RESTAG_SCORECN2_1":{
                 "properties": {
+                  "condition":"",
                   "description": "cN score ('dubbel' tumor)",
                   "possible_values": ["N0","N1","N2","Nx / onbekend"]
                 }
              },
             "SCORECM":{
                 "properties": {
+                  "condition":"",
                   "description": "cM score",
                   "possible_values": ["M0","M1","Mx / onbekend"]
                 }
              },
             "SCORECM2":{
                 "properties": {
+                  "condition":"",
                   "description": "cM score ('dubbel' tumor)",
                   "possible_values": ["M0","M1","Mx / onbekend"]
                 }
              },
             "RESTAG_SCORECM_1":{
                 "properties": {
+                  "condition":"",
                   "description": "cM score",
                   "possible_values": ["M0","M1","Mx / onbekend"]
                 }
              },
             "RESTAG_SCORECM2_1":{
                 "properties": {
+                  "condition":"",
                   "description": "cM score ('dubbel' tumor)",
                   "possible_values": ["M0","M1","Mx / onbekend"]
                 }
              },
             "PROCOK":{
                 "properties": {
+                  "condition":"",
                   "description": "",
                   "possible_values": ["Ileocoecaal (+appendectomie)","(Extended) Hemicolectomie rechts","Transversum resectie","(Extended) Hemicolectomie links","(Low) anteriorresectie/sigmoidresectie",
                     "Subtotale colectomie (coecum totrectum)","Abdomino-perianaleresectie","Panproctocolectomie","Transanaal endoscopische procedure","Transanaal endoscopische procedure gevolgd door anterior resectie",
@@ -156,126 +181,147 @@
              },
             "mdo_chir":{
                 "properties": {
+                  "condition":"",
                   "description": "Patiënt zal chirurgisch worden behandeld",
                   "possible_values": ["Ya","Nee"]
                 }
              },
             "geenresectie_irres":{
                 "properties": {
+                  "condition":"",
                   "description": "Reden: Irresectabel",
                   "possible_values": ["No","Yes"]
                 }
              },
             "geenresectie_meta":{
                 "properties": {
+                  "condition":"",
                   "description": "Reden: Gemetastaseerd",
                   "possible_values": ["No","Yes"]
                 }
              },
             "geenresectie_anders":{
                 "properties": {
+                  "condition":"",
                   "description": "Reden: Anders",
                   "possible_values": "unknown"
                 }
              },
             "geenresec_palltherYN":{
                 "properties": {
+                  "condition":"",
                   "description": "Palliatieve therapie",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pall_NO_reden":{
                 "properties": {
+                  "condition":"",
                   "description": "Reden",
                   "possible_values": ["Comorbiditeit","wens patiënt","overleden"]
                 }
              },
             "pallther_chemo":{
                 "properties": {
+                  "condition":"",
                   "description": "Chemotherapie",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_chemoSTUDIE":{
                 "properties": {
+                  "condition":"",
                   "description": "Chemotherapie in studieverband",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_RT":{
                 "properties": {
+                  "condition":"",
                   "description": "Radiotherapie",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_RTstudie":{
                 "properties": {
+                  "condition":"",
                   "description": "Radiotherapie in studieverband",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_chemoRT":{
                 "properties": {
+                  "condition":"",
                   "description": "Chemoradiatie",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_chemoRTstudie":{
                 "properties": {
+                  "condition":"",
                   "description": "Chemoradiatie in studieverband",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_startdatum":{
                 "properties": {
+                  "condition":"",
                   "description": "Startdatum: eerste palliatieve therapie",
                   "possible_values": "unknown"
                 }
              },
             "COMORB":{
                 "properties": {
+                  "condition":"",
                   "description": "Comorbiditeit aanwezig",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBCAR":{
                 "properties": {
+                  "condition":"",
                   "description": "Cardiaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBVAS":{
                 "properties": {
+                  "condition":"",
                   "description": "Vasculair",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBDIA":{
                 "properties": {
+                  "condition":"",
                   "description": "Diabetes",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBPUL":{
                 "properties": {
+                  "condition":"",
                   "description": "Pulmonaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBNEU":{
                 "properties": {
+                  "condition":"",
                   "description": "Neurologisch",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBMDA":{
                 "properties": {
+                  "condition":"",
                   "description": "Gastrointestinaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBURO":{
                 "properties": {
+                  "condition":"",
                   "description": "Urogenitaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }

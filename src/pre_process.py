@@ -22,23 +22,23 @@ class Preprocessor():
 
 
 class MyPreprocessor(Preprocessor):
-    def __init__(self, stem=None, stop=None, extrastop=None):
-        if stem == 'Dutch':
+    def __init__(self, preprocessdict, extras=None):
+        if "stem" in preprocessdict:
             self.stemmer = nltk.stem.snowball.DutchStemmer()
         else:
             self.stemmer = None
-        if stop:
-            self.stopwords = []
-            for st in stop:
-                self.stopwords += nltk.corpus.stopwords.words(st)
-            if extrastop:
-                self.stopwords += extrastop
+        if "stop" in preprocessdict:
+            self.stopwords = nltk.corpus.stopwords.words("dutch")
         else:
-            if extrastop:
-                self.stopwords = extrastop
-            else:
-                self.stopwords = None
-        self.add_synonyms = False
+            self.stopwords = []
+        if "extrastop" in preprocessdict and extras != None:
+            self.stopwords += [e for e in extras]
+            print "stopwords:",self.stopwords
+        if "synonyms" in preprocessdict:
+            self.add_synonyms = True
+        else:
+            self.add_synonyms = False
+
 
     def save(self, file):
         pickle.dump(self, open(file, "wb"))
@@ -74,7 +74,7 @@ class MyPreprocessor(Preprocessor):
     def preprocess(self, source_text):
         new_source_text = self.remove_codes(source_text)
         tokens = nltk.word_tokenize(new_source_text.lower())
-        if self.stopwords:
+        if self.stopwords != []:
             tokens = [tok for tok in tokens if not tok in self.stopwords]
         if self.add_synonyms:
             tokens = self.add_same_terms(tokens)
@@ -83,16 +83,10 @@ class MyPreprocessor(Preprocessor):
         return " ".join(tok for tok in tokens)
 
 
-def make_word_embeddings(con, type_doc, id_docs, filename, preprocessor=None):
-    to_remove = ['newline', 'newlin']
-    to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
-    some_preprocess = MyPreprocessor(
-        extrastop=to_remove)  # no stemming or stopwords. only code removing and punctuation
-    # some_preprocess.add_synonyms = True  # with synonyms . or can i add them later like sentences with equals
-    # some_preprocess = pickle.load("Mypreprocessor.p")
+def make_word_embeddings(con, type_doc, id_docs, filename, w2vpreprocessor=None):
     from ESutils import MyReports
-    reps=MyReports(con,type_doc,id_docs,some_preprocess)
-    word2vec = WordEmbeddings(reps)
+    reps=MyReports(con,type_doc,id_docs,w2vpreprocessor)
+    word2vec = WordEmbeddings(reps,min_count=2)
     word2vec.save(filename)
     print "trained word2vec. voc size =", len(word2vec.model.vocab)
     return word2vec
@@ -120,9 +114,8 @@ def structure_sections(con, type_doc, id_docs):
                 print "source=", rep
 
 
-def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor, add_synonyms=False):
+def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
     start_time = time.time()
-    preprocessor.add_synonyms = add_synonyms
     for source_text in con.documents(from_type, id_docs):
         preprocessed_text = {}
         for field in source_text:
@@ -134,6 +127,8 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor, ad
                         for inner_field in record:
                             processed_text = preprocessor.preprocess(record[inner_field])
                             rec[inner_field] = processed_text
+                            if field in id_forms and record[inner_field] != processed_text:
+                                print "form's value changed from , ", record[inner_field]," to ",processed_text
                         l.append(rec)
                     preprocessed_text[field] = l
                 else:
@@ -141,9 +136,11 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor, ad
                     for inner_field in source_text[field]:
                         processed_text = preprocessor.preprocess(source_text[field][inner_field])
                         rec[inner_field] = processed_text
+                        if field in id_forms and source_text[field][inner_field] != processed_text:
+                            print "form's value changed from , ", source_text[field][inner_field], " to ", processed_text
                     preprocessed_text[field] = rec
             id_doc = int(source_text['patient_nr'])
-        if int(source_text['patient_nr']) % 100 == 0:
+        if int(source_text['patient_nr']) % 10 == 0:
             print "preprocessed_text: ", preprocessed_text, " for patient ", id_doc
         con.index_doc(index, to_type, id_doc, preprocessed_text)
     print("--- %s seconds for annotate method---" % (time.time() - start_time))
@@ -152,18 +149,12 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor, ad
 
 if __name__ == '__main__':
 
-    settings2.init1("..\\Configurations\\configurations.yml", "values.json", "ids.json","values_used.json")
+    settings2.init("..\\Configurations\\configurations.yml", "values.json", "ids.json", "values_used.json")
     host = settings2.global_settings['host']
     con = ES_connection(host)
 
-    """
-    to_remove = settings2.global_settings['to_remove']
-    if 'punctuation' in to_remove:
-        to_remove += [i for i in string.punctuation]
-        # to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
+    w2vpreprocessor = pickle.load("preprocessor_1_1_1_1.p")
 
-    preprocessor = MyPreprocessor(stem='dutch', stop=['dutch'], extrastop=to_remove)
-    """
     index_name = settings2.global_settings['index_name']
     type_name_p = settings2.global_settings['type_name_p']
     type_name_pp = settings2.global_settings['type_name_pp']
@@ -171,15 +162,10 @@ if __name__ == '__main__':
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
 
-    #    annotate(con, index_name, type_name_p, type_name_pp, patient_ids, forms_ids, preprocessor, True)
+    #structure_sections(con,type_name_p,patient_ids)
 
-    #    preprocessor.save("Mypreprocessor.p")
-
-    #    structure_sections(con,type_name_p,patient_ids)
-
-    make_word_embeddings(con, type_name_p, patient_ids[0:1],"W2V_punctuationremovefrompatient.p")
-
-    w2v=WordEmbeddings()
-    w2v.load("W2V_punctuationremovefrompatient.p")
+    make_word_embeddings(con, type_name_p, patient_ids,"W2V_patient_1_1_1_1.p")
+    w2v = WordEmbeddings()
+    w2v.load("W2V_patient_1_1_1_1.p")
     for a,b in w2v.get_vocab().items():
         print a,b
