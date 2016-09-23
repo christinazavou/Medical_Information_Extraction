@@ -46,7 +46,7 @@ class ReportSentences(object):
 class WordEmbeddings:
     def __init__(self, sentences=None, min_count=5):
         if sentences and min_count:
-            self.model = gensim.models.Word2Vec(sentences, min_count=min_count, size=4 * 12, workers=4)
+            self.model = gensim.models.Word2Vec(sentences, min_count=min_count, workers=4)
             self.builded = True
         else:
             self.model = gensim.models.Word2Vec(iter=1, min_count=2)

@@ -149,23 +149,19 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
 
 if __name__ == '__main__':
 
-    settings2.init("..\\Configurations\\configurations.yml", "values.json", "ids.json", "values_used.json")
+    settings2.init("..\\Configurations\\configurations.yml", "values.json", "ids.json")
     host = settings2.global_settings['host']
     con = ES_connection(host)
 
-    w2vpreprocessor = pickle.load("preprocessor_1_1_1_1.p")
-
-    index_name = settings2.global_settings['index_name']
-    type_name_p = settings2.global_settings['type_name_p']
     type_name_pp = settings2.global_settings['type_name_pp']
-
     patient_ids = settings2.ids['medical_info_extraction patient ids']
-    forms_ids = settings2.global_settings['forms']
-
-    #structure_sections(con,type_name_p,patient_ids)
-
-    make_word_embeddings(con, type_name_p, patient_ids,"W2V_patient_1_1_1_1.p")
+    patient_ids=patient_ids[0:1]
+    preprocessor_name=("preprocessor_"+type_name_pp+".p").replace("patient_","")
+    w2vpreprocessor = pickle.load(open( preprocessor_name,"rb"))
+    W2Vname="W2V"+type_name_pp+".p"
+    make_word_embeddings(con, type_name_pp, patient_ids,W2Vname)
     w2v = WordEmbeddings()
-    w2v.load("W2V_patient_1_1_1_1.p")
+    w2v.load(W2Vname)
     for a,b in w2v.get_vocab().items():
         print a,b
+    # structure_sections(con,type_name_p,patient_ids)
