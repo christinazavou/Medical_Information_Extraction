@@ -154,14 +154,18 @@ if __name__ == '__main__':
     con = ES_connection(host)
 
     type_name_pp = settings2.global_settings['type_name_pp']
-    patient_ids = settings2.ids['medical_info_extraction patient ids']
-    patient_ids=patient_ids[0:1]
-    preprocessor_name=("preprocessor_"+type_name_pp+".p").replace("patient_","")
-    w2vpreprocessor = pickle.load(open( preprocessor_name,"rb"))
-    W2Vname="W2V"+type_name_pp+".p"
-    make_word_embeddings(con, type_name_pp, patient_ids,W2Vname)
+    patient_ids_all = settings2.ids['medical_info_extraction patient ids']
+    pct = settings2.global_settings['patients_pct']
+    import random
+    patient_ids_used = random.sample(patient_ids_all, int(pct * len(patient_ids_all)))
+    preprocessor_name = ("preprocessor_" + type_name_pp + ".p").replace("patient_", "")
+    w2vpreprocessor = pickle.load(open(preprocessor_name, "rb"))
+    W2Vname = "W2V" + type_name_pp + ".p"
+    print "make W2V with ",type_name_pp," and ",len(patient_ids_used)
+    make_word_embeddings(con, type_name_pp, patient_ids_used, W2Vname)
     w2v = WordEmbeddings()
     w2v.load(W2Vname)
     for a,b in w2v.get_vocab().items():
         print a,b
+
     # structure_sections(con,type_name_p,patient_ids)

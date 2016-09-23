@@ -9,6 +9,7 @@ import Evaluation
 from pre_process import annotate, MyPreprocessor
 import json
 import time
+import random
 
 if __name__ == '__main__':
 
@@ -57,7 +58,10 @@ if __name__ == '__main__':
 
     """-------------------------------------------set params--------------------------------------------------------"""
 
-    patient_ids = settings2.ids['medical_info_extraction patient ids']
+    patient_ids_all = settings2.ids['medical_info_extraction patient ids']
+    pct=settings2.global_settings['patients_pct']
+    patient_ids_used = random.sample(patient_ids_all, int(pct*len(patient_ids_all)/100.0))
+
     forms_ids = settings2.global_settings['forms']
     settings2.update_values_used()
     if settings2.global_settings['assign_all']:
@@ -74,14 +78,14 @@ if __name__ == '__main__':
     else:
         evaluations_dict={'evaluation': []}
 
-    """--------------------------------------------annotate---------------------------------------------------------"""
+    """--------------------------------------------annotate (all)----------------------------------------------------"""
 
     if settings2.global_settings['read_dossiers'] or len(settings2.global_settings['preprocess']) != 0:
         to_remove = settings2.global_settings['to_remove']
         if 'punctuation' in to_remove:
             to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
         preprocessor = MyPreprocessor(settings2.global_settings['preprocess'])
-        annotate(con, index_name, type_patient, type_processed_patient, patient_ids, forms_ids, preprocessor)
+        annotate(con, index_name, type_patient, type_processed_patient, patient_ids_all, forms_ids, preprocessor)
         preprocessor.save(preprocessor_name)
         print "Finish annotating ",type_processed_patient," data (indexing preprocessed files)."
 
@@ -90,7 +94,7 @@ if __name__ == '__main__':
     if settings2.global_settings['run_algo']:
         if settings2.global_settings['algo'] == "random":
             myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algoname, labels_possible_values)
-            myalgo.assign(patient_ids, forms_ids)
+            myalgo.assign(patient_ids_used, forms_ids)
         if settings2.global_settings['algo'] == "baseline":
             if settings2.global_settings['with_description']:
                 myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, algoname, labels_possible_values,
@@ -100,15 +104,15 @@ if __name__ == '__main__':
                 myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, algoname,labels_possible_values,
                                                      settings2.global_settings['when_no_preference'],
                                                      settings2.global_settings['fuzziness'])
-            myalgo.assign(patient_ids, forms_ids)
+            myalgo.assign(patient_ids_used, forms_ids)
         print "Finish assigning values."
 
     """---------------------------------------------Evaluate---------------------------------------------------------"""
     if settings2.global_settings['eval_algo']:
         myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, algoname, lab_pos_val)
-        score = myeval.eval(patient_ids, forms_ids)
+        score = myeval.eval(patient_ids_used, forms_ids)
         evaluations_dict['evaluation'] += [{'description':description, 'score': score, 'algoname':algoname,
-                                                'dte-time': time.strftime("%c")}]
+                                                'dte-time': time.strftime("%c"),'pct_of_patients':pct}]
         with open('evaluations.json', 'w') as jfile:
             json.dump(evaluations_dict, jfile, indent=4)
         print "Finish evaluating."

@@ -38,29 +38,30 @@ class MyReports():
         current_rep = 0
         while current_doc <= len(self.ids) - 1:
             doc_source = self.con.get_doc_source('medical_info_extraction', self.type_doc, self.ids[current_doc])
-            report = doc_source['report']
-            if type(report) == dict:
-                doc_reports = 1
-            else:
-                doc_reports = len(report)
-            if doc_reports == 1:
-                if type(report) is list:
-                    print "OPA"
-                if self.preprocessor is None:
-                    yield (report['description']).split()
+            if 'report' in doc_source.keys():
+                report = doc_source['report']
+                if type(report) == dict:
+                    doc_reports = 1
                 else:
-                    yield (self.preprocessor.preprocess(report['description'])).split()
-                current_doc += 1
-                current_rep = 0
-            else:
-                if self.preprocessor is None:
-                    yield (report[current_rep]['description']).split()
-                else:
-                    yield (self.preprocessor.preprocess(report[current_rep]['description'])).split()
-                current_rep += 1
-                if current_rep == doc_reports:
+                    doc_reports = len(report)
+                if doc_reports == 1:
+                    if type(report) is list:
+                        print "OPA"
+                    if self.preprocessor is None:
+                        yield (report['description']).split()
+                    else:
+                        yield (self.preprocessor.preprocess(report['description'])).split()
                     current_doc += 1
                     current_rep = 0
+                else:
+                    if self.preprocessor is None:
+                        yield (report[current_rep]['description']).split()
+                    else:
+                        yield (self.preprocessor.preprocess(report[current_rep]['description'])).split()
+                    current_rep += 1
+                    if current_rep == doc_reports:
+                        current_doc += 1
+                        current_rep = 0
 
 
 class ES_connection():

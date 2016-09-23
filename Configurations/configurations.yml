@@ -14,6 +14,7 @@ assign_all: True
 run_algo: True
 eval_algo: True
 forms: ["colorectaal"] #,"mamma"]
+patients_pct: 10 # percentage
 
 #fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
 #                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99','SCORECT','SCORECT2',
