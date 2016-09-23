@@ -72,7 +72,6 @@ class Evaluation():
         if random.random() < 0.05:
             print "a pair score is ", score, " and has ", empties, " empty targets out of ", len(targets)
             print "score out of ",len(usedLabels)," not ",len(predictions)
-        print len(predictions), "AND", len(usedLabels)
         return score
 
 

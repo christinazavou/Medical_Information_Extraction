@@ -39,7 +39,7 @@ class Algorithm():
                 print "assign: ", self.algo_assignments[patient_id], " to patient: ", patient_id
         with open(self.results_jfile, 'w') as f:
             json.dump(self.algo_assignments, f, indent=4)
-        pickle.dump( self.algo_assignments, open( self.results_jfile.replace("json","p"), "wb" ) )
+        #pickle.dump( self.algo_assignments, open( self.results_jfile.replace("json","p"), "wb" ) )
         return self.algo_assignments
 
     @abstractmethod

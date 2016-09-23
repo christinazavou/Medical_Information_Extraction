@@ -8,7 +8,7 @@ import Algorithm
 import Evaluation
 from pre_process import annotate, MyPreprocessor
 import json
-import datetime
+import time
 
 if __name__ == '__main__':
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, algoname, lab_pos_val)
     score = myeval.eval(patient_ids, forms_ids)
     evaluations_dict['evaluation'] += [{'description':description, 'score': score, 'algoname':algoname,
-                                            'time': datetime.date.today().strftime("%B %d, %Y")}]
+                                            'dte-time': time.strftime("%c")}]
     with open('evaluations.json', 'w') as jfile:
         json.dump(evaluations_dict, jfile, indent=4)
     print "Finish evaluating."

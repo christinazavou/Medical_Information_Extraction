@@ -153,6 +153,9 @@ def make_names_and_description():
     description['when_no_preference'] = global_settings['when_no_preference']
     description['fuzziness'] = global_settings['fuzziness']
     description['with_description']=global_settings['with_description']
+    description['assign_all']=global_settings['assign_all']
+    description['run_algo']=global_settings['run_algo']
+    description['forms']=global_settings['forms']
     for form_id in global_settings['forms']:
         description[form_id] = global_settings[form_id]
     preprocessor_name = "preprocessor"
@@ -160,9 +163,9 @@ def make_names_and_description():
     preprocessor_name=preprocessor_name.replace("patient_","")
     algoname="algorithm"
     if global_settings['algo']=="random":
-        algoname+="_random.json"
+        algoname+="_random1.json"
     else:
-        algoname+="_baseline.json"
+        algoname+="_baseline1.json"
     while os.path.isdir(os.path.join(os.path.realpath(__file__).replace("settings2.py", algoname))):
         currentint=int(filter(str.isdigit, algoname))
         algoname=algoname.replace(str(currentint),str(currentint+1))
