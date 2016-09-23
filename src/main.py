@@ -12,8 +12,8 @@ import time
 
 if __name__ == '__main__':
 
-    configFilePath = "..\Configurations\Configurations.yml"
-    existing=True
+    configFilePath = "..\Configurations\configurations.yml"
+    existing=False
 
     if not existing:
         settings2.init(configFilePath)

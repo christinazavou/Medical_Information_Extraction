@@ -29,7 +29,7 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None, valuesusedfile=N
 
     global_settings['preprocess'] = doc['preprocess']
     global_settings['type_name_pp'] = doc['type_name_pp']
-    if global_settings['preprocess'] == []:
+    if len(global_settings['preprocess']) == 0:
         print "no preprocess. patient->",global_settings['type_name_pp']
     else:
         if global_settings['preprocess'].__contains__('stem'):
@@ -175,4 +175,5 @@ def make_names_and_description():
 if __name__ == "__main__":
     configFile = "..\\Configurations\\Configurations.yml"
 
-    init(configFile, "values.json", "ids.json", "values_used.json")
+    #init(configFile, "values.json", "ids.json", "values_used.json")
+    init(configFile)
