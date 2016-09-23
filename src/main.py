@@ -13,7 +13,7 @@ import random
 
 if __name__ == '__main__':
 
-    configFilePath = "..\Configurations\configurations.yml"
+    configFilePath = "..\\aux_config\\conf1.yml"
     existing=True
     print "run with existing ",existing
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     patient_ids_all = settings2.ids['medical_info_extraction patient ids']
     pct=settings2.global_settings['patients_pct']
-    patient_ids_used = random.sample(patient_ids_all, int(pct*len(patient_ids_all)/100.0))
+    patient_ids_used = random.sample(patient_ids_all, int(pct*len(patient_ids_all)))
 
     forms_ids = settings2.global_settings['forms']
     settings2.update_values_used()
@@ -91,10 +91,10 @@ if __name__ == '__main__':
 
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
+    print "use ",len(patient_ids_used)
     if settings2.global_settings['run_algo']:
         if settings2.global_settings['algo'] == "random":
             myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algoname, labels_possible_values)
-            myalgo.assign(patient_ids_used, forms_ids)
         if settings2.global_settings['algo'] == "baseline":
             if settings2.global_settings['with_description']:
                 myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, algoname, labels_possible_values,
@@ -104,7 +104,7 @@ if __name__ == '__main__':
                 myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient, algoname,labels_possible_values,
                                                      settings2.global_settings['when_no_preference'],
                                                      settings2.global_settings['fuzziness'])
-            myalgo.assign(patient_ids_used, forms_ids)
+        myalgo.assign(patient_ids_used, forms_ids)
         print "Finish assigning values."
 
     """---------------------------------------------Evaluate---------------------------------------------------------"""
