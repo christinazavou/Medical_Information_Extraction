@@ -7,6 +7,7 @@ Algo_Output: Randomly assigns terms / randomly choose 4914 out of k
 
 import json, random, pickle, os, operator, nltk
 from abc import ABCMeta, abstractmethod
+import time
 
 from ESutils import ES_connection, start_ES
 import settings2
@@ -27,6 +28,7 @@ class Algorithm():
         self.algo_assignments = {}
 
     def assign(self, assign_patients, assign_forms):
+        start_time=time.time()
         for patient_id in assign_patients:
             patient_forms = {}
             doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
@@ -40,6 +42,7 @@ class Algorithm():
         with open(self.results_jfile, 'w') as f:
             json.dump(self.algo_assignments, f, indent=4)
         #pickle.dump( self.algo_assignments, open( self.results_jfile.replace("json","p"), "wb" ) )
+        print("--- %s seconds for assign method---" % (time.time() - start_time))
         return self.algo_assignments
 
     @abstractmethod
@@ -58,16 +61,20 @@ class randomAlgorithm(Algorithm):
                 assignment = self.labels_possible_values[form_id][label]['values'][chosen]
             else:
                 doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
-                reports=doc['report']
-                if type(reports)==list:
-                    chosen_description=reports[random.randint(0,len(reports)-1)]['description']
+                if 'report' in doc.keys():
+                    reports=doc['report']
+                    if type(reports)==list:
+                        chosen_description=reports[random.randint(0,len(reports)-1)]['description']
+                    else:
+                        chosen_description=reports['description']
+                    if chosen_description:
+                        tokens=nltk.word_tokenize(chosen_description.lower())
+                        assignment = tokens[random.randint(0,len(tokens)-1)]
+                    else:
+                        assignment=""
                 else:
-                    chosen_description=reports['description']
-                if chosen_description:
-                    tokens=nltk.word_tokenize(chosen_description.lower())
-                    assignment = tokens[random.randint(0,len(tokens)-1)]
-                else:
-                    assignment=""
+                    print "patient ",patient_id, " has no reports =/ "
+                    assignment = ""
             patient_form_assign[label] = assignment
         return patient_form_assign
 

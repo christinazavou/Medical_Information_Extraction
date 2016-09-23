@@ -69,9 +69,8 @@ class Evaluation():
                     if predictions[field] == targets[field]:
                         score += 1.0
         score /= len(usedLabels)
-        if random.random() < 0.05:
-            print "a pair score is ", score, " and has ", empties, " empty targets out of ", len(targets)
-            print "score out of ",len(usedLabels)," not ",len(predictions)
+        if random.random() < 0.01:
+            print "a pair score is ", score, " and has ", empties, " empty targets out of ", len(usedLabels) ," not ", len(predictions)
         return score
 
 

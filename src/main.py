@@ -13,7 +13,8 @@ import time
 if __name__ == '__main__':
 
     configFilePath = "..\Configurations\configurations.yml"
-    existing=False
+    existing=True
+    print "run with existing ",existing
 
     if not existing:
         settings2.init(configFilePath)
@@ -31,7 +32,8 @@ if __name__ == '__main__':
     type_processed_patient = settings2.global_settings['type_name_pp']
     data_path = settings2.global_settings['data_path']
     con = ES_connection(settings2.global_settings['host'])
-    """--------------------------------------------------------------------------------------------------------------"""
+
+    """-----------------------------------------read_dossiers--------------------------------------------------------"""
 
     if settings2.global_settings['read_dossiers']:
         path_root_indossiers = settings2.global_settings['path_root_indossiers']
@@ -53,7 +55,7 @@ if __name__ == '__main__':
         # print "the sentences ids ",con.get_type_ids(index_name,type_sentence,1500)
         print "Finished importing Data."
 
-    """--------------------------------------------------------------------------------------------------------------"""
+    """-------------------------------------------set params--------------------------------------------------------"""
 
     patient_ids = settings2.ids['medical_info_extraction patient ids']
     forms_ids = settings2.global_settings['forms']
@@ -72,9 +74,9 @@ if __name__ == '__main__':
     else:
         evaluations_dict={'evaluation': []}
 
-    """--------------------------------------------------------------------------------------------------------------"""
+    """--------------------------------------------annotate---------------------------------------------------------"""
 
-    if settings2.global_settings['read_dossiers'] or settings2.global_settings['preprocess'] != []:
+    if settings2.global_settings['read_dossiers'] or len(settings2.global_settings['preprocess']) != 0:
         to_remove = settings2.global_settings['to_remove']
         if 'punctuation' in to_remove:
             to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
@@ -83,7 +85,7 @@ if __name__ == '__main__':
         preprocessor.save(preprocessor_name)
         print "Finish annotating ",type_processed_patient," data (indexing preprocessed files)."
 
-    """--------------------------------------------------------------------------------------------------------------"""
+    """---------------------------------------------Run algorithm----------------------------------------------------"""
 
     if settings2.global_settings['run_algo']:
         if settings2.global_settings['algo'] == "random":
@@ -101,7 +103,7 @@ if __name__ == '__main__':
             myalgo.assign(patient_ids, forms_ids)
         print "Finish assigning values."
 
-    """--------------------------------------------------------------------------------------------------------------"""
+    """---------------------------------------------Evaluate---------------------------------------------------------"""
     myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, algoname, lab_pos_val)
     score = myeval.eval(patient_ids, forms_ids)
     evaluations_dict['evaluation'] += [{'description':description, 'score': score, 'algoname':algoname,

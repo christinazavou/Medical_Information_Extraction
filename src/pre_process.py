@@ -127,8 +127,8 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
                         for inner_field in record:
                             processed_text = preprocessor.preprocess(record[inner_field])
                             rec[inner_field] = processed_text
-                            if field in id_forms and record[inner_field] != processed_text:
-                                print "form's value changed from , ", record[inner_field]," to ",processed_text
+                            #if field in id_forms and record[inner_field] != processed_text:
+                            #    print "form's value changed from , ", record[inner_field]," to ",processed_text
                         l.append(rec)
                     preprocessed_text[field] = l
                 else:
@@ -136,8 +136,8 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
                     for inner_field in source_text[field]:
                         processed_text = preprocessor.preprocess(source_text[field][inner_field])
                         rec[inner_field] = processed_text
-                        if field in id_forms and source_text[field][inner_field] != processed_text:
-                            print "form's value changed from , ", source_text[field][inner_field], " to ", processed_text
+                        #if field in id_forms and source_text[field][inner_field] != processed_text:
+                        #    print "form's value changed from , ", source_text[field][inner_field], " to ", processed_text
                     preprocessed_text[field] = rec
             id_doc = int(source_text['patient_nr'])
         if int(source_text['patient_nr']) % 10 == 0:

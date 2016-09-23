@@ -10,7 +10,7 @@ read_dossiers: False
 algo: "baseline" # "random" or "baseline"
 data_path_root: "C:\\Users\\Christina Zavou\\Documents"  # ".." or "C:\Users\Christina Zavou\Documents"
 
-assign_all: True
+assign_all: False
 run_algo: True
 forms: ["colorectaal"] #,"mamma"]
 
@@ -29,14 +29,14 @@ fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klach
 #fields_mamma: []
 
 # if empty preprocess then take type_name_pp as is
-preprocess: [] #['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
+preprocess: [] #[] #['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
 to_remove: ['newlin','newline', 'punctuation']
-type_name_pp: "patient_1_1_1_0" # "patient_stem_stop_extrastop_synonyms" #"patient_stem_stop_extrastop_synonyms" or given name like patient_1_1_1_1 # always remove codes
+type_name_pp: "patient_1_1_1_1" #"patient_stem_stop_extrastop_synonyms" or given name like patient_1_1_1_1 # always remove codes
 
 unknowns: "include"
-when_no_preference: "empty" # "random" or "empty"
+when_no_preference: "random" # "random" or "empty"
 fuzziness: 2
-with_description: False
+with_description: True
 # ---------------------------------------------------------------------------------------------------------------------#
 index_name: "medical_info_extraction"
 initmap_jfile: "mapping.json"
