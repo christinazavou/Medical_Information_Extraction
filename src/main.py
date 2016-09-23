@@ -104,10 +104,11 @@ if __name__ == '__main__':
         print "Finish assigning values."
 
     """---------------------------------------------Evaluate---------------------------------------------------------"""
-    myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, algoname, lab_pos_val)
-    score = myeval.eval(patient_ids, forms_ids)
-    evaluations_dict['evaluation'] += [{'description':description, 'score': score, 'algoname':algoname,
-                                            'dte-time': time.strftime("%c")}]
-    with open('evaluations.json', 'w') as jfile:
-        json.dump(evaluations_dict, jfile, indent=4)
-    print "Finish evaluating."
+    if settings2.global_settings['eval_algo']:
+        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, algoname, lab_pos_val)
+        score = myeval.eval(patient_ids, forms_ids)
+        evaluations_dict['evaluation'] += [{'description':description, 'score': score, 'algoname':algoname,
+                                                'dte-time': time.strftime("%c")}]
+        with open('evaluations.json', 'w') as jfile:
+            json.dump(evaluations_dict, jfile, indent=4)
+        print "Finish evaluating."

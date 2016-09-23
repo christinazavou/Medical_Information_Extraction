@@ -71,6 +71,7 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None, valuesusedfile=N
     global_settings['path_root_outdossiers'] = global_settings['data_path'] + global_settings['path_outdossiers']
     global_settings['assign_all']=doc['assign_all']
     global_settings['run_algo']=doc['run_algo']
+    global_settings['eval_algo']=doc['eval_algo']
 
     global_settings['forms'] = []
     for decease in doc['forms']:
