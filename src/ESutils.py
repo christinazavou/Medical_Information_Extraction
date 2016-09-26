@@ -161,7 +161,6 @@ class ES_connection():
             update_body = {"doc": update_dict}
         else:
             update_body = {"script": {"file": script_name, "params": params_dict}}
-        print("updating doc %s" % id_doc)
         #try:
         res = self.es.update(index=index_name, doc_type=type_name, id=id_doc, body=update_body, refresh=True)
         #except TransportError as e:
@@ -176,7 +175,6 @@ class ES_connection():
     def put_map(self, map_jfile, index_name, type_name):
         with open(map_jfile, "r") as jsonfile:
             map = json.load(jsonfile, encoding='utf-8')
-        print("putting a mapping...")
         try:
             res = self.es.indices.put_mapping(type_name, map, index_name)
             map = self.es.indices.get_mapping(index_name, type_name)

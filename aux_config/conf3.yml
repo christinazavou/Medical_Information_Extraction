@@ -8,6 +8,7 @@ csv_forms_directory: "decease\\"
 path_indossiers: "decease\\patients_selection_decease\\"
 path_outdossiers: "decease\\patients_selection_decease_json\\"
 data_path_root: ".."  # ".." or "C:\Users\Christina Zavou\Documents"
+results_path_root: "..\\results\\"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
 read_dossiers: False # if True -> makes jsons and index them in ES
@@ -18,7 +19,7 @@ eval_algo: True
 eval_file: "" # if run_algo is false give which file to eval
 patients_pct: 1 # 0.01 # percentage of patients to work with
 
-preprocess: ['remove_codes','extrastop','remove_stopwards','stem','add_synonyms'] # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
+preprocess: ['remove_codes','extrastop','remove_stopwords','stem','add_synonyms'] # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
 # if empty preprocess then take type_name_pp as is
 to_remove: ['newlin','newline', 'punctuation'] # note: codes are always removed
 type_name_pp: "patient_stem_stop_extrastop_synonyms" # "patient_stem_stop_extrastop_synonyms" or ~ patient_1_1_1_1

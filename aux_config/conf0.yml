@@ -8,9 +8,10 @@ csv_forms_directory: "decease\\"
 path_indossiers: "decease\\patients_selection_decease\\"
 path_outdossiers: "decease\\patients_selection_decease_json\\"
 data_path_root: ".."  # ".." or "C:\Users\Christina Zavou\Documents"
+results_path_root: "..\\results\\"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
-read_dossiers: False # if True -> makes jsons and index them in ES
+read_dossiers: True # if True -> makes jsons and index them in ES
 algo: "random" # "random" or "baseline"
 run_algo: True
 forms: ["colorectaal"] #,"mamma"]
@@ -18,10 +19,10 @@ eval_algo: True
 eval_file: "" # if run_algo is false give which file to eval
 patients_pct: 1 # 0.01 # percentage of patients to work with
 
-preprocess: [] # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
+preprocess: ['remove_codes','extrastop','remove_stopwords'] # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
 # if empty preprocess then take type_name_pp as is
 to_remove: ['newlin','newline', 'punctuation'] # note: codes are always removed
-type_name_pp: "patient_1_1_1_0" # "patient_stem_stop_extrastop_synonyms" or ~ patient_1_1_1_1
+type_name_pp: "patient_stem_stop_extrastop_synonyms" # "patient_stem_stop_extrastop_synonyms" or ~ patient_1_1_1_1
 
 unknowns: "include" # "include" or "exclude" -> to use or not the fields that are open-questions;not 1-of-k
 when_no_preference: "random" # "random" or "empty" -> to assign when no preference between the k possible values

@@ -8,6 +8,7 @@ csv_forms_directory: "decease\\"
 path_indossiers: "decease\\patients_selection_decease\\"
 path_outdossiers: "decease\\patients_selection_decease_json\\"
 data_path_root: ".."  # ".." or "C:\Users\Christina Zavou\Documents"
+results_path_root: "..\\results\\"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
 read_dossiers: False # if True -> makes jsons and index them in ES

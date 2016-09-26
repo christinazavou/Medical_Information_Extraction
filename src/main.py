@@ -1,4 +1,5 @@
 import os
+import sys
 import string
 import pickle
 import json
@@ -15,7 +16,8 @@ import Evaluation
 
 if __name__ == '__main__':
 
-    configFilePath = "..\\configurations\\configurations.yml"
+    # configFilePath = "..\\configurations\\configurations.yml"
+    configFilePath = sys.argv[1]
 
     if not (os.path.isfile("values.json") and os.path.isfile("ids.json")):
         settings.init(configFilePath)

@@ -24,6 +24,7 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
     global_settings['data_path'] = global_settings['data_path_root'] + '\\Data\\'
     global_settings['path_root_indossiers'] = global_settings['data_path'] + tmp_path_in
     global_settings['path_root_outdossiers'] = global_settings['data_path'] + tmp_path_out
+    global_settings['results_path_root'] = doc['results_path_root']
     # ----------------------------------------------excecution config--------------------------------------------------#
     global_settings['read_dossiers'] = doc['read_dossiers']
     global_settings['algo'] = doc['algo']
@@ -34,9 +35,8 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
             global_settings['forms'].append(decease)
         else:
             print "no directory for input decease ",decease," exists."
-    print "forms",global_settings['forms']
     global_settings['eval_algo'] = doc['eval_algo']
-    global_settings['eval_file'] = doc['eval_file']
+    global_settings['eval_file'] = doc['results_path_root'] + doc['eval_file']
     global_settings['patients_pct'] = doc['patients_pct']
 
     global_settings['preprocess'] = doc['preprocess']
@@ -61,7 +61,6 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
             global_settings['type_name_pp'] = global_settings['type_name_pp'].replace("synonyms", "1")
         else:
             global_settings['type_name_pp'] = global_settings['type_name_pp'].replace("synonyms", "0")
-        print "preprocess. patient->", global_settings['type_name_pp']
 
     global_settings['unknowns'] = doc['unknowns']
     global_settings['when_no_preference'] = doc['when_no_preference']
@@ -137,19 +136,21 @@ def get_W2V_name():
 
 def get_preprocessor_name():
     preprocessor_name = ("preprocessor_" + global_settings['type_name_pp'] + ".p").replace("patient_", "")
+    print "preprocsser_name ",preprocessor_name
     return preprocessor_name
 
 
 def get_results_filename():
+    results_filename = global_settings['results_path_root']
     if global_settings['algo'] == "random":
-        results_filename = "algorithm_random1.json"
+        results_filename += "algorithm_random1.json"
     else:
-        results_filename = "algorithm_baseline1.json"
+        results_filename += "algorithm_baseline1.json"
     while os.path.isfile(results_filename):
         # while os.path.isdir(os.path.join(os.path.realpath(__file__).replace("settings.py", results_filename))):
         currentint = int(filter(str.isdigit, results_filename))
         results_filename = results_filename.replace(str(currentint), str(currentint+1))
-    if global_settings['eval_file'] == "":
+    if global_settings['eval_file'] == global_settings['results_path_root']:
         global_settings['eval_file'] = results_filename
     return results_filename
 

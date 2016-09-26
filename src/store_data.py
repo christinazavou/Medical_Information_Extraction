@@ -48,7 +48,6 @@ class Decease():
                 body_data["forms"] = [self.name]
                 self.con.index_doc(self.index, self.patients_type, patient_id, body_data)
             return
-        print "put form name"
         params = dict(decease=self.name)
         self.con.update_es_doc(self.index, self.patients_type, patient_id, "script",script_name="put_form_name",params_dict=params)
         return
@@ -76,7 +75,6 @@ class Decease():
         form_name = self.name
         with open(self.json_form) as field_file:
             f = json.load(field_file)
-        print "form name =",form_name," should be ",f['properties'].keys()[0]
         assert form_name == f['properties'].keys()[0], "form name is not valid"
         fields_dict = f['properties'][form_name]['properties']
         body_data = {"name": form_name, "fields": fields_dict}
@@ -116,7 +114,6 @@ class Decease():
                     for field in fields:
                         id_dict[field] = row_dict[field]
                     partial_dict = {id_form: id_dict}
-                    print "put form values"
                     self.con.update_es_doc(self.index, self.patients_type, id_patient, "doc", partial_dict)
                 else:
                     print 'patient\'s id, ', id_patient, ' not in ', self.name, ' form\'s Data'
@@ -134,12 +131,10 @@ def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directo
         directory = data_path + decease_name + "\\"
         decease.set_paths_params(directory_p, directory, directory_f)
         decease.index_es_patients(existing_patients_ids)  # index patients of that decease training set
-        print "the ", decease.name, " patients ", decease.patients
         decease.index_form()
         decease.put_form_in_patients()
         if decease_name == decease_folders[len(decease_folders) - 1]:
             existing_patients_ids = con.get_type_ids(index_name, type_name_p) # finally...to get ids of last form saved
-            print "existing patients: ", existing_patients_ids
         MyDeceases.append(decease)
     print("--- %s seconds for annotate method---" % (time.time() - start_time))
     return MyDeceases
