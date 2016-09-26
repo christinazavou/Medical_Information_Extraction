@@ -1,7 +1,7 @@
 
 import os, time
 
-for c in range(9):
+for c in range(2):
     start_time = time.time()
     runargs = "python main.py ..\\aux_config\\conf" + str(c) + ".yml"
     os.system(runargs)

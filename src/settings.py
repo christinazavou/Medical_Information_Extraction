@@ -12,6 +12,7 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
     with open(configFile, 'r') as f:
         doc = yaml.load(f)
     global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
+    global_settings['configFile'] = configFile
     # -----------------------------------------------paths-------------------------------------------------------------#
     global_settings['host'] = doc['host']
     tmp_json_dir = doc['json_forms_directory']
@@ -136,20 +137,12 @@ def get_W2V_name():
 
 def get_preprocessor_name():
     preprocessor_name = ("preprocessor_" + global_settings['type_name_pp'] + ".p").replace("patient_", "")
-    print "preprocsser_name ",preprocessor_name
     return preprocessor_name
 
 
 def get_results_filename():
-    results_filename = global_settings['results_path_root']
-    if global_settings['algo'] == "random":
-        results_filename += "algorithm_random1.json"
-    else:
-        results_filename += "algorithm_baseline1.json"
-    while os.path.isfile(results_filename):
-        # while os.path.isdir(os.path.join(os.path.realpath(__file__).replace("settings.py", results_filename))):
-        currentint = int(filter(str.isdigit, results_filename))
-        results_filename = results_filename.replace(str(currentint), str(currentint+1))
+    results_filename = global_settings['configFile'].replace("aux_config","results")+"_results.json"
+    results_filename = results_filename.replace(".yml","")
     if global_settings['eval_file'] == global_settings['results_path_root']:
         global_settings['eval_file'] = results_filename
     return results_filename

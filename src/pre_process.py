@@ -26,7 +26,6 @@ class MyPreprocessor(object):
             self.stopwords = []
         if "extrastop" in preprocessdict and extras != None:
             self.stopwords += [e for e in extras]
-            print "stopwords:", self.stopwords
         if "synonyms" in preprocessdict:
             self.add_synonyms = True
         else:

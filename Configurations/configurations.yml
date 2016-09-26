@@ -16,7 +16,7 @@ algo: "baseline" # "random" or "baseline"
 run_algo: False
 forms: ["colorectaal"] #,"mamma"]
 eval_algo: True
-eval_file: "algorithm_baseline1.json" # if run_algo is false give which file to eval
+eval_file: "conf1_results.json" # if run_algo is false give which file to eval
 patients_pct: 1 # 0.01 # percentage of patients to work with
 
 preprocess: [] # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
