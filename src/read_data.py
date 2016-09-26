@@ -1,7 +1,7 @@
 import os
 import csv
 import json
-import settings2
+import settings
 
 
 """
@@ -55,13 +55,13 @@ def readPatients(path_root_in,path_root_out):
 
 
 if __name__ == '__main__':
-    settings2.init1('..\\Configurations\\Configurations.yml')
-    data_path= settings2.global_settings['data_path']
-    settings2.global_settings['data_path_root'] = ".."
-    settings2.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
-    settings2.init2()
-    path_root_indossiers=settings2.global_settings['path_root_indossiers']
-    path_root_outdossiers=settings2.global_settings['path_root_outdossiers']
+    settings.init1('..\\Configurations\\Configurations.yml')
+    data_path= settings.global_settings['data_path']
+    settings.global_settings['data_path_root'] = ".."
+    settings.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
+    settings.init2()
+    path_root_indossiers=settings.global_settings['path_root_indossiers']
+    path_root_outdossiers=settings.global_settings['path_root_outdossiers']
 
     decease_folders= [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
 

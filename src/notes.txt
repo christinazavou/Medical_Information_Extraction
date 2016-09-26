@@ -198,3 +198,94 @@ GET /medical_info_extraction/patient/_search
         }
     }
 }
+
+
+has_dis = re.search(r"<DIS>", sentence, re.IGNORECASE) is not None
+
+"""
+    res=es.indices.create(index="neoindex", body=
+    {
+        "analysis": {
+            "filter": {
+                "search_synonym_filter": {
+                    "type": "synonym",
+                    "synonyms": [
+                        "sneakers,pumps"
+                    ]
+                }
+            },
+            "analyzer": {
+                "search_synonyms": {
+                    "filter": [
+                        "lowercase",
+                        "search_synonym_filter"
+                    ],
+                    "tokenizer": "standard"
+                }
+            }
+        },
+        "settings": {
+            "number_of_shards": 2,
+            "number_of_replicas": 1
+        }
+    })
+    print("res %s"%res)
+    res=es.indices.put_mapping("proto",body=
+    {
+        "properties": {
+            "kati": {
+                "type": "string",
+                "analyzer": "search_synonyms"
+            },
+            "katiallo": {
+                "type": "string",
+                "analyzer": "standard"
+            }
+        }
+    },index="neoindex")
+    es.bulk(body=[
+    {
+        "index": {
+            "_index": "neoindex",
+            "_type": "proto",
+            "_id": 1
+        }
+    },
+    {
+        "kati": "sneakers",
+        "katiallo": "kafes"
+    }],index="neoindex",doc_type="proto")
+    print("res %s"%res)
+    res=es.bulk(body=[
+        {
+            "index": {
+                "_index": "neoindex",
+                "_type": "proto",
+                "_id": 2
+            }
+        },
+        {
+            "kati": "pumps",
+            "katiallo": "dunno"
+        }], index="neoindex", doc_type="proto")
+    print("res %s"%res)
+"""
+
+
+"""
+put_form:
+
+#Or if I have a mapping already in ES for the form:
+map=es.indices.get_mapping(index=index_name);
+imp_fields=res['medical_info_extraction']['mappings']['patient']['properties'][form_name];
+important_fields=[i for i in imp_fields['properties']]
+"""
+
+"""
+#I can add Data to the index without first putting a mapping
+with open("..\configurations\important_fields_colon.json","r") as map_file:
+    map=json.load(map_file)
+print("putting a new (part) mapping...")
+res=es.indices.put_mapping(type_name,map,index_name)
+print(" response: '%s'" % (res))
+"""

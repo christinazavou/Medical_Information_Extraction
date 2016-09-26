@@ -4,7 +4,7 @@
           "properties":{
             "SCOPNUMB":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM = Rectum",
                   "description": "Aantal gevonden tumoren. Het betreft het totaal aantal gevonden primaire colorectale carcinomen.",
                   "possible_values": ["1","2","3"]
                 }
@@ -18,21 +18,21 @@
              },
             "LOCPRIM2":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "Locatie van de 'dubbel' tumor. Het gaat hier om de één na belangrijkste tumor wat betreft prognose of behandeling.",
                   "possible_values": ["Caecum","Appendix","Colon ascendens","Flexura hepatica","Colon transversum","Flexura splenica","Colon descendens","Colon sigmoideum","Rectum","Anders"]
                 }
              },
             "SCOPDIST":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM = Rectum",
                   "description": "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters.nomen.",
                   "possible_values": "unknown"
                 }
              },
             "SCOPDIST2":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters",
                   "possible_values": "unknown"
                 }
@@ -88,7 +88,7 @@
              },
             "SCORECT2":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "cT score ('dubbel' tumor)",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
@@ -102,7 +102,7 @@
              },
             "RESTAG_SCORECT2_1":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "cT score ('dubbel' tumor)",
                   "possible_values": ["T1","T2","T3","T4","Tx / onbekend"]
                 }
@@ -123,7 +123,7 @@
              },
             "SCORECN2":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "cN score ('dubbel' tumor)",
                   "possible_values": ["N0","N1","N2","Nx / onbekend"]
                 }
@@ -137,7 +137,7 @@
              },
             "RESTAG_SCORECN2_1":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "cN score ('dubbel' tumor)",
                   "possible_values": ["N0","N1","N2","Nx / onbekend"]
                 }
@@ -151,7 +151,7 @@
              },
             "SCORECM2":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "cM score ('dubbel' tumor)",
                   "possible_values": ["M0","M1","Mx / onbekend"]
                 }
@@ -165,7 +165,7 @@
              },
             "RESTAG_SCORECM2_1":{
                 "properties": {
-                  "condition":"",
+                  "condition":"LOCPRIM != Caecum",
                   "description": "cM score ('dubbel' tumor)",
                   "possible_values": ["M0","M1","Mx / onbekend"]
                 }
@@ -179,6 +179,14 @@
                   "Transanaal endoscopische procedure gevolgd door abdomino-perinealeresectie","Overig (nietresectieve procedure)"]
                 }
              },
+            "TYPPROCOK":{
+                "properties": {
+                  "condition":"PROCOK = Overig (nietresectieve procedure)",
+                  "description": "",
+                  "possible_values": ["Ileostoma","Colostoma","Transversum resectie","Bypass","TEM",
+                    "Laparotomie","Laparoscopie","Anders"]
+                }
+             },
             "mdo_chir":{
                 "properties": {
                   "condition":"",
@@ -188,63 +196,63 @@
              },
             "geenresectie_irres":{
                 "properties": {
-                  "condition":"",
+                  "condition":"mdo_chir = Nee",
                   "description": "Reden: Irresectabel",
                   "possible_values": ["No","Yes"]
                 }
              },
             "geenresectie_meta":{
                 "properties": {
-                  "condition":"",
+                  "condition":"mdo_chir = Nee",
                   "description": "Reden: Gemetastaseerd",
                   "possible_values": ["No","Yes"]
                 }
              },
             "geenresectie_anders":{
                 "properties": {
-                  "condition":"",
+                  "condition":"mdo_chir = Nee",
                   "description": "Reden: Anders",
                   "possible_values": "unknown"
                 }
              },
             "geenresec_palltherYN":{
                 "properties": {
-                  "condition":"",
+                  "condition":"mdo_chir = Nee",
                   "description": "Palliatieve therapie",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pall_NO_reden":{
                 "properties": {
-                  "condition":"",
+                  "condition":"geenresec_palltherYN = No",
                   "description": "Reden",
                   "possible_values": ["Comorbiditeit","wens patiënt","overleden"]
                 }
              },
             "pallther_chemo":{
                 "properties": {
-                  "condition":"",
+                  "condition":"geenresec_palltherYN = Yes",
                   "description": "Chemotherapie",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_chemoSTUDIE":{
                 "properties": {
-                  "condition":"",
+                  "condition":"geenresec_palltherYN = Yes",
                   "description": "Chemotherapie in studieverband",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_RT":{
                 "properties": {
-                  "condition":"",
+                  "condition":"geenresec_palltherYN = Yes",
                   "description": "Radiotherapie",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_RTstudie":{
                 "properties": {
-                  "condition":"",
+                  "condition":"geenresec_palltherYN = Yes",
                   "description": "Radiotherapie in studieverband",
                   "possible_values": ["No","Yes"]
                 }
@@ -258,14 +266,14 @@
              },
             "pallther_chemoRTstudie":{
                 "properties": {
-                  "condition":"",
+                  "condition":"geenresec_palltherYN = Yes",
                   "description": "Chemoradiatie in studieverband",
                   "possible_values": ["No","Yes"]
                 }
              },
             "pallther_startdatum":{
                 "properties": {
-                  "condition":"",
+                  "condition":"geenresec_palltherYN = Yes",
                   "description": "Startdatum: eerste palliatieve therapie",
                   "possible_values": "unknown"
                 }
@@ -279,49 +287,49 @@
              },
             "COMORBCAR":{
                 "properties": {
-                  "condition":"",
+                  "condition":"COMORB = Ja",
                   "description": "Cardiaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBVAS":{
                 "properties": {
-                  "condition":"",
+                  "condition":"COMORB = Ja",
                   "description": "Vasculair",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBDIA":{
                 "properties": {
-                  "condition":"",
+                  "condition":"COMORB = Ja",
                   "description": "Diabetes",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBPUL":{
                 "properties": {
-                  "condition":"",
+                  "condition":"COMORB = Ja",
                   "description": "Pulmonaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBNEU":{
                 "properties": {
-                  "condition":"",
+                  "condition":"COMORB = Ja",
                   "description": "Neurologisch",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBMDA":{
                 "properties": {
-                  "condition":"",
+                  "condition":"COMORB = Ja",
                   "description": "Gastrointestinaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }
              },
             "COMORBURO":{
                 "properties": {
-                  "condition":"",
+                  "condition":"COMORB = Ja",
                   "description": "Urogenitaal",
                   "possible_values": ["Ja","Nee","Onbekend"]
                 }

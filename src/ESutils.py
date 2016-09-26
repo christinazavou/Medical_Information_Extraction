@@ -4,7 +4,7 @@ import json,string
 from elasticsearch import Elasticsearch
 from elasticsearch import ImproperlyConfigured, ElasticsearchException, TransportError, SSLError
 
-import settings2
+import settings
 
 """
 Start Elastic Search
@@ -17,21 +17,12 @@ def start_ES():
     print " ElasticSearch has started "
 
 
-"""
-class ES_index():
-    def __init__(self,name):
-        self.name=name
-        self.types=[]
-    def put_type(self,type_name):
-        self.types.append(type)
-"""
-
 class MyReports():
-    def __init__(self,esconn,type_doc,ids,preprocessor=None):
-        self.con=esconn
-        self.type_doc=type_doc
-        self.ids=ids
-        self.preprocessor=preprocessor
+    def __init__(self, esconn, type_doc, ids, preprocessor=None):
+        self.con = esconn
+        self.type_doc = type_doc
+        self.ids = ids
+        self.preprocessor = preprocessor
 
     def __iter__(self):
         current_doc = 0
@@ -86,8 +77,8 @@ class ES_connection():
         hits = res['hits']['hits']
         docs_ids = [hit['_id'] for hit in hits]
         name = index_name + " " + type_name + " ids"
-        settings2.ids[name] = docs_ids
-        settings2.update_ids()
+        settings.ids[name] = docs_ids
+        settings.update_ids()
         return docs_ids
 
     """
@@ -247,29 +238,21 @@ class ES_connection():
 
 if __name__ == "__main__":
     # start_ES()
-    host = {"host": "localhost", "port": 9200}
-    con = ES_connection(host)
-    settings2.init1("..\\Configurations\\configurations.yml", "values.json", "ids.json","values_used.json")
-    patient_ids = settings2.ids['medical_info_extraction patient ids']
-    forms_ids = settings2.global_settings['forms']
-    """
-    #con.createIndex("medical_info_extraction","discard")
-    #con.put_map("..\\Configurations\\mapping.json","medical_info_extraction","patient")
-    #con.get_type_ids("medical_info_extraction", "report_description_sentence", 1500)
-    #print con.search(index="medical_info_extraction",body={"query" : { "term" : {"lab_result.description" : "TSH"}}})
-    """
-    print con.exists("medical_info_extraction", "form", "colorectaal_form")
+    settings.init("..\\configurations\\configurations.yml", "values.json", "ids.json")
 
-    to_remove = ['newline', 'newlin']
-    to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
+    con = ES_connection(settings.global_settings['host'])
+    patient_ids = settings.ids['medical_info_extraction patient ids']
+    forms_ids = settings.global_settings['forms']
+
+    print con.exists("medical_info_extraction", "form", "colorectaal")
+
     from pre_process import MyPreprocessor
-    preprocessor = MyPreprocessor(
-        extrastop=to_remove)  # no stemming or stopwords. only code removing and punctuation
+    import pickle
+    pname = 'preprocessor_0_1_1_0.p'
+    preprocessor = pickle.load(open(pname, "rb"))
 
-    reps=MyReports(con,'patient',patient_ids,preprocessor)
-    import types
-    print isinstance(reps, types.GeneratorType)
+    reps = MyReports(con, 'patient', patient_ids, preprocessor)
+
     import collections
     print isinstance(reps, collections.Iterable)
-    for rr in reps:
-        print rr
+

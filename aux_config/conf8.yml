@@ -1,0 +1,56 @@
+
+# ---------------------------------- ------Program configuration ------------------------------------------------------#
+
+# --------------------------------------------------paths--------------------------------------------------------------#
+host: {"host": "localhost", "port": 9200}
+json_forms_directory: "important_fields\\"
+csv_forms_directory: "decease\\"
+path_indossiers: "decease\\patients_selection_decease\\"
+path_outdossiers: "decease\\patients_selection_decease_json\\"
+data_path_root: ".."  # ".." or "C:\Users\Christina Zavou\Documents"
+# ---------------------------------------------------------------------------------------------------------------------#
+# ----------------------------------------------excecution config------------------------------------------------------#
+read_dossiers: False # if True -> makes jsons and index them in ES
+algo: "baseline" # "random" or "baseline"
+run_algo: True
+forms: ["colorectaal"] #,"mamma"]
+eval_algo: True
+eval_file: "" # if run_algo is false give which file to eval
+patients_pct: 1 # 0.01 # percentage of patients to work with
+
+preprocess: [] # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
+# if empty preprocess then take type_name_pp as is
+to_remove: ['newlin','newline', 'punctuation'] # note: codes are always removed
+type_name_pp: "patient_1_1_1_0" # "patient_stem_stop_extrastop_synonyms" or ~ patient_1_1_1_1
+
+unknowns: "include" # "include" or "exclude" -> to use or not the fields that are open-questions;not 1-of-k
+when_no_preference: "random" # "random" or "empty" -> to assign when no preference between the k possible values
+fuzziness: 2
+with_description: True # if True -> search for {the field label + possible value + field description}
+
+# ----------------------------------------------fields config ---------------------------------------------------------#
+assign_all: True # if True -> assigns all fields of given forms during algorithm assignment
+fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
+                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99']
+#fields_mamma: []
+#fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
+#                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99','SCORECT','SCORECT2',
+#                     'RESTAG_SCORECT_1','RESTAG_SCORECT2_1','RESTAG_CT','SCORECN','SCORECN2','RESTAG_SCORECN_1',
+#                     'RESTAG_SCORECN2_1','SCORECM','SCORECM2','RESTAG_SCORECM_1','RESTAG_SCORECM2_1','PROCOK','mdo_chir',
+#                     'geenresectie_irres','geenresectie_meta','geenresectie_anders','geenresec_palltherYN','pall_NO_reden',
+#                     'pallther_chemo','pallther_chemoSTUDIE','pallther_RT','pallther_RTstudie','pallther_chemoRT',
+#                     'pallther_chemoRTstudie','pallther_startdatum','COMORB','COMORBCAR','COMORBVAS','COMORBDIA','COMORBPUL',
+#                     'COMORBNEU','COMORBMDA','COMORBURO']
+#fields_mamma: ['anamn_MENOPSTATUS','VOORGESCH_answer0','VOORGESCH_answer1','VOORGESCH_answer1','anamn_TNMCT',
+#               'resec_pallther_chemo','resec_geenresectie_anders']
+# ---------------------------------------------------------------------------------------------------------------------#
+# --------------------------------------------------naming config------------------------------------------------------#
+index_name: "medical_info_extraction"
+initmap_jfile: "mapping.json"
+type_name_p: "patient"
+type_name_f: "form"
+type_name_s: "report_description_sentence"
+# ---------------------------------------------------------------------------------------------------------------------#
+# --------------------------------------------------extra config-------------------------------------------------------#
+run_W2V: True
+patient_W2V: "" # if empty take patient_pp name given

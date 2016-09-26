@@ -1,9 +1,10 @@
 import json
 import csv
 import os
+import time
 
 from ESutils import ES_connection, start_ES
-import settings2
+import settings
 
 
 class Decease():
@@ -54,8 +55,8 @@ class Decease():
 
     def store_patients_ids(self):
         name = self.index + " patients' ids in " + self.name
-        settings2.ids[name] = self.patients
-        settings2.update_ids()
+        settings.ids[name] = self.patients
+        settings.update_ids()
         if self.con.exists(self.index, self.decease_type, self.name):
             self.con.update_es_doc(self.index, self.decease_type, self.name, "doc",
                                    update_dict={"patients": self.patients})
@@ -92,8 +93,8 @@ class Decease():
     def store_possible_values(self, from_es=False):
         if from_es:
             print "should read from es first...and save it to self.possible valeus"
-        settings2.labels_possible_values[self.name] = self.possible_values
-        settings2.update_values()
+        settings.labels_possible_values[self.name] = self.possible_values
+        settings.update_values()
 
     """
     Accepts the .csv file to be read and updates patients docs of this decease
@@ -122,6 +123,7 @@ class Decease():
 
 
 def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directory_p, directory_f):
+    start_time = time.time()
     MyDeceases=[]
     decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
     for decease_name in decease_folders:
@@ -139,30 +141,31 @@ def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directo
             existing_patients_ids = con.get_type_ids(index_name, type_name_p) # finally...to get ids of last form saved
             print "existing patients: ", existing_patients_ids
         MyDeceases.append(decease)
+    print("--- %s seconds for annotate method---" % (time.time() - start_time))
     return MyDeceases
 
 
 if __name__ == '__main__':
     # start_es()
 
-    settings2.init1("..\\Configurations\\Configurations.yml")
-    settings2.global_settings['data_path_root'] = ".."
-    settings2.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
-    settings2.init2()
-    map_jfile = settings2.global_settings['map_jfile']
-    host = settings2.global_settings['host']
-    index_name = settings2.global_settings['index_name']
-    type_name_p = settings2.global_settings['type_name_p']
-    type_name_f = settings2.global_settings['type_name_f']
+    settings.init1("..\\Configurations\\Configurations.yml")
+    settings.global_settings['data_path_root'] = ".."
+    settings.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
+    settings.init2()
+    map_jfile = settings.global_settings['map_jfile']
+    host = settings.global_settings['host']
+    index_name = settings.global_settings['index_name']
+    type_name_p = settings.global_settings['type_name_p']
+    type_name_f = settings.global_settings['type_name_f']
 
     con = ES_connection(host)
 
     con.createIndex(index_name, "discard")
     con.put_map(map_jfile, index_name, type_name_p)
 
-    directory_p = settings2.global_settings['directory_p']
-    directory_f = settings2.global_settings['directory_f']
-    data_path = settings2.global_settings['data_path']
+    directory_p = settings.global_settings['directory_p']
+    directory_f = settings.global_settings['directory_f']
+    data_path = settings.global_settings['data_path']
 
     store_deceases(con, index_name, type_name_p, type_name_f, data_path, directory_p, directory_f)
     print "note that ids where stored from reading patients jsons and not forms csvs"

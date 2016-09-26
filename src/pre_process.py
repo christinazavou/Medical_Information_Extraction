@@ -1,27 +1,20 @@
 # -*- coding: utf-8 -*-
 
-import nltk, re, pprint
-from abc import ABCMeta, abstractmethod
-import string, pickle
-
-from ESutils import ES_connection
-import settings2
-from term_lookup import term_lookup
+import pickle
+import string
 import time
+from abc import ABCMeta, abstractmethod
+import nltk
+import re
+
+import settings
+from ESutils import ES_connection
+from aux_lib.term_lookup import term_lookup
 from text_analysis import RosetteApi
-from text_analysis import ReportSentences, WordEmbeddings
-import gensim
+from text_analysis import WordEmbeddings
 
 
-class Preprocessor():
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def preprocess(self, source_text):
-        pass
-
-
-class MyPreprocessor(Preprocessor):
+class MyPreprocessor(object):
     def __init__(self, preprocessdict, extras=None):
         if "stem" in preprocessdict:
             self.stemmer = nltk.stem.snowball.DutchStemmer()
@@ -33,15 +26,11 @@ class MyPreprocessor(Preprocessor):
             self.stopwords = []
         if "extrastop" in preprocessdict and extras != None:
             self.stopwords += [e for e in extras]
-            print "stopwords:",self.stopwords
+            print "stopwords:", self.stopwords
         if "synonyms" in preprocessdict:
             self.add_synonyms = True
         else:
             self.add_synonyms = False
-
-
-    def save(self, file):
-        pickle.dump(self, open(file, "wb"))
 
     def remove_codes(self, source_text):
         s = source_text.split(' ')
@@ -82,20 +71,31 @@ class MyPreprocessor(Preprocessor):
             tokens = [self.stemmer.stem(t) for t in tokens]
         return " ".join(tok for tok in tokens)
 
+    def __get_state__(self):
+        return (self.stemmer, self.stopwords, self.add_synonyms)
+
+    def __set_state__(self, stemmer, stopwords, add_synonyms,):
+        self.add_synonyms = add_synonyms
+        self.stemmer = stemmer
+        self.stopwords = stopwords
+
 
 def make_word_embeddings(con, type_doc, id_docs, filename, w2vpreprocessor=None):
+    print "make W2V with {} and {}".format(type_doc, len(id_docs))
+    start_time = time.time()
     from ESutils import MyReports
-    reps=MyReports(con,type_doc,id_docs,w2vpreprocessor)
-    word2vec = WordEmbeddings(reps,min_count=2)
+    reps = MyReports(con, type_doc, id_docs, w2vpreprocessor)
+    word2vec = WordEmbeddings(reps, min_count=2)
     word2vec.save(filename)
     print "trained word2vec. voc size =", len(word2vec.model.vocab)
+    print("--- %s seconds for W2V method---" % (time.time() - start_time))
     return word2vec
 
 
 def structure_sections(con, type_doc, id_docs):
     to_remove = ['newline', 'newlin']
     to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
-    some_preprocess = MyPreprocessor(extrastop=to_remove)
+    some_preprocess = MyPreprocessor(extrastop = to_remove)
     txt_analysis = RosetteApi()
     for source_text in con.documents(type_doc, id_docs):
         report = source_text['report']
@@ -127,8 +127,8 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
                         for inner_field in record:
                             processed_text = preprocessor.preprocess(record[inner_field])
                             rec[inner_field] = processed_text
-                            #if field in id_forms and record[inner_field] != processed_text:
-                            #    print "form's value changed from , ", record[inner_field]," to ",processed_text
+                            # if field in id_forms and record[inner_field] != processed_text:
+                            # print "form's value changed from , ", record[inner_field]," to ",processed_text
                         l.append(rec)
                     preprocessed_text[field] = l
                 else:
@@ -136,8 +136,8 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
                     for inner_field in source_text[field]:
                         processed_text = preprocessor.preprocess(source_text[field][inner_field])
                         rec[inner_field] = processed_text
-                        #if field in id_forms and source_text[field][inner_field] != processed_text:
-                        #    print "form's value changed from , ", source_text[field][inner_field], " to ", processed_text
+                        # if field in id_forms and source_text[field][inner_field] != processed_text:
+                        # print "form's value changed from , ", source_text[field][inner_field], " to ", processed_text
                     preprocessed_text[field] = rec
             id_doc = int(source_text['patient_nr'])
         if int(source_text['patient_nr']) % 10 == 0:
@@ -149,23 +149,22 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
 
 if __name__ == '__main__':
 
-    settings2.init("..\\Configurations\\configurations.yml", "values.json", "ids.json")
-    host = settings2.global_settings['host']
+    settings.init("..\\Configurations\\configurations.yml", "values.json", "ids.json")
+    # settings.init("..\\Configurations\\configurations.yml")
+    host = settings.global_settings['host']
     con = ES_connection(host)
 
-    type_name_pp = settings2.global_settings['type_name_pp']
-    patient_ids_all = settings2.ids['medical_info_extraction patient ids']
-    pct = settings2.global_settings['patients_pct']
+    type_name_pp = settings.global_settings['type_name_pp']
+    patient_ids_all = settings.ids['medical_info_extraction patient ids']
+    pct = settings.global_settings['patients_pct']
     import random
     patient_ids_used = random.sample(patient_ids_all, int(pct * len(patient_ids_all)))
-    preprocessor_name = ("preprocessor_" + type_name_pp + ".p").replace("patient_", "")
-    w2vpreprocessor = pickle.load(open(preprocessor_name, "rb"))
-    W2Vname = "W2V" + type_name_pp + ".p"
-    print "make W2V with ",type_name_pp," and ",len(patient_ids_used)
-    make_word_embeddings(con, type_name_pp, patient_ids_used, W2Vname)
+
+    w2vpreprocessor = pickle.load(open(settings.get_preprocessor_name(), "rb"))
+    make_word_embeddings(con, type_name_pp, patient_ids_used, settings.get_W2V_name())
     w2v = WordEmbeddings()
-    w2v.load(W2Vname)
-    for a,b in w2v.get_vocab().items():
-        print a,b
+    w2v.load(settings.get_W2V_name())
+    for a, b in w2v.get_vocab().items():
+        print a, b
 
     # structure_sections(con,type_name_p,patient_ids)
