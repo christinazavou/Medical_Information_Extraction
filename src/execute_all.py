@@ -27,5 +27,5 @@ with open("from_execution.txt", "wb") as f:
     f.write("After git pulling etc, run program, and send zip results.")
 
 print "finished. Now zipping..."
-zip("..\\aux_config", "..\\finalresults")
+zip("..\\aux_config", "C:\\Users\\Christina\\Desktop\\finalresults")
 print "zip finished."
