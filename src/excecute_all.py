@@ -10,3 +10,7 @@ for c in range(2):
 """
 
 print "executing !!"
+with open("from_execution.txt","wb") as f:
+    f.write("After git pulling etc, run program, and push new files.")
+
+print "finished."
