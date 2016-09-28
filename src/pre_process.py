@@ -9,7 +9,8 @@ import re
 
 import settings
 from ESutils import ES_connection
-from aux_lib.term_lookup import term_lookup
+# from aux_lib.term_lookup import term_lookup
+from term_lookup import term_lookup
 from text_analysis import RosetteApi
 from text_analysis import WordEmbeddings
 
