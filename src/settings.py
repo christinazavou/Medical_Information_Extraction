@@ -26,6 +26,7 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
     global_settings['path_root_indossiers'] = global_settings['data_path'] + tmp_path_in
     global_settings['path_root_outdossiers'] = global_settings['data_path'] + tmp_path_out
     global_settings['results_path_root'] = doc['results_path_root']
+    global_settings['final_zip_root'] = doc['final_zip_root']
     # ----------------------------------------------excecution config--------------------------------------------------#
     global_settings['read_dossiers'] = doc['read_dossiers']
     global_settings['algo'] = doc['algo']

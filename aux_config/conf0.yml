@@ -9,6 +9,7 @@ path_indossiers: "decease\\patients_selection_decease\\"
 path_outdossiers: "decease\\patients_selection_decease_json\\"
 data_path_root: ".."  # ".." or "C:\Users\Christina Zavou\Documents"
 results_path_root: "..\\results\\"
+final_zip_root: "C:\Users\Christina Zavou\Documents"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
 read_dossiers: True # if True -> makes jsons and index them in ES
