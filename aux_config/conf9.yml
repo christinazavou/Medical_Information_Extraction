@@ -31,17 +31,17 @@ with_description: False # if True -> search for {the field label + possible valu
 
 # ----------------------------------------------fields config ---------------------------------------------------------#
 assign_all: True # if True -> assigns all fields of given forms during algorithm assignment
-fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
-                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99']
-#fields_mamma: []
 #fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
-#                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99','SCORECT','SCORECT2',
-#                     'RESTAG_SCORECT_1','RESTAG_SCORECT2_1','RESTAG_CT','SCORECN','SCORECN2','RESTAG_SCORECN_1',
-#                     'RESTAG_SCORECN2_1','SCORECM','SCORECM2','RESTAG_SCORECM_1','RESTAG_SCORECM2_1','PROCOK','mdo_chir',
-#                     'geenresectie_irres','geenresectie_meta','geenresectie_anders','geenresec_palltherYN','pall_NO_reden',
-#                     'pallther_chemo','pallther_chemoSTUDIE','pallther_RT','pallther_RTstudie','pallther_chemoRT',
-#                     'pallther_chemoRTstudie','pallther_startdatum','COMORB','COMORBCAR','COMORBVAS','COMORBDIA','COMORBPUL',
-#                     'COMORBNEU','COMORBMDA','COMORBURO']
+#                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99']
+#fields_mamma: []
+fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
+                     'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99','SCORECT','SCORECT2',
+                     'RESTAG_SCORECT_1','RESTAG_SCORECT2_1','RESTAG_CT','SCORECN','SCORECN2','RESTAG_SCORECN_1',
+                     'RESTAG_SCORECN2_1','SCORECM','SCORECM2','RESTAG_SCORECM_1','RESTAG_SCORECM2_1','PROCOK','mdo_chir',
+                     'geenresectie_irres','geenresectie_meta','geenresectie_anders','geenresec_palltherYN','pall_NO_reden',
+                     'pallther_chemo','pallther_chemoSTUDIE','pallther_RT','pallther_RTstudie','pallther_chemoRT',
+                     'pallther_chemoRTstudie','pallther_startdatum','COMORB','COMORBCAR','COMORBVAS','COMORBDIA','COMORBPUL',
+                     'COMORBNEU','COMORBMDA','COMORBURO']
 #fields_mamma: ['anamn_MENOPSTATUS','VOORGESCH_answer0','VOORGESCH_answer1','VOORGESCH_answer1','anamn_TNMCT',
 #               'resec_pallther_chemo','resec_geenresectie_anders']
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -53,5 +53,5 @@ type_name_f: "form"
 type_name_s: "report_description_sentence"
 # ---------------------------------------------------------------------------------------------------------------------#
 # --------------------------------------------------extra config-------------------------------------------------------#
-run_W2V: True
+run_W2V: False
 patient_W2V: "" # if empty take patient_pp name given

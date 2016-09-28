@@ -118,7 +118,10 @@ if __name__ == '__main__':
         evaluations_dict['evaluation'] += [{'description': settings.get_run_description(), 'file': eval_file,
                                             'score': score, 'fields_score': fields_score,
                                             'dte-time': time.strftime("%c")}]
-        with open('evaluations.json', 'w') as jfile:
+        import os
+        ff = os.path.realpath(__file__).replace("Medical_Information_Extraction\src\main.py",
+                                                "\evaluations.json")
+        with open(ff, 'w') as jfile:
             json.dump(evaluations_dict, jfile, indent=4)
         print "Finish evaluating."
 

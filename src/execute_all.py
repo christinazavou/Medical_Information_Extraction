@@ -21,7 +21,7 @@ final_zip_root = final_zip_root + datetime.datetime.now().strftime('%Y-%m-%d_%H-
 
 for c in range(2):
     start_time = time.time()
-    # run_cmd = "python main.py ..\\aux_config\\conf" + str(c) + ".yml"
+    #run_cmd = "python main.py ..\\aux_config\\conf" + str(c) + ".yml"
     run_cmd = os.path.realpath(__file__).replace("execute_all", "main") + " ..\\aux_config\\conf" + str(c) + ".yml"
     os.system(run_cmd)
     print "Finished conf{} after {} minutes.".format(c, (time.time() - start_time) / 60.0)
