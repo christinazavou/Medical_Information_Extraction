@@ -39,6 +39,7 @@ class Algorithm():
             self.algo_assignments[patient_id] = patient_forms
             if int(patient_id) % 100 == 0:
                 print "assign: ", self.algo_assignments[patient_id], " to patient: ", patient_id
+        print "in algo, results file name ",self.results_jfile
         with open(self.results_jfile, 'wb') as f:
             json.dump(self.algo_assignments, f, indent=4)
         print("--- %s seconds for assign method---" % (time.time() - start_time))

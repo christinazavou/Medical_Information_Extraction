@@ -155,6 +155,7 @@ def get_results_filename():
         if global_settings['run_algo'] == False:
             print "kanonika eprepe na doso arxio"
         global_settings['eval_file'] = results_filename
+    print "results_file name :",results_filename
     return results_filename
 
 
@@ -164,7 +165,7 @@ def get_run_description():
     description['run_algo'] = global_settings['run_algo']
     description['forms'] = global_settings['forms']
     description['patients_pct'] = global_settings['patients_pct']
-    description['preprocessor_name'] = get_preprocessor_name()
+    description['preprocessor_name'] = get_preprocessor_file_name()
     description['to_remove'] = global_settings['to_remove']
     description['type_name_pp'] = global_settings['type_name_pp']
     description['unknowns'] = global_settings['unknowns']
