@@ -5,9 +5,9 @@ import os
 
 def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
     if os.path.realpath(__file__)[-1] == 'c':
-        configFile = os.path.realpath(__file__).replace("\\src\\settings.pyc", configFile)
+        configFile = os.path.realpath(__file__).replace("src\\settings.pyc", configFile)
     else:
-        configFile = os.path.realpath(__file__).replace("\\src\\settings.py", configFile)
+        configFile = os.path.realpath(__file__).replace("src\\settings.py", configFile)
     global labels_possible_values
     global ids
     global chosen_labels_possible_values
