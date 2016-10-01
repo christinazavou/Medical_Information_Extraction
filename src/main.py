@@ -90,8 +90,8 @@ if __name__ == '__main__':
             to_remove += [i for i in string.punctuation if i not in ['.', '?', ',', ':']]
         preprocessor = MyPreprocessor(settings.global_settings['preprocess'], to_remove)
         annotate(con, index_name, type_patient, type_processed_patient, patient_ids_all, forms_ids, preprocessor)
-        pickle.dump(preprocessor, open(settings.get_preprocessor_name(), "wb"))
-        print "Finish annotating ",type_processed_patient," data (indexing preprocessed files)."
+        pickle.dump(preprocessor, open(settings.get_preprocessor_file_name(), "wb"))
+        print "Finish annotating ", type_processed_patient, " data (indexing preprocessed files)."
 
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 

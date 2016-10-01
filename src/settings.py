@@ -139,8 +139,9 @@ def get_W2V_name():
     return W2Vname
 
 
-def get_preprocessor_name():
+def get_preprocessor_file_name():
     preprocessor_name = ("preprocessor_" + global_settings['type_name_pp'] + ".p").replace("patient_", "")
+    preprocessor_name = os.path.realpath(__file__).replace("settings.py", preprocessor_name)
     return preprocessor_name
 
 

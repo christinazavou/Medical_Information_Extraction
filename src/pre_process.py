@@ -160,7 +160,7 @@ if __name__ == '__main__':
     import random
     patient_ids_used = random.sample(patient_ids_all, int(pct * len(patient_ids_all)))
 
-    w2vpreprocessor = pickle.load(open(settings.get_preprocessor_name(), "rb"))
+    w2vpreprocessor = pickle.load(open(settings.get_preprocessor_file_name(), "rb"))
     make_word_embeddings(con, type_name_pp, patient_ids_used, settings.get_W2V_name())
     w2v = WordEmbeddings()
     w2v.load(settings.get_W2V_name())
