@@ -16,8 +16,8 @@ import Evaluation
 
 if __name__ == '__main__':
 
-    configFilePath = "\\aux_config\\conf10.yml"
-    # configFilePath = sys.argv[1]
+    # configFilePath = "\\aux_config\\conf10.yml"
+    configFilePath = sys.argv[1]
     valuesFilePath = os.path.realpath(__file__).replace("main.py", "values.json")
     idsFilePath = os.path.realpath(__file__).replace("main.py", "ids.json")
     finalfile = None
