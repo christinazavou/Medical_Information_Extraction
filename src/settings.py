@@ -148,11 +148,8 @@ def get_preprocessor_file_name():
 
 
 def get_results_filename():
-    if global_settings['configFile'].__contains__("aux_config"):
-        results_filename = global_settings['configFile'].replace("aux_config", "results") + "_results.json"
-    if global_settings['configFile'].__contains__("configurations"):
-        results_filename = global_settings['configFile'].replace("configurations", "results")
-    results_filename = results_filename.replace(".yml", "")
+    # re.findall('\d+', s)
+    results_filename = global_settings['results_path_root'] + "conf" + filter(str.isdigit, global_settings['configFile']) + "_results.json"
     if global_settings['eval_file'] == global_settings['results_path_root']:
         if global_settings['run_algo'] == False:
             print "kanonika eprepe na doso arxio"
