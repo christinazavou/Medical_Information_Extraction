@@ -3,11 +3,8 @@ import yaml
 import os
 
 
-def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
-    if os.path.realpath(__file__)[-1] == 'c':
-        configFile = os.path.realpath(__file__).replace("src\\settings.pyc", configFile)
-    else:
-        configFile = os.path.realpath(__file__).replace("src\\settings.py", configFile)
+def init(configFile, resultsFilePath, fieldsconfigFile=None, idsconfigFile=None):
+    configFile = os.path.dirname(os.path.realpath(__file__)).replace("src","") + configFile
     global labels_possible_values
     global ids
     global chosen_labels_possible_values
@@ -29,7 +26,9 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
     global_settings['data_path'] = global_settings['data_path_root'] + '\\Data\\'
     global_settings['path_root_indossiers'] = global_settings['data_path'] + tmp_path_in
     global_settings['path_root_outdossiers'] = global_settings['data_path'] + tmp_path_out
-    global_settings['results_path_root'] = doc['results_path_root']
+    if not os.path.exists(resultsFilePath):
+        os.makedirs(resultsFilePath)
+    global_settings['results_path_root'] = resultsFilePath  # doc['results_path_root']
     # ----------------------------------------------excecution config--------------------------------------------------#
     global_settings['read_dossiers'] = doc['read_dossiers']
     global_settings['algo'] = doc['algo']
@@ -104,14 +103,14 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
 
 
 def update_values():
-    file = os.path.realpath(__file__).replace("settings.py", "values.json")
+    file = os.path.dirname(os.path.realpath(__file__)) + "\\values.json"
     with open(file, "w") as json_file:
         data = json.dumps(labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 
 def update_ids():
-    file = os.path.realpath(__file__).replace("settings.py", "ids.json")
+    file = os.path.dirname(os.path.realpath(__file__)) + "\\ids.json"
     with open(file, "w") as json_file:
         data = json.dumps(ids, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
@@ -127,7 +126,7 @@ def find_chosen_labels_possible_values():
         for field in full_dict:
             if global_settings[form].__contains__(field):
                 chosen_labels_possible_values[form][field] = full_dict[field]
-    file = os.path.realpath(__file__).replace("settings.py", "chosen_fields.json")
+    file = os.path.dirname(os.path.realpath(__file__)) + "\\chosen_fields.json"
     with open(file, "w") as json_file:
         data = json.dumps(chosen_labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
@@ -141,7 +140,10 @@ def get_W2V_name():
 
 def get_preprocessor_file_name():
     preprocessor_name = ("preprocessor_" + global_settings['type_name_pp'] + ".p").replace("patient_", "")
-    preprocessor_name = os.path.realpath(__file__).replace("settings.py", preprocessor_name)
+    if os.path.realpath(__file__)[-1] == 'c':
+        preprocessor_name = os.path.realpath(__file__).replace("settings.pyc", preprocessor_name)
+    else:
+        preprocessor_name = os.path.realpath(__file__).replace("settings.py", preprocessor_name)
     return preprocessor_name
 
 

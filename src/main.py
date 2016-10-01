@@ -16,18 +16,17 @@ import Evaluation
 
 if __name__ == '__main__':
 
-    # configFilePath = "\\aux_config\\conf10.yml"
+    # configFilePath = "\\aux_config\\conf0.yml"
+    # resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
     configFilePath = sys.argv[1]
     valuesFilePath = os.path.realpath(__file__).replace("main.py", "values.json")
     idsFilePath = os.path.realpath(__file__).replace("main.py", "ids.json")
-    finalfile = None
-    if len(sys.argv) > 2:
-        finalfile = sys.argv[2]
+    resultsFilePath = sys.argv[2]
 
     if not (os.path.isfile(valuesFilePath) and os.path.isfile(idsFilePath)):
-        settings.init(configFilePath)
+        settings.init(configFilePath, resultsFilePath)
     else:
-        settings.init(configFilePath, valuesFilePath, idsFilePath)
+        settings.init(configFilePath, resultsFilePath, valuesFilePath, idsFilePath)
 
     index_name = settings.global_settings['index_name']
     type_patient = settings.global_settings['type_name_p']
@@ -129,9 +128,8 @@ if __name__ == '__main__':
 
         with open(evaluationsFilePath, 'w') as jfile:
             json.dump(evaluations_dict, jfile, indent=4)
-        if finalfile:
-            with open(finalfile, 'w') as jfile:
-                json.dump(evaluations_dict, jfile, indent=4)
+        with open(resultsFilePath+'\\evaluation.json', 'w') as jfile:
+            json.dump(evaluations_dict, jfile, indent=4)
         print "Finish evaluating."
 
     """-----------------------------------------Word Embeddings------------------------------------------------------"""
