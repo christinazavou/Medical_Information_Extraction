@@ -23,8 +23,8 @@ class Algorithm():
         self.index_name = index_name
         self.search_type = search_type
         self.assignments = {}
-        self.results_jfile=results_jfile
-        self.labels_possible_values=algo_labels_possible_values
+        self.results_jfile = results_jfile
+        self.labels_possible_values = algo_labels_possible_values
         self.algo_assignments = {}
 
     def assign(self, assign_patients, assign_forms):

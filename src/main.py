@@ -16,13 +16,18 @@ import Evaluation
 
 if __name__ == '__main__':
 
-    # configFilePath = "..\\configurations\\configurations.yml"
-    configFilePath = sys.argv[1]
+    configFilePath = "\\aux_config\\conf10.yml"
+    # configFilePath = sys.argv[1]
+    valuesFilePath = os.path.realpath(__file__).replace("main.py", "values.json")
+    idsFilePath = os.path.realpath(__file__).replace("main.py", "ids.json")
+    finalfile = None
+    if len(sys.argv) > 2:
+        finalfile = sys.argv[2]
 
-    if not (os.path.isfile("values.json") and os.path.isfile("ids.json")):
+    if not (os.path.isfile(valuesFilePath) and os.path.isfile(idsFilePath)):
         settings.init(configFilePath)
     else:
-        settings.init(configFilePath, "values.json", "ids.json")
+        settings.init(configFilePath, valuesFilePath, idsFilePath)
 
     index_name = settings.global_settings['index_name']
     type_patient = settings.global_settings['type_name_p']
@@ -63,15 +68,18 @@ if __name__ == '__main__':
         labels_possible_values = settings.chosen_labels_possible_values
     chosen_labels_possible_values = settings.chosen_labels_possible_values  # ONLY USED FIELDS
     algo_results_name = settings.get_results_filename()
-    if os.path.isfile('evaluations.json'):
-        with open('evaluations.json', 'r') as jfile:
+    evaluationsFilePath = os.path.realpath(__file__).replace("main.py", "evaluations.json")
+    if os.path.isfile(evaluationsFilePath):
+        with open(evaluationsFilePath, 'r') as jfile:
             evaluations_dict = json.load(jfile)
     else:
-        evaluations_dict={'evaluation': []}
+        evaluations_dict = {'evaluation': []}
     if settings.global_settings['run_algo']:
         eval_file = algo_results_name
+        print "run algo. eval file is results name :",eval_file
     else:
         eval_file = settings.global_settings['eval_file']
+        print "dont run algo. eval file is eval file:",eval_file
 
     """--------------------------------------------annotate (all)----------------------------------------------------"""
 
@@ -87,7 +95,7 @@ if __name__ == '__main__':
 
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
-    print "use ",len(chosen_patient_ids)
+    print "use ", len(chosen_patient_ids)
     if settings.global_settings['run_algo']:
         if settings.global_settings['algo'] == "random":
             myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
@@ -118,17 +126,17 @@ if __name__ == '__main__':
         evaluations_dict['evaluation'] += [{'description': settings.get_run_description(), 'file': eval_file,
                                             'score': score, 'fields_score': fields_score,
                                             'dte-time': time.strftime("%c")}]
-        import os
-        ff = os.path.realpath(__file__).replace("Medical_Information_Extraction\src\main.py",
-                                                "\evaluations.json")
-        with open(ff, 'w') as jfile:
+
+        with open(evaluationsFilePath, 'w') as jfile:
             json.dump(evaluations_dict, jfile, indent=4)
+        if finalfile:
+            with open(finalfile, 'w') as jfile:
+                json.dump(evaluations_dict, jfile, indent=4)
         print "Finish evaluating."
 
     """-----------------------------------------Word Embeddings------------------------------------------------------"""
 
     if settings.global_settings['run_W2V']:
-        print "should check extra/different preprocess??"
         from pre_process import make_word_embeddings
         if not os.path.isfile(settings.get_W2V_name()):
             myw2v = make_word_embeddings(con, settings.global_settings['patient_W2V'], patient_ids_all,

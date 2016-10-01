@@ -25,20 +25,20 @@ def csv2dict(csv_filename):
 """
 Makes a json file with all information (dictionaries) coming from all of a patient's files.
 """
-def patient2jsondoc(path_root_in,path_root_out,directory_name,patient_id):
-    path=path_root_in+directory_name+"\\"
-    patient_doc={"patient_nr":patient_id}#dictionary for json file of a patient
+def patient2jsondoc(path_root_in, path_root_out, directory_name, patient_id):
+    path = path_root_in + directory_name + "\\"
+    patient_doc = {"patient_nr": patient_id}  # dictionary for json file of a patient
     for root, _, files in os.walk(path):
         for file in files:
             if file.endswith(".csv"):
                 toread = os.path.join(root, file)
                 field = file[:-4]
-                patient_doc[field]=csv2dict(toread)
+                patient_doc[field] = csv2dict(toread)
 
-    json_filename =  path_root_out+directory_name+".json"
+    json_filename = path_root_out + directory_name + ".json"
     json_file = open(json_filename, 'w+')
 
-    data=json.dumps(patient_doc, separators=[',', ':'], indent=4, sort_keys=True)
+    data = json.dumps(patient_doc, separators=[',', ':'], indent=4, sort_keys=True)
     json_file.write(data)
 
 

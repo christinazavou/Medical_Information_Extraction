@@ -4,7 +4,10 @@ import os
 
 
 def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
-    configFile = os.path.realpath(__file__).replace("\\src\\settings.py", configFile).replace("..","")
+    if os.path.realpath(__file__)[-1] == 'c':
+        configFile = os.path.realpath(__file__).replace("\\src\\settings.pyc", configFile)
+    else:
+        configFile = os.path.realpath(__file__).replace("\\src\\settings.py", configFile)
     global labels_possible_values
     global ids
     global chosen_labels_possible_values
@@ -101,14 +104,14 @@ def init(configFile, fieldsconfigFile=None, idsconfigFile=None):
 
 
 def update_values():
-    file = "values.json"
+    file = os.path.realpath(__file__).replace("settings.py", "values.json")
     with open(file, "w") as json_file:
         data = json.dumps(labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 
 def update_ids():
-    file = "ids.json"
+    file = os.path.realpath(__file__).replace("settings.py", "ids.json")
     with open(file, "w") as json_file:
         data = json.dumps(ids, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
@@ -124,7 +127,7 @@ def find_chosen_labels_possible_values():
         for field in full_dict:
             if global_settings[form].__contains__(field):
                 chosen_labels_possible_values[form][field] = full_dict[field]
-    file = "chosen_fields.json"
+    file = os.path.realpath(__file__).replace("settings.py", "chosen_fields.json")
     with open(file, "w") as json_file:
         data = json.dumps(chosen_labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
@@ -142,9 +145,14 @@ def get_preprocessor_name():
 
 
 def get_results_filename():
-    results_filename = global_settings['configFile'].replace("aux_config","results")+"_results.json"
-    results_filename = results_filename.replace(".yml","")
+    if global_settings['configFile'].__contains__("aux_config"):
+        results_filename = global_settings['configFile'].replace("aux_config", "results") + "_results.json"
+    if global_settings['configFile'].__contains__("configurations"):
+        results_filename = global_settings['configFile'].replace("configurations", "results")
+    results_filename = results_filename.replace(".yml", "")
     if global_settings['eval_file'] == global_settings['results_path_root']:
+        if global_settings['run_algo'] == False:
+            print "kanonika eprepe na doso arxio"
         global_settings['eval_file'] = results_filename
     return results_filename
 
