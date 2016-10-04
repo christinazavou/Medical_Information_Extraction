@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
+
 import json
 import yaml
 import os
 
 
-def init(configFile, resultsFilePath, fieldsconfigFile=None, idsconfigFile=None):
+def init(configFile, resultsFilePath):
     configFile = os.path.dirname(os.path.realpath(__file__)).replace("src","") + configFile
     global labels_possible_values
     global ids
@@ -28,7 +30,7 @@ def init(configFile, resultsFilePath, fieldsconfigFile=None, idsconfigFile=None)
     global_settings['path_root_outdossiers'] = global_settings['data_path'] + tmp_path_out
     if not os.path.exists(resultsFilePath):
         os.makedirs(resultsFilePath)
-    global_settings['results_path_root'] = resultsFilePath  # doc['results_path_root']
+    global_settings['results_path_root'] = resultsFilePath
     # ----------------------------------------------excecution config--------------------------------------------------#
     global_settings['read_dossiers'] = doc['read_dossiers']
     global_settings['algo'] = doc['algo']
@@ -38,9 +40,9 @@ def init(configFile, resultsFilePath, fieldsconfigFile=None, idsconfigFile=None)
         if os.path.isdir(os.path.join(global_settings['data_path'], decease)):
             global_settings['forms'].append(decease)
         else:
-            print "no directory for input decease ",decease," exists."
+            print "no directory for input decease ", decease, " exists."
     global_settings['eval_algo'] = doc['eval_algo']
-    global_settings['eval_file'] = doc['results_path_root'] + doc['eval_file']
+    global_settings['eval_file'] = global_settings['results_path_root'] + doc['eval_file']
     global_settings['patients_pct'] = doc['patients_pct']
 
     global_settings['preprocess'] = doc['preprocess']
@@ -90,12 +92,14 @@ def init(configFile, resultsFilePath, fieldsconfigFile=None, idsconfigFile=None)
     if global_settings['patient_W2V'] == "":
         global_settings['patient_W2V'] = global_settings['type_name_pp']
     # -----------------------------------------------------------------------------------------------------------------#
-    if fieldsconfigFile:
+    fieldsconfigFile = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\values.json"
+    if os.path.isfile(fieldsconfigFile):
         with open(fieldsconfigFile, 'r') as json_file:
             labels_possible_values = json.load(json_file, encoding='utf-8')
     else:
         labels_possible_values = {}
-    if idsconfigFile:
+    idsconfigFile = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\ids.json"
+    if os.path.isfile(idsconfigFile):
         with open(idsconfigFile, 'r') as json_file:
             ids = json.load(json_file, encoding='utf-8')
     else:
@@ -103,14 +107,14 @@ def init(configFile, resultsFilePath, fieldsconfigFile=None, idsconfigFile=None)
 
 
 def update_values():
-    file = os.path.dirname(os.path.realpath(__file__)) + "\\values.json"
+    file = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\values.json"
     with open(file, "w") as json_file:
         data = json.dumps(labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 
 def update_ids():
-    file = os.path.dirname(os.path.realpath(__file__)) + "\\ids.json"
+    file = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\ids.json"
     with open(file, "w") as json_file:
         data = json.dumps(ids, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
@@ -134,16 +138,18 @@ def find_chosen_labels_possible_values():
 
 
 def get_W2V_name():
-    W2Vname = "W2V"+global_settings['patient_W2V']+".p"
+    W2Vname = global_settings['results_path_root']+"W2V"+global_settings['patient_W2V']+".p"
     return W2Vname
 
 
 def get_preprocessor_file_name():
-    preprocessor_name = ("preprocessor_" + global_settings['type_name_pp'] + ".p").replace("patient_", "")
-    if os.path.realpath(__file__)[-1] == 'c':
-        preprocessor_name = os.path.realpath(__file__).replace("settings.pyc", preprocessor_name)
-    else:
-        preprocessor_name = os.path.realpath(__file__).replace("settings.py", preprocessor_name)
+    preprocessor_name = global_settings['results_path_root']+("preprocessor_" + global_settings['type_name_pp'] + ".p").replace("patient_", "")
+    configFile = os.path.dirname(os.path.realpath(__file__)) + preprocessor_name
+
+    #if os.path.realpath(__file__)[-1] == 'c':
+    #    preprocessor_name = os.path.realpath(__file__).replace("settings.pyc", preprocessor_name)
+    #else:
+    #    preprocessor_name = os.path.realpath(__file__).replace("settings.py", preprocessor_name)
     return preprocessor_name
 
 

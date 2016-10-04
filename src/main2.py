@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 import string
@@ -10,17 +12,17 @@ from ESutils import ES_connection, start_ES
 from read_data import readPatients
 from store_data import store_deceases
 import settings
-import Algorithm
+import Algorithm2
 import Evaluation
 
 
 if __name__ == '__main__':
 
     random.seed(100)
-    # configFilePath = "\\aux_config\\conf0.yml"
+    # configFilePath = "\\aux_config\\conf11.yml"
     configFilePath = sys.argv[1]
-    valuesFilePath = os.path.realpath(__file__).replace("main.py", "values.json")
-    idsFilePath = os.path.realpath(__file__).replace("main.py", "ids.json")
+    valuesFilePath = os.path.realpath(__file__).replace("main2.py", "values.json")
+    idsFilePath = os.path.realpath(__file__).replace("main2.py", "ids.json")
     # resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
     # resultsFilePath = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
     resultsFilePath = sys.argv[2]
@@ -66,7 +68,7 @@ if __name__ == '__main__':
         labels_possible_values = settings.chosen_labels_possible_values
     chosen_labels_possible_values = settings.chosen_labels_possible_values  # ONLY USED FIELDS
     algo_results_name = settings.get_results_filename()
-    evaluationsFilePath = os.path.realpath(__file__).replace("main.py", "evaluations.json")
+    evaluationsFilePath = os.path.realpath(__file__).replace("main2.py", "evaluations.json")
     if os.path.isfile(evaluationsFilePath):
         with open(evaluationsFilePath, 'r') as jfile:
             evaluations_dict = json.load(jfile)
@@ -77,7 +79,7 @@ if __name__ == '__main__':
         print "run algo. eval file is results name :",eval_file
     else:
         eval_file = settings.global_settings['eval_file']
-        print "dont run algo. eval file is eval file:",eval_file
+        print "dont run algo. eval file is eval file:", eval_file
 
     """--------------------------------------------annotate (all)----------------------------------------------------"""
 
@@ -95,24 +97,14 @@ if __name__ == '__main__':
 
     print "use ", len(chosen_patient_ids)
     if settings.global_settings['run_algo']:
-        if settings.global_settings['algo'] == "random":
-            myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
-                                               labels_possible_values)
-            myalgo.assign(chosen_patient_ids, forms_ids)
         if settings.global_settings['algo'] == "baseline":
-            if settings.global_settings['with_description']:
-                myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                                     algo_results_name, labels_possible_values,
-                                                     settings.global_settings['when_no_preference'],
-                                                     settings.global_settings['fuzziness'],
-                                                     settings.get_preprocessor_file_name())
-                myalgo.assign(chosen_patient_ids, forms_ids)
-            else:
-                myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                                     algo_results_name, labels_possible_values,
-                                                     settings.global_settings['when_no_preference'],
-                                                     settings.global_settings['fuzziness'])
-                myalgo.assign(chosen_patient_ids, forms_ids)
+            myalgo = Algorithm2.baselineAlgorithm(con, index_name, type_processed_patient, algo_results_name,
+                                                  labels_possible_values, settings.ids,
+                                                  settings.global_settings['when_no_preference'],
+                                                  settings.global_settings['fuzziness'],
+                                                  settings.get_preprocessor_file_name(),
+                                                  settings.global_settings['with_description'])
+            myalgo.assign(chosen_patient_ids, forms_ids)
         print "Finish assigning values."
 
     """---------------------------------------------Evaluate---------------------------------------------------------"""

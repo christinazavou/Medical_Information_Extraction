@@ -55,7 +55,7 @@ class MyReports():
                         current_rep = 0
 
 
-class ES_connection():
+class ES_connection:
     def __init__(self, host):
         try:
             self.es = Elasticsearch(hosts=[host])
@@ -99,7 +99,7 @@ class ES_connection():
     def createIndex(self, index_name, if_exist="discard", shards=5, replicas=1):  # shards=4914,replicas=0
         if if_exist == "discard":
             if self.es.indices.exists(index_name):
-                print("deleting '%s' index..." % (index_name))
+                print("deleting '%s' index..." % index_name)
                 try:
                     res = self.es.indices.delete(index=index_name)
                 except:
@@ -137,9 +137,9 @@ class ES_connection():
         }
         bulk_data.append(op_dict)
         bulk_data.append(body_data)
-        #try:
+        # try:
         res = self.es.bulk(index=index_name, body=bulk_data, refresh=True)
-        #except:
+        # except:
         #    raise Exception("some exception occurred while writing in an index")
 
     """
@@ -161,11 +161,11 @@ class ES_connection():
             update_body = {"doc": update_dict}
         else:
             update_body = {"script": {"file": script_name, "params": params_dict}}
-        #try:
+        # try:
         res = self.es.update(index=index_name, doc_type=type_name, id=id_doc, body=update_body, refresh=True)
-        #except TransportError as e:
+        # except TransportError as e:
         #    print("TransportError: %s occurred while updating" % e.error)
-        #except:
+        # except:
         #    raise Exception("some exception occurred while updating a document")
 
     """
@@ -202,41 +202,42 @@ class ES_connection():
     def exists(self, index_name, type_name, id_doc):
         return self.es.exists(index_name, type_name, id_doc)
 
-    def documents(self,type_doc,ids):
+    def documents(self, type_doc, ids):
         current = 0
         while current <= len(ids) - 1:
             yield self.get_doc_source('medical_info_extraction', type_doc, ids[current])
             current += 1
 
     def reports(self, type_doc, ids, preprocessor=None):
-        current_doc=0
-        current_rep=0
-        while current_doc <= len(ids)-1 :
-            doc_source=self.get_doc_source('medical_info_extraction',type_doc,ids[current_doc])
-            report=doc_source['report']
+        current_doc = 0
+        current_rep = 0
+        while current_doc <= len(ids)-1:
+            doc_source = self.get_doc_source('medical_info_extraction', type_doc, ids[current_doc])
+            report = doc_source['report']
             if type(report) == dict:
-                doc_reports=1
+                doc_reports = 1
             else:
-                doc_reports=len(report)
+                doc_reports = len(report)
             if doc_reports == 1:
                 if preprocessor is None:
                     yield report['description']
                 else:
                     yield preprocessor.preprocess(report['description'])
-                current_doc+=1
-                current_rep=0
+                current_doc += 1
+                current_rep = 0
             else:
                 if preprocessor is None:
                     yield report[current_rep]['description']
                 else:
                     yield preprocessor.preprocess(report[current_rep]['description'])
-                current_rep+=1
-                if current_rep==doc_reports:
-                    current_doc+=1
+                current_rep += 1
+                if current_rep == doc_reports:
+                    current_doc += 1
+
 
 if __name__ == "__main__":
     # start_ES()
-    settings.init("..\\configurations\\configurations.yml", "values.json", "ids.json")
+    settings.init("aux_config\\conf1.yml", "results","values.json", "ids.json")
 
     con = ES_connection(settings.global_settings['host'])
     patient_ids = settings.ids['medical_info_extraction patient ids']
@@ -244,6 +245,19 @@ if __name__ == "__main__":
 
     print con.exists("medical_info_extraction", "form", "colorectaal")
 
+    body = {
+        "ids": ["1504", "4914"],
+        "parameters": {
+            "fields": [
+                    "report.description"
+            ]
+        }
+    }
+    res = con.es.mtermvectors("medical_info_extraction","patient",body)
+    a = [res['docs'][i]['_id'] for i in range(len(res['docs']))]
+    ind = a.index('4914')
+    print res['docs'][ind]['term_vectors']['report.description']['terms']
+    """
     from pre_process import MyPreprocessor
     import pickle
     pname = 'preprocessor_0_1_1_0.p'
@@ -253,4 +267,4 @@ if __name__ == "__main__":
 
     import collections
     print isinstance(reps, collections.Iterable)
-
+    """

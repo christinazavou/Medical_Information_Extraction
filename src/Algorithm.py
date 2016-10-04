@@ -39,7 +39,7 @@ class Algorithm():
             self.algo_assignments[patient_id] = patient_forms
             if int(patient_id) % 100 == 0:
                 print "assign: ", self.algo_assignments[patient_id], " to patient: ", patient_id
-        print "in algo, results file name ",self.results_jfile
+        print "in algo, results file name ", self.results_jfile
         with open(self.results_jfile, 'wb') as f:
             json.dump(self.algo_assignments, f, indent=4)
         print("--- %s seconds for assign method---" % (time.time() - start_time))
@@ -63,18 +63,18 @@ class randomAlgorithm(Algorithm):
             else:
                 doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
                 if 'report' in doc.keys():
-                    reports=doc['report']
-                    if type(reports)==list:
-                        chosen_description=reports[random.randint(0,len(reports)-1)]['description']
+                    reports = doc['report']
+                    if type(reports) == list:
+                        chosen_description = reports[random.randint(0, len(reports)-1)]['description']
                     else:
-                        chosen_description=reports['description']
+                        chosen_description = reports['description']
                     if chosen_description:
                         tokens=nltk.word_tokenize(chosen_description.lower())
-                        assignment = tokens[random.randint(0,len(tokens)-1)]
+                        assignment = tokens[random.randint(0, len(tokens)-1)]
                     else:
-                        assignment=""
+                        assignment = ""
                 else:
-                    print "patient ",patient_id, " has no reports =/ "
+                    print "patient ", patient_id, " has no reports =/ "
                     assignment = ""
             patient_form_assign[label] = assignment
         return patient_form_assign
@@ -138,9 +138,9 @@ class baselineAlgorithm(Algorithm):
                     "number_of_fragments": 10
                 }
             }
-            res = self.con.search(index=self.index_name,body=highlight_search_body,doc_type =self.search_type)
+            res = self.con.search(index=self.index_name, body=highlight_search_body, doc_type=self.search_type)
             correct_hit = None
-            if res['hits']['total'] > 0 :
+            if res['hits']['total'] > 0:
                 hits=res['hits']['hits']
                 if type(hits) == list:
                     for hit in hits:
@@ -156,11 +156,14 @@ class baselineAlgorithm(Algorithm):
                 scores[i] = 0
         max_index, max_value = max(enumerate(scores), key=operator.itemgetter(1))
         if max_value == 0:
-            if self.when_no_preference == "random":
-                rand = random.randint(0, len(scores)-1)
-                assignment = {'value': values[rand], 'evidence': "no preference. random assignment"}
+            if "anders" in values:
+                assignment = {'value': "anders", 'evidence': "no preference. anders available"}
             else:
-                assignment = {'value': "", 'evidence': "no preference. empty assignment"}
+                if self.when_no_preference == "random":
+                    rand = random.randint(0, len(scores)-1)
+                    assignment = {'value': values[rand], 'evidence': "no preference. random assignment"}
+                else:
+                    assignment = {'value': "", 'evidence': "no preference. empty assignment"}
         else:
             assignment = {'value': values[max_index], 'evidence': evidences[max_index]}
         return assignment

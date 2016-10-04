@@ -14,7 +14,7 @@ def term_lookup(term):
          fuzziness = 2;
 
     # // Filter out CUI codes that the user already selected
-    elastic_query =  {
+    elastic_query = {
         "query": {
             "fuzzy" : {
                 "exact" : {
