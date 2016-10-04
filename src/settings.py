@@ -92,13 +92,13 @@ def init(configFile, resultsFilePath):
     if global_settings['patient_W2V'] == "":
         global_settings['patient_W2V'] = global_settings['type_name_pp']
     # -----------------------------------------------------------------------------------------------------------------#
-    fieldsconfigFile = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\values.json"
+    fieldsconfigFile = global_settings['results_path_root'] + "\\values.json"
     if os.path.isfile(fieldsconfigFile):
         with open(fieldsconfigFile, 'r') as json_file:
             labels_possible_values = json.load(json_file, encoding='utf-8')
     else:
         labels_possible_values = {}
-    idsconfigFile = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\ids.json"
+    idsconfigFile = global_settings['results_path_root']  + "\\ids.json"
     if os.path.isfile(idsconfigFile):
         with open(idsconfigFile, 'r') as json_file:
             ids = json.load(json_file, encoding='utf-8')
@@ -107,14 +107,14 @@ def init(configFile, resultsFilePath):
 
 
 def update_values():
-    file = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\values.json"
+    file = global_settings['results_path_root'] + "\\values.json"
     with open(file, "w") as json_file:
         data = json.dumps(labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 
 def update_ids():
-    file = os.path.dirname(os.path.realpath(__file__)).replace("src", "results") + "\\ids.json"
+    file = global_settings['results_path_root'] + "\\ids.json"
     with open(file, "w") as json_file:
         data = json.dumps(ids, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
