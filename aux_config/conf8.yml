@@ -7,8 +7,8 @@ json_forms_directory: "important_fields\\"
 csv_forms_directory: "decease\\"
 path_indossiers: "decease\\patients_selection_decease\\"
 path_outdossiers: "decease\\patients_selection_decease_json\\"
-data_path_root: "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction"  # or "C:\Users\Christina Zavou\Documents"
-results_path_root: "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"  # or "C:\Users\Christina Zavou\Documents\\results"
+data_path_root: "C:\\Users\\Christina Zavou\\Documents"  # "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction" or "C:\Users\Christina Zavou\Documents"
+results_path_root: "C:\\Users\\Christina Zavou\\Desktop\\results\\" # "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\" or "C:\Users\Christina Zavou\Documents\\results"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
 read_dossiers: False # if True -> makes jsons and index them in ES

@@ -23,6 +23,17 @@ def init(configFile, resultsFilePath):
     tmp_path_in = doc['path_indossiers']
     tmp_path_out = doc['path_outdossiers']
     global_settings['data_path_root'] = doc['data_path_root']
+    if not os.path.isdir(doc['data_path_root']):
+        if os.path.isdir("C:\\Users\\Christina Zavou\\Documents"):
+            global_settings['data_path_root'] = "C:\\Users\\Christina Zavou\\Documents"
+            print "wrong configuration. will use as data path root: {}".format(global_settings['data_path_root'])
+        else:
+            if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction"):
+                global_settings['data_path_root'] = \
+                    "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction"
+                print "wrong configuration. will use as data path root: {}".format(global_settings['data_path_root'])
+            else:
+                print "a correct data path root is unspecified."
     global_settings['directory_p'] = global_settings['data_path_root'] + '\\Data\\' + tmp_path_out
     global_settings['directory_f'] = global_settings['source_path_root'] + 'Configurations\\' + tmp_json_dir
     global_settings['data_path'] = global_settings['data_path_root'] + '\\Data\\'
