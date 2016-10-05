@@ -66,7 +66,7 @@ if __name__ == '__main__':
         labels_possible_values = settings.chosen_labels_possible_values
     chosen_labels_possible_values = settings.chosen_labels_possible_values  # ONLY USED FIELDS
     algo_results_name = settings.get_results_filename()
-    evaluationsFilePath = os.path.realpath(__file__).replace("main.py", "evaluations.json")
+    evaluationsFilePath = resultsFilePath + '\\evaluation.json'
     if os.path.isfile(evaluationsFilePath):
         with open(evaluationsFilePath, 'r') as jfile:
             evaluations_dict = json.load(jfile)
@@ -126,8 +126,6 @@ if __name__ == '__main__':
                                             'dte-time': time.strftime("%c")}]
 
         with open(evaluationsFilePath, 'w') as jfile:
-            json.dump(evaluations_dict, jfile, indent=4)
-        with open(resultsFilePath+'\\evaluation.json', 'w') as jfile:
             json.dump(evaluations_dict, jfile, indent=4)
         print "Finish evaluating."
 
