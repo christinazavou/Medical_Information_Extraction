@@ -200,15 +200,16 @@ class baselineAlgorithm(Algorithm):
                 if hits['_id'] == patient_id:
                     correct_hit = hits
         if correct_hit:
-            assignment={'value': correct_hit['highlight']['report.description'][1]}
+            assignment = {'value': correct_hit['highlight']['report.description'][0]}
+            print "correct hit {}".format(correct_hit)
         else:
-            assignment={'value': ""}
+            assignment = {'value': ""}
         return assignment
 
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("..\\configurations\\configurations.yml", "values.json", "ids.json")
+    settings.init("aux_config\\conf5.yml", "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
 
     used_forms = settings.global_settings['forms']
     index_name = settings.global_settings['index_name']
@@ -217,11 +218,14 @@ if __name__ == '__main__':
     type_name_pp = settings.global_settings['type_name_pp']
     labels_possible_values = settings.labels_possible_values
     used_patients = settings.ids['medical_info_extraction patient ids']
-    global con
     con = ES_connection(settings.global_settings['host'])
-    b1 = baselineAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
-                           settings.global_settings['when_no_preference'])
-    ass = b1.assign(used_patients, used_forms)
+
+    myalgo = baselineAlgorithm(con, index_name, type_name_pp,
+                                         settings.get_results_filename(), labels_possible_values,
+                                         settings.global_settings['when_no_preference'],
+                                         settings.global_settings['fuzziness'],
+                                         settings.get_preprocessor_file_name())
+    ass = myalgo.assign(used_patients, used_forms)
 
     # note: me to fuzziness apla vriskei kai lexeis pou ine paromies, diladi mispelled.
     # alla genika an to query exei 20 lexeis kai mono mia ine mesa tha to vrei kai xoris fuzziness
