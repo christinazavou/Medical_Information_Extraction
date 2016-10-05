@@ -289,3 +289,5 @@ print("putting a new (part) mapping...")
 res=es.indices.put_mapping(type_name,map,index_name)
 print(" response: '%s'" % (res))
 """
+
+#    start_word = phrase if word_count == 0 else tmp[0]
