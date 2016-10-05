@@ -201,7 +201,6 @@ class baselineAlgorithm(Algorithm):
                     correct_hit = hits
         if correct_hit:
             assignment = {'value': correct_hit['highlight']['report.description'][0]}
-            print "correct hit {}".format(correct_hit)
         else:
             assignment = {'value': ""}
         return assignment
