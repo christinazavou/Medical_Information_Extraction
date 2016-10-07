@@ -313,8 +313,8 @@ class TF_Algorithm(Algorithm):
                 else:
                     assignment = {'value': "", 'evidence': "no preference. empty assignment"}
         else:
-            assignment = {'value': values[max_index], 'evidence': "tf_score is {} and position {}".format(
-                tf_scores[max_index], term_vectors[values[max_index]]['tokens']['position'])}
+            assignment = {'value': values[max_index], 'evidence': "tf_score is {} and position of tokens {}".format(
+                tf_scores[max_index], "didnt found it")}
         return assignment
 
 
