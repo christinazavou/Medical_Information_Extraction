@@ -47,7 +47,7 @@
                 "properties": {
                     "date": {"type": "string"},
                     "type": {"type": "string"},
-                    "description": {"type": "string"}
+                    "description": {"type": "string", "term_vector": "with_positions"}
                 }
             }
         }

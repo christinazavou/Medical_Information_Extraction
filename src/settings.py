@@ -6,7 +6,7 @@ import os
 
 
 def init(configFile, resultsFilePath):
-    configFile = os.path.dirname(os.path.realpath(__file__)).replace("src","") + configFile
+    configFile = os.path.dirname(os.path.realpath(__file__)).replace("src", "") + configFile
     global labels_possible_values
     global ids
     global chosen_labels_possible_values
@@ -103,13 +103,16 @@ def init(configFile, resultsFilePath):
     if global_settings['patient_W2V'] == "":
         global_settings['patient_W2V'] = global_settings['type_name_pp']
     # -----------------------------------------------------------------------------------------------------------------#
-    fieldsconfigFile = global_settings['results_path_root'] + "\\values.json"
+    if not os.path.isdir(global_settings['results_path_root']):
+        print "wrong results path"
+        exit(-1)
+    fieldsconfigFile = global_settings['results_path_root'] + "values.json"
     if os.path.isfile(fieldsconfigFile):
         with open(fieldsconfigFile, 'r') as json_file:
             labels_possible_values = json.load(json_file, encoding='utf-8')
     else:
         labels_possible_values = {}
-    idsconfigFile = global_settings['results_path_root']  + "\\ids.json"
+    idsconfigFile = global_settings['results_path_root'] + "ids.json"
     if os.path.isfile(idsconfigFile):
         with open(idsconfigFile, 'r') as json_file:
             ids = json.load(json_file, encoding='utf-8')
@@ -154,13 +157,8 @@ def get_W2V_name():
 
 
 def get_preprocessor_file_name():
-    preprocessor_name = global_settings['results_path_root']+("preprocessor_" + global_settings['type_name_pp'] + ".p").replace("patient_", "")
-    configFile = os.path.dirname(os.path.realpath(__file__)) + preprocessor_name
-
-    #if os.path.realpath(__file__)[-1] == 'c':
-    #    preprocessor_name = os.path.realpath(__file__).replace("settings.pyc", preprocessor_name)
-    #else:
-    #    preprocessor_name = os.path.realpath(__file__).replace("settings.py", preprocessor_name)
+    preprocessor_name = global_settings['results_path_root']+("preprocessor_" + global_settings['type_name_pp']
+                                                              + ".p").replace("patient_", "")
     return preprocessor_name
 
 
@@ -195,8 +193,9 @@ def get_run_description():
 
 
 if __name__ == "__main__":
-    configFile = "..\\Configurations\\Configurations.yml"
-    #init(configFile)
-    init(configFile, "values.json", "ids.json")
+
+    init("\\aux_config\\conf5.yml", "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
     find_chosen_labels_possible_values()
     print get_W2V_name()
+    print get_preprocessor_file_name()
+    print find_chosen_labels_possible_values()

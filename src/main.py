@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import os
 import sys
 import string
@@ -19,8 +21,6 @@ if __name__ == '__main__':
     random.seed(100)
     # configFilePath = "\\aux_config\\conf0.yml"
     configFilePath = sys.argv[1]
-    valuesFilePath = os.path.realpath(__file__).replace("main.py", "values.json")
-    idsFilePath = os.path.realpath(__file__).replace("main.py", "ids.json")
     # resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
     # resultsFilePath = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
     resultsFilePath = sys.argv[2]
@@ -109,10 +109,21 @@ if __name__ == '__main__':
                 myalgo.assign(chosen_patient_ids, forms_ids)
             else:
                 myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                                     algo_results_name, labels_possible_values,
+                                                     algo_results_name,
+                                                     labels_possible_values,
                                                      settings.global_settings['when_no_preference'],
                                                      settings.global_settings['fuzziness'])
                 myalgo.assign(chosen_patient_ids, forms_ids)
+        if settings.global_settings['algo'] == 'tf':
+            myalgo = Algorithm.TF_Algorithm(con, index_name, type_processed_patient,
+                                            settings.get_results_filename(),
+                                            labels_possible_values,
+                                            settings.ids,
+                                            settings.global_settings['when_no_preference'],
+                                            settings.global_settings['fuzziness'],
+                                            settings.get_preprocessor_file_name(),
+                                            settings.global_settings['with_description'])
+            myalgo.assign(chosen_patient_ids, forms_ids)
         print "Finish assigning values."
 
     """---------------------------------------------Evaluate---------------------------------------------------------"""

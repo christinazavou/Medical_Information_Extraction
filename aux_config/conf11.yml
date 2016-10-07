@@ -12,7 +12,7 @@ results_path_root: "C:\\Users\\Christina Zavou\\Desktop\\results\\" # "C:\\Users
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
 read_dossiers: False # if True -> makes jsons and index them in ES
-algo: "baseline" # "random" or "baseline"
+algo: "tf" # "random" or "baseline"
 run_algo: True
 forms: ["colorectaal"] #,"mamma"]
 eval_algo: True
