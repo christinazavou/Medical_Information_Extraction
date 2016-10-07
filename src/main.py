@@ -19,11 +19,13 @@ import Evaluation
 if __name__ == '__main__':
 
     random.seed(100)
-    # configFilePath = "\\aux_config\\conf0.yml"
-    configFilePath = sys.argv[1]
-    # resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
-    # resultsFilePath = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
-    resultsFilePath = sys.argv[2]
+    if len(sys.argv) < 3:
+        configFilePath = "\\aux_config\\conf11.yml"
+        # resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
+        resultsFilePath = "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+    else:
+        configFilePath = sys.argv[1]
+        resultsFilePath = sys.argv[2]
 
     settings.init(configFilePath, resultsFilePath)
 

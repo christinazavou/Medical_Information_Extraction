@@ -41,9 +41,11 @@ class Evaluation:
         with open(self.file) as jfile:
             predictions = json.load(jfile, encoding='utf-8')
         for patient_id in patients_ids:
+            if not (patient_id in predictions.keys()):
+                continue
             doc = self.con.get_doc_source(self.index_name, self.type_name_p, patient_id)
             for form_id in eval_forms:
-                if form_id in doc.keys():
+                if form_id in doc.keys() and form_id in predictions[patient_id].keys():  # double check
                     chosen_labels = [label for label in self.chosen_labels_possible_values[form_id]]
                     patient_form_pairs += 1
                     patient_form_predictions = predictions[str(patient_id)][form_id]

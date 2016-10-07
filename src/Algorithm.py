@@ -240,28 +240,33 @@ class TF_Algorithm(Algorithm):
 
     def assign(self, assign_patients, assign_forms):
         start_time = time.time()
-        body = {
-            "ids": assign_patients,
-            "parameters": {
-                "fields": [
-                    "report.description"
-                ]
-            }
-        }
-        res = self.con.es.mtermvectors(self.index_name, self.search_type, body)
-        numbers = [res['docs'][i]['_id'] for i in range(len(res['docs']))]
-        print "len patients {}, len numbers {}".format(len(assign_patients), len(numbers))
+        # body = {
+        #     "ids": assign_patients,
+        #     "parameters": {
+        #         "fields": [
+        #             "report.description"
+        #         ]
+        #     }
+        # }
+        # res = self.con.es.mtermvectors(self.index_name, self.search_type, body)
+        # numbers = [res['docs'][i]['_id'] for i in range(len(res['docs']))]
         for patient_id in assign_patients:
+            body = {"fields": ["report.description"]}
+            res = self.con.es.termvectors(self.index_name, self.search_type, patient_id, body)
             patient_forms = {}
-            ind = numbers.index(patient_id)
-            patient_term_vectors = res['docs'][ind]['term_vectors']['report.description']['terms']
+            # ind = numbers.index(patient_id)
+            # patient_term_vectors = res['docs'][ind]['term_vectors']['report.description']['terms']
+            if not 'report.description' in res['term_vectors'].keys():
+                print "check patient {} {} : no reports for him. no golden values. wont account for him".format(self.search_type, patient_id)
+                continue
+            patient_term_vectors = res['term_vectors']['report.description']['terms']
             for form_id in assign_forms:
                 if patient_id in self.ids["medical_info_extraction patients' ids in "+form_id]:
                     form_values = self.assign_patient_form(patient_id, form_id, patient_term_vectors)
                     patient_forms[form_id] = form_values
             self.algo_assignments[patient_id] = patient_forms
             if int(patient_id) % 100 == 0:
-                print "assign: ", patient_forms, " to patient: ", patient_id
+                print patient_id, "patient assigned"# print "assign: ", patient_forms, " to patient: ", patient_id
         with open(self.results_jfile, 'wb') as f:
             json.dump(self.algo_assignments, f, indent=4)
         print("--- %s seconds for assign method---" % (time.time() - start_time))
