@@ -19,22 +19,24 @@ import datetime
 # final_zip_root = "C:\\Users\\Christina\\Desktop\\results_"
 # final_zip_root = final_zip_root + datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 
+import sys
 # for c in range(2):
 start_time = time.time()
 run_cmd = "python " + os.path.dirname(os.path.realpath(__file__)) + "\\main.py"+" aux_config\\conf11.yml " + \
-          "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+          sys.argv[1]
 os.system(run_cmd)
 print "Finished conf{} after {} minutes.".format(11, (time.time() - start_time) / 60.0)
-start_time = time.time()
-run_cmd = "python " + os.path.dirname(os.path.realpath(__file__)) + "\\main.py" + " aux_config\\conf4.yml " + \
-          "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
-os.system(run_cmd)
-print "Finished conf{} after {} minutes.".format(4, (time.time() - start_time) / 60.0)
-start_time = time.time()
-run_cmd = "python " + os.path.dirname(os.path.realpath(__file__)) + "\\main.py" + " aux_config\\conf5.yml " + \
-          "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
-os.system(run_cmd)
-print "Finished conf{} after {} minutes.".format(5, (time.time() - start_time) / 60.0)
+
+# start_time = time.time()
+# run_cmd = "python " + os.path.dirname(os.path.realpath(__file__)) + "\\main.py" + " aux_config\\conf4.yml " + \
+#           "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+# os.system(run_cmd)
+# print "Finished conf{} after {} minutes.".format(4, (time.time() - start_time) / 60.0)
+# start_time = time.time()
+# run_cmd = "python " + os.path.dirname(os.path.realpath(__file__)) + "\\main.py" + " aux_config\\conf5.yml " + \
+#           "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+# os.system(run_cmd)
+# print "Finished conf{} after {} minutes.".format(5, (time.time() - start_time) / 60.0)
 
 
 # print "Now zipping..."
