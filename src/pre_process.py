@@ -140,7 +140,7 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
                         # print "form's value changed from , ", source_text[field][inner_field], " to ", processed_text
                     preprocessed_text[field] = rec
             id_doc = int(source_text['patient_nr'])
-        if int(source_text['patient_nr']) % 10 == 0:
+        if int(source_text['patient_nr']) % 100 == 0:
             print "preprocessed_text: ", preprocessed_text, " for patient ", id_doc
         con.index_doc(index, to_type, id_doc, preprocessed_text)
     print("--- %s seconds for annotate method---" % (time.time() - start_time))
