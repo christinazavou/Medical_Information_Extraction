@@ -5,6 +5,7 @@ Takes as Input: The fields of the form to be filled-in
 Algo_Output: Randomly assigns terms / randomly choose 4914 out of k
 """
 
+import string
 import json, random, pickle, os, operator, nltk
 from abc import ABCMeta, abstractmethod
 import time
@@ -230,20 +231,17 @@ class baselineAlgorithm(Algorithm):
 class TF_Algorithm(Algorithm):
 
     def __init__(self, con, index_name, search_type, results_jfile, algo_labels_possible_values, ids,
-                 when_no_preference, fuzziness=0, preprocessorfile=None, with_description=None):
+                 when_no_preference, preprocessorfile=None, with_description=None):
         super(TF_Algorithm, self).__init__(con, index_name, search_type, results_jfile, algo_labels_possible_values)
         self.ids = ids
-        self.fuzziness = fuzziness
         self.MyPreprocessor = pickle.load(open(preprocessorfile, "rb"))
         self.with_description = with_description
         self.when_no_preference = when_no_preference
 
     def assign(self, assign_patients, assign_forms):
-        search_patients = self.ids['medical_info_extraction patient ids']
-
         start_time = time.time()
         body = {
-            "ids": search_patients,
+            "ids": assign_patients,
             "parameters": {
                 "fields": [
                     "report.description"
@@ -252,6 +250,7 @@ class TF_Algorithm(Algorithm):
         }
         res = self.con.es.mtermvectors(self.index_name, self.search_type, body)
         numbers = [res['docs'][i]['_id'] for i in range(len(res['docs']))]
+        print "len patients {}, len numbers {}".format(len(assign_patients), len(numbers))
         for patient_id in assign_patients:
             patient_forms = {}
             ind = numbers.index(patient_id)
@@ -273,23 +272,22 @@ class TF_Algorithm(Algorithm):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:
             values = self.labels_possible_values[form_id][label]['values']
-            # print "values before {}".format(values)
-            if values != "unknown":
-                for i in range(len(values)):
-                    values[i] = self.MyPreprocessor.preprocess(values[i])
-            #    print "values after {}".format(values)
+            # if values != "unknown": # no unknowns now
+            for i in range(len(values)):
+                values[i] = self.MyPreprocessor.preprocess(values[i])
             search_for = label
             if self.with_description:
                 search_for += " " + self.labels_possible_values[form_id][label]['description']
                 search_for = self.MyPreprocessor.preprocess(search_for)  # will do the same preprocess as for indexing
                                                                          # patients
-            if values != "unknown":
+            # if values != "unknown":  # no unknowns now
                 # pick the label that has the most (synonyms) occurrences in the patient's reports'
                 # description (sentences)
-                assignment = self.pick_best(search_for, values, term_vectors)
-            else:
+            assignment = self.pick_best(search_for, values, term_vectors)
+            # else:
+            #     print "we got unknown"
                 # pick a word from the patient's reports' descriptions(sentences) that matches the field
-                assignment = {'value': ""}
+                # assignment = {'value': ""}
             assignment['search_for'] = search_for
             patient_form_assign[label] = assignment
         return patient_form_assign
@@ -297,8 +295,13 @@ class TF_Algorithm(Algorithm):
     def pick_best(self, search_for, values, term_vectors):
         tf_scores = [0 for value in values]
         for i, value in enumerate(values):
-            if value in term_vectors.keys():
-                tf_scores[value] = term_vectors[value]['term_freq']
+            tokens = value.split(" ")
+            num_tokens = 1
+            for token in tokens:
+                if (token in term_vectors.keys()) and not(token in string.punctuation):
+                    tf_scores[i] += term_vectors[token]['term_freq']
+                    num_tokens += 1
+            tf_scores[i] /= num_tokens
         max_index, max_value = max(enumerate(tf_scores), key=operator.itemgetter(1))
         if len(set(tf_scores)) == 1:
             if "anders" in values:
@@ -318,7 +321,7 @@ class TF_Algorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf5.yml", "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+    settings.init("aux_config\\conf11.yml", "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
 
     used_forms = settings.global_settings['forms']
     index_name = settings.global_settings['index_name']
@@ -339,8 +342,11 @@ if __name__ == '__main__':
     # note: me to fuzziness apla vriskei kai lexeis pou ine paromies, diladi mispelled, alla genika an to query
     # exei 20 lexeis kai mono mia ine mesa tha to vrei kai xoris fuzziness
 
-    myalgo = TF_Algorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
-                          settings.ids, settings.global_settings['when_no_preference'],
-                          settings.global_settings['fuzziness'], settings.get_preprocessor_file_name(),
+    myalgo = TF_Algorithm(con, index_name, "patient_0_1_1_0",
+                          settings.get_results_filename(),
+                          settings.find_chosen_labels_possible_values(),
+                          settings.ids,
+                          settings.global_settings['when_no_preference'],
+                          settings.get_preprocessor_file_name(),
                           settings.global_settings['with_description'])
     ass = myalgo.assign(used_patients, used_forms)

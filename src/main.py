@@ -74,10 +74,10 @@ if __name__ == '__main__':
         evaluations_dict = {'evaluation': []}
     if settings.global_settings['run_algo']:
         eval_file = algo_results_name
-        print "run algo. eval file is results name :",eval_file
+        print "run algo. eval file is results name :", eval_file
     else:
         eval_file = settings.global_settings['eval_file']
-        print "dont run algo. eval file is eval file:",eval_file
+        print "dont run algo. eval file is eval file:", eval_file
 
     """--------------------------------------------annotate (all)----------------------------------------------------"""
 
@@ -117,10 +117,9 @@ if __name__ == '__main__':
         if settings.global_settings['algo'] == 'tf':
             myalgo = Algorithm.TF_Algorithm(con, index_name, type_processed_patient,
                                             settings.get_results_filename(),
-                                            labels_possible_values,
+                                            chosen_labels_possible_values,  # CALL IT WITH UNKNOWNS EXCLUDE
                                             settings.ids,
                                             settings.global_settings['when_no_preference'],
-                                            settings.global_settings['fuzziness'],
                                             settings.get_preprocessor_file_name(),
                                             settings.global_settings['with_description'])
             myalgo.assign(chosen_patient_ids, forms_ids)

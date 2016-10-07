@@ -142,6 +142,8 @@ def find_chosen_labels_possible_values():
         chosen_labels_possible_values[form] = {}
         full_dict = labels_possible_values[form]
         for field in full_dict:
+            if global_settings['unknowns'] == "exclude" and full_dict[field]['values'] == "unknown":
+                continue
             if global_settings[form].__contains__(field):
                 chosen_labels_possible_values[form][field] = full_dict[field]
     file = os.path.dirname(os.path.realpath(__file__)) + "\\chosen_fields.json"
@@ -166,10 +168,9 @@ def get_results_filename():
     # re.findall('\d+', s)
     results_filename = global_settings['results_path_root'] + "conf" + filter(str.isdigit, global_settings['configFile']) + "_results.json"
     if global_settings['eval_file'] == global_settings['results_path_root']:
-        if global_settings['run_algo'] == False:
+        if global_settings['run_algo'] is False:
             print "kanonika eprepe na doso arxio"
         global_settings['eval_file'] = results_filename
-    print "results_file name :",results_filename
     return results_filename
 
 
