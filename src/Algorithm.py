@@ -352,7 +352,7 @@ class TF_Algorithm(Algorithm):
                                   do_max_value['position'], do_max_value['date'])}
                 return assignment
             else:
-                return {"no indexed sentences on patient"}
+                return {}
         except:
             print "exception for patient {} and search_for {}.".format(patient_id, search_for)
             return {}
