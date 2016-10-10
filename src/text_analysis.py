@@ -74,9 +74,19 @@ class WordEmbeddings:
 
 if __name__ == '__main__':
     myros = RosetteApi()
-    # source_text = "Last month director Paul Feig announced the movie will have an all-star female cast including Kristen Wiig, Melissa McCarthy, Leslie Jones and Kate McKinnon."
-    # source_text = "Patiënte is recentelijk moeilijker gaan lopen. Er zijn gehoorsveranderingen geweest, waardoor ze de tv wat harder zet. Looppatroon: patiënte loop voorzichtig en heeft geen normale pasgrootte en stapt niet uit. Dr. Neurneberg, neuroloog"
-    source_text = "Anamnese -Algemeen form. MDL -Verwijzer -Huisarts Spanga, HA -Reden van komst -Moeite met ademhalen. -MDL Voorgeschiedenis -&gt; 2001 gastroscopie ivm passageklachten: geen endoscopische afwijkingen. -Overige voorgeschiedenis bypass en COPD. -Medicatie voorgeschiedenis -geen. -Allergie&#235;n en intoleranties -peniciline allergische reactie. -Intoxicatie -roken-, alcohol-. -Anamnese -sinds twee maanden last van duizeligheid. -tractus: goede conditie -Familieanamnese -1 zusje borstkanker, moeder mammacarcinoom -Sociaal - niet getrouwd -Uitslagen onderzoeken -echo abdomen: De blaas is goed gevuld, Normale uterus. -Conclusie -Geen verdenking maligniteit. -Beleid -Beleid + Aanvraag -Colonoscopie"
+    # source_text = "Last month director Paul Feig announced the movie will have an all-star female cast including
+    #  Kristen Wiig, Melissa McCarthy, Leslie Jones and Kate McKinnon."
+    # source_text = "Patiënte is recentelijk moeilijker gaan lopen. Er zijn gehoorsveranderingen geweest, waardoor
+    # ze de tv wat harder zet. Looppatroon: patiënte loop voorzichtig en heeft geen normale pasgrootte en stapt niet
+    #  uit. Dr. Neurneberg, neuroloog"
+    source_text = "Anamnese -Algemeen form. MDL -Verwijzer -Huisarts Spanga, HA -Reden van komst -Moeite met " \
+                  "ademhalen. -MDL Voorgeschiedenis -&gt; 2001 gastroscopie ivm passageklachten: geen endoscopische" \
+                  " afwijkingen. -Overige voorgeschiedenis bypass en COPD. -Medicatie voorgeschiedenis -geen. " \
+                  "-Allergie&#235;n en intoleranties -peniciline allergische reactie. -Intoxicatie -roken-, alcohol-." \
+                  " -Anamnese -sinds twee maanden last van duizeligheid. -tractus: goede conditie -Familieanamnese -1" \
+                  " zusje borstkanker, moeder mammacarcinoom -Sociaal - niet getrouwd -Uitslagen onderzoeken -echo " \
+                  "abdomen: De blaas is goed gevuld, Normale uterus. -Conclusie -Geen verdenking maligniteit. -Beleid" \
+                  " -Beleid + Aanvraag -Colonoscopie"
     result = myros.get_nouns(source_text)
     print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True).encode("utf8"))
     result = myros.get_entitiesnlinks(source_text)

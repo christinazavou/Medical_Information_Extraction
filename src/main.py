@@ -95,37 +95,54 @@ if __name__ == '__main__':
 
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
-    print "use ", len(chosen_patient_ids)
-    if settings.global_settings['run_algo']:
-        if settings.global_settings['algo'] == "random":
-            myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
-                                               labels_possible_values)
-            myalgo.assign(chosen_patient_ids, forms_ids)
-        elif settings.global_settings['algo'] == "baseline":
-            if settings.global_settings['with_description']:
-                myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                                     algo_results_name, labels_possible_values,
-                                                     settings.global_settings['when_no_preference'],
-                                                     settings.global_settings['fuzziness'],
-                                                     settings.get_preprocessor_file_name())
+    if "conf13" in configFilePath:
+        import store
+        store.update_form_values("colorectaal", settings.global_settings['source_path_root'] + "Configurations" +
+                                 "\\important_fields\\important_fields_colorectaal.json")
+        store.update_form_values("mamma", settings.global_settings['source_path_root'] + "Configurations" +
+                                 "\\important_fields\\important_fields_mamma.json")
+        import algo
+        myalgo = algo.TfAlgorithm(con, index_name, type_processed_patient,
+                                  settings.get_results_filename(),
+                                  settings.find_chosen_labels_possible_values(),
+                                  settings.ids,
+                                  settings.global_settings['when_no_preference'],
+                                  settings.get_preprocessor_file_name(),
+                                  settings.global_settings['with_description'])
+        ass = myalgo.assign(chosen_patient_ids, forms_ids)
+    else:
+
+        print "use ", len(chosen_patient_ids)
+        if settings.global_settings['run_algo']:
+            if settings.global_settings['algo'] == "random":
+                myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
+                                                   labels_possible_values)
                 myalgo.assign(chosen_patient_ids, forms_ids)
-            else:
-                myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
-                                                     algo_results_name,
-                                                     labels_possible_values,
-                                                     settings.global_settings['when_no_preference'],
-                                                     settings.global_settings['fuzziness'])
+            elif settings.global_settings['algo'] == "baseline":
+                if settings.global_settings['with_description']:
+                    myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
+                                                         algo_results_name, labels_possible_values,
+                                                         settings.global_settings['when_no_preference'],
+                                                         settings.global_settings['fuzziness'],
+                                                         settings.get_preprocessor_file_name())
+                    myalgo.assign(chosen_patient_ids, forms_ids)
+                else:
+                    myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
+                                                         algo_results_name,
+                                                         labels_possible_values,
+                                                         settings.global_settings['when_no_preference'],
+                                                         settings.global_settings['fuzziness'])
+                    myalgo.assign(chosen_patient_ids, forms_ids)
+            elif settings.global_settings['algo'] == 'tf':
+                myalgo = Algorithm.TF_Algorithm(con, index_name, type_processed_patient,
+                                                settings.get_results_filename(),
+                                                chosen_labels_possible_values,  # CALL IT WITH UNKNOWNS EXCLUDE
+                                                settings.ids,
+                                                settings.global_settings['when_no_preference'],
+                                                settings.get_preprocessor_file_name(),
+                                                settings.global_settings['with_description'])
                 myalgo.assign(chosen_patient_ids, forms_ids)
-        elif settings.global_settings['algo'] == 'tf':
-            myalgo = Algorithm.TF_Algorithm(con, index_name, type_processed_patient,
-                                            settings.get_results_filename(),
-                                            chosen_labels_possible_values,  # CALL IT WITH UNKNOWNS EXCLUDE
-                                            settings.ids,
-                                            settings.global_settings['when_no_preference'],
-                                            settings.get_preprocessor_file_name(),
-                                            settings.global_settings['with_description'])
-            myalgo.assign(chosen_patient_ids, forms_ids)
-        print "Finish assigning values."
+            print "Finish assigning values."
 
     """---------------------------------------------Evaluate---------------------------------------------------------"""
 

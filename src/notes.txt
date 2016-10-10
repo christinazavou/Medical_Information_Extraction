@@ -291,3 +291,16 @@ print(" response: '%s'" % (res))
 """
 
 #    start_word = phrase if word_count == 0 else tmp[0]
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "folding": {
+          "tokenizer": "standard",
+          "filter":  [ "lowercase", "asciifolding" ]
+        }
+      }
+    }
+  }
+}

@@ -91,6 +91,11 @@ def init(configFile, resultsFilePath):
     global_settings['when_no_preference'] = doc['when_no_preference']
     global_settings['fuzziness'] = doc['fuzziness']
     global_settings['with_description'] = doc['with_description']
+
+    if "with_evidence" in doc.keys():
+        global_settings['with_evidence'] = doc['with_evidence']
+    if "with_conditions" in doc.keys():
+        global_settings['with_conditions'] = doc['with_conditions']
     # ----------------------------------------------fields config -----------------------------------------------------#
     global_settings['assign_all'] = doc['assign_all']
     for field in doc.keys():
