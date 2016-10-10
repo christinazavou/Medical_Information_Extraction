@@ -5,6 +5,7 @@ Takes as Input: The fields of the form to be filled-in
 Algo_Output: Randomly assigns terms / randomly choose 4914 out of k
 """
 
+import types
 import string
 import json, random, pickle, os, operator, nltk
 from abc import ABCMeta, abstractmethod
@@ -272,8 +273,11 @@ class TF_Algorithm(Algorithm):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:
             values = self.labels_possible_values[form_id][label]['values']
-            for i in range(len(values)):
-                values[i] = self.MyPreprocessor.preprocess(values[i])
+            if isinstance(values, types.ListType):
+                for i in range(len(values)):
+                    values[i] = self.MyPreprocessor.preprocess(values[i])
+            else:
+                values = self.MyPreprocessor.preprocess(values)
             search_for = label
             if self.with_description:
                 search_for += " " + self.labels_possible_values[form_id][label]['description']
