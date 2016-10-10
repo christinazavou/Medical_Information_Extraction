@@ -17,9 +17,10 @@ def start_ES():
     print " ElasticSearch has started "
 
 
-class MyReports():
-    def __init__(self, esconn, type_doc, ids, preprocessor=None):
+class MyReports:
+    def __init__(self, esconn, index_name, type_doc, ids, preprocessor=None):
         self.con = esconn
+        self.index_name = index_name
         self.type_doc = type_doc
         self.ids = ids
         self.preprocessor = preprocessor
@@ -28,7 +29,7 @@ class MyReports():
         current_doc = 0
         current_rep = 0
         while current_doc <= len(self.ids) - 1:
-            doc_source = self.con.get_doc_source('medical_info_extraction', self.type_doc, self.ids[current_doc])
+            doc_source = self.con.get_doc_source(self.index_name, self.type_doc, self.ids[current_doc])
             if 'report' in doc_source.keys():
                 report = doc_source['report']
                 if type(report) == dict:
@@ -237,14 +238,13 @@ class ES_connection:
 
 if __name__ == "__main__":
     # start_ES()
-    settings.init("aux_config\\conf1.yml", "results","values.json", "ids.json")
+    settings.init("aux_config\\conf1.yml",
+                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
 
     con = ES_connection(settings.global_settings['host'])
     patient_ids = settings.ids['medical_info_extraction patient ids']
     forms_ids = settings.global_settings['forms']
-
-    print con.exists("medical_info_extraction", "form", "colorectaal")
-
+    """
     body = {
         "ids": ["1504", "4914"],
         "parameters": {
@@ -258,13 +258,15 @@ if __name__ == "__main__":
     ind = a.index('4914')
     print res['docs'][ind]['term_vectors']['report.description']['terms']
     """
+    """
     from pre_process import MyPreprocessor
     import pickle
     pname = 'preprocessor_0_1_1_0.p'
     preprocessor = pickle.load(open(pname, "rb"))
-
-    reps = MyReports(con, 'patient', patient_ids, preprocessor)
-
-    import collections
-    print isinstance(reps, collections.Iterable)
     """
+    reps = MyReports(con, 'help_mie', 'patient', ["1", "2"])
+    for r in reps:
+        print r
+    # import collections
+    # print isinstance(reps, collections.Iterable)
+

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from nltk import tokenize
+import types
 import json
 import csv
 import os
@@ -9,7 +11,7 @@ from ESutils import ES_connection, start_ES
 import settings
 
 
-class Decease():
+class Decease:
     def __init__(self, name):
         self.name = name
         self.patients = []
@@ -44,7 +46,7 @@ class Decease():
         self.store_patients_ids()
 
     def index_es_patient(self, patient_id, file=None):
-        if file != None:
+        if file:
             with open(file, 'r') as json_file:
                 body_data = json.load(json_file, encoding='utf-8')
                 body_data["forms"] = [self.name]
@@ -80,19 +82,19 @@ class Decease():
         assert form_name == f['properties'].keys()[0], "form name is not valid"
         fields_dict = f['properties'][form_name]['properties']
         body_data = {"name": form_name, "fields": fields_dict}
-        if self.patients != []:
+        if self.patients:
             body_data['patients'] = self.patients
         fields = [i for i in fields_dict]
         self.possible_values = {}
         for field in fields:
             values = fields_dict[field]['properties']['possible_values']
             description = fields_dict[field]['properties']['description']
-            self.possible_values[field] = {'values':values,'description':description}
+            self.possible_values[field] = {'values': values, 'description': description}
         return body_data
 
     def store_possible_values(self, from_es=False):
         if from_es:
-            print "should read from es first...and save it to self.possible valeus"
+            print "should read from es first...and save it to self.possible values"
         settings.labels_possible_values[self.name] = self.possible_values
         settings.update_values()
 
@@ -142,29 +144,53 @@ def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directo
     return MyDeceases
 
 
+def split_into_sentences(source_text):
+    list_of_sententces = tokenize.sent_tokenize(source_text)
+    return list_of_sententces
+
+
+def index_sentences(connection, index_name, patient_type, sentence_type, patients_ids):
+    sentence_id = 0
+    for patient_id in patients_ids:
+        settings.ids[patient_id] = []
+        patient_doc = connection.get_doc_source(index_name, patient_type, patient_id)
+        patient_reports = patient_doc['report'] if "report" in patient_doc.keys() else None
+        if isinstance(patient_reports, types.ListType):
+            for report in patient_reports:
+                report_sentences = split_into_sentences(report['description'])
+                date = report['date']
+                for i, sentence in enumerate(report_sentences):
+                    sentence_id += 1
+                    body_data = {"text": sentence, "patient": patient_id, "date": date, "position": i}
+                    connection.index_doc(index_name, sentence_type, sentence_id, body_data)
+                    settings.ids[patient_id] = settings.ids[patient_id].__add__([sentence_id])
+        elif isinstance(patient_reports, types.DictionaryType):
+            report_sentences = split_into_sentences(patient_reports['description'])
+            date = patient_reports['date']
+            for i, sentence in enumerate(report_sentences):
+                sentence_id += 1
+                body_data = {"text": sentence, "patient": patient_id, "date": date, "position": i}
+                connection.index_doc(index_name, sentence_type, sentence_id, body_data)
+                settings.ids[patient_id] = settings.ids[patient_id].__add__([sentence_id])
+        if int(patient_id) % 100 == 0:
+            print "sentences of patient {} has been indexed.".format(patient_id)
+    settings.update_ids()
+
+
 if __name__ == '__main__':
     # start_es()
 
-    settings.init1("..\\Configurations\\Configurations.yml")
-    settings.global_settings['data_path_root'] = ".."
-    settings.global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
-    settings.init2()
+    settings.init("aux_config\\conf0.yml",
+                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+
     map_jfile = settings.global_settings['map_jfile']
     host = settings.global_settings['host']
     index_name = settings.global_settings['index_name']
-    type_name_p = settings.global_settings['type_name_p']
-    type_name_f = settings.global_settings['type_name_f']
+    type_name_pp = settings.global_settings['type_name_pp']
+    type_name_s = settings.global_settings['type_name_s']
 
     con = ES_connection(host)
 
-    con.createIndex(index_name, "discard")
-    con.put_map(map_jfile, index_name, type_name_p)
-
-    directory_p = settings.global_settings['directory_p']
-    directory_f = settings.global_settings['directory_f']
-    data_path = settings.global_settings['data_path']
-
-    store_deceases(con, index_name, type_name_p, type_name_f, data_path, directory_p, directory_f)
-    print "note that ids where stored from reading patients jsons and not forms csvs"
-
-    # index_sentences(con,index_name,type_name_p,type_name_s)
+    start_time = time.time()
+    index_sentences(con, index_name, type_name_pp, type_name_s, settings.ids['medical_info_extraction patient ids'])
+    print "Finished sentence indexing after {} minutes.".format((time.time() - start_time) / 60.0)

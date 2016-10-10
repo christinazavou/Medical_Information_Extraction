@@ -39,8 +39,16 @@ def init(configFile, resultsFilePath):
     global_settings['data_path'] = global_settings['data_path_root'] + '\\Data\\'
     global_settings['path_root_indossiers'] = global_settings['data_path'] + tmp_path_in
     global_settings['path_root_outdossiers'] = global_settings['data_path'] + tmp_path_out
-    if not os.path.exists(resultsFilePath):
-        os.makedirs(resultsFilePath)
+    if not os.path.isdir(resultsFilePath):
+        if os.path.isdir("C:\\Users\\Christina Zavou\\Desktop\\results"):
+            resultsFilePath = "C:\\Users\\Christina Zavou\\Desktop\\results\\"
+            print "wrong configuration. will use as results path root: {}".format(resultsFilePath)
+        else:
+            if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results"):
+                resultsFilePath = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+                print "wrong configuration. will use as result path root: {}".format(resultsFilePath)
+            else:
+                print "a correct results path root is unspecified."
     global_settings['results_path_root'] = resultsFilePath
     # ----------------------------------------------excecution config--------------------------------------------------#
     global_settings['read_dossiers'] = doc['read_dossiers']
@@ -96,7 +104,7 @@ def init(configFile, resultsFilePath):
     global_settings['map_jfile'] = global_settings['source_path_root'] + 'Configurations\\' + tmp_map
     global_settings['type_name_p'] = doc['type_name_p']
     global_settings['type_name_f'] = doc['type_name_f']
-    global_settings['type_name_s'] = doc['type_name_s']
+    global_settings['type_name_s'] = (doc['type_name_s'] + global_settings['type_name_pp']).replace("patient", "")
     # ----------------------------------------------extra config-------------------------------------------------------#
     global_settings['run_W2V'] = doc['run_W2V']
     global_settings['patient_W2V'] = doc['patient_W2V']
@@ -166,7 +174,8 @@ def get_preprocessor_file_name():
 
 def get_results_filename():
     # re.findall('\d+', s)
-    results_filename = global_settings['results_path_root'] + "conf" + filter(str.isdigit, global_settings['configFile']) + "_results.json"
+    results_filename = global_settings['results_path_root'] + "conf" + \
+                       filter(str.isdigit, global_settings['configFile']) + "_results.json"
     if global_settings['eval_file'] == global_settings['results_path_root']:
         if global_settings['run_algo'] is False:
             print "kanonika eprepe na doso arxio"
@@ -196,6 +205,7 @@ def get_run_description():
 if __name__ == "__main__":
 
     init("\\aux_config\\conf5.yml", "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+
     find_chosen_labels_possible_values()
     print get_W2V_name()
     print get_preprocessor_file_name()

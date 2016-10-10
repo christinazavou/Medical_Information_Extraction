@@ -126,16 +126,10 @@ class baselineAlgorithm(Algorithm):
                 search_for = self.MyPreprocessor.preprocess(search_for)  # will do the same preprocess as for indexing
                                                                          # patients
             if values != "unknown":
-                # pick the label that has the most (synonyms) occurrences in the patient's reports'
-                # description (sentences)
                 assignment = self.pick_best(patient_id, search_for, values)
             else:
-                # pick a word from the patient's reports' descriptions(sentences) that matches the field
                 assignment = self.pick_similar(patient_id, search_for)
-            # if type(assignment)== str:
-            #    assignment={label:assignment}
-            #    print "changed"
-            assignment['search_for']= search_for
+            assignment['search_for'] = search_for
             patient_form_assign[label] = assignment
         return patient_form_assign
 
@@ -163,7 +157,7 @@ class baselineAlgorithm(Algorithm):
             res = self.con.search(index=self.index_name, body=highlight_search_body, doc_type=self.search_type)
             correct_hit = None
             if res['hits']['total'] > 0:
-                hits=res['hits']['hits']
+                hits = res['hits']['hits']
                 if type(hits) == list:
                     for hit in hits:
                         if hit['_id'] == patient_id:
@@ -197,7 +191,7 @@ class baselineAlgorithm(Algorithm):
         highlight_search_body = {
             "query": {
                 "match": {
-                    "report.description":{
+                    "report.description": {
                        "query": str(search_for),
                        "fuzziness": self.fuzziness
                     }
@@ -257,7 +251,8 @@ class TF_Algorithm(Algorithm):
             # ind = numbers.index(patient_id)
             # patient_term_vectors = res['docs'][ind]['term_vectors']['report.description']['terms']
             if not 'report.description' in res['term_vectors'].keys():
-                print "check patient {} {} : no reports for him. no golden values. wont account for him".format(self.search_type, patient_id)
+                print "check patient {} {} : no reports for him. no golden values. " \
+                      "wont account for him".format(self.search_type, patient_id)
                 continue
             patient_term_vectors = res['term_vectors']['report.description']['terms']
             for form_id in assign_forms:
@@ -266,7 +261,7 @@ class TF_Algorithm(Algorithm):
                     patient_forms[form_id] = form_values
             self.algo_assignments[patient_id] = patient_forms
             if int(patient_id) % 100 == 0:
-                print patient_id, "patient assigned"# print "assign: ", patient_forms, " to patient: ", patient_id
+                print patient_id, "patient assigned"  # print "assign: ", patient_forms, " to patient: ", patient_id
         with open(self.results_jfile, 'wb') as f:
             json.dump(self.algo_assignments, f, indent=4)
         print("--- %s seconds for assign method---" % (time.time() - start_time))
@@ -277,56 +272,96 @@ class TF_Algorithm(Algorithm):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:
             values = self.labels_possible_values[form_id][label]['values']
-            # if values != "unknown": # no unknowns now
-            for i in range(len(values)):
-                values[i] = self.MyPreprocessor.preprocess(values[i])
-            search_for = label
-            if self.with_description:
-                search_for += " " + self.labels_possible_values[form_id][label]['description']
-                search_for = self.MyPreprocessor.preprocess(search_for)  # will do the same preprocess as for indexing
-                                                                         # patients
-            # if values != "unknown":  # no unknowns now
-                # pick the label that has the most (synonyms) occurrences in the patient's reports'
-                # description (sentences)
-            assignment = self.pick_best(search_for, values, term_vectors)
-            # else:
-            #     print "we got unknown"
-                # pick a word from the patient's reports' descriptions(sentences) that matches the field
-                # assignment = {'value': ""}
+            if values != "unknown":
+                for i in range(len(values)):
+                    values[i] = self.MyPreprocessor.preprocess(values[i])
+                search_for = label
+                if self.with_description:
+                    search_for += " " + self.labels_possible_values[form_id][label]['description']
+                    search_for = self.MyPreprocessor.preprocess(search_for)  # will do the same preprocess as for
+                    # indexing patients
+            if values != "unknown":
+                assignment = self.pick_best(search_for, values, term_vectors)
+            else:
+                assignment = self.pick_similar(search_for, patient_id) \
+                    if settings.global_settings['unknowns'] == "include" else {"value": ""}
             assignment['search_for'] = search_for
             patient_form_assign[label] = assignment
         return patient_form_assign
 
     def pick_best(self, search_for, values, term_vectors):
-        tf_scores = [0 for value in values]
-        for i, value in enumerate(values):
-            tokens = value.split(" ")
-            num_tokens = 1
-            for token in tokens:
-                if (token in term_vectors.keys()) and not(token in string.punctuation):
-                    tf_scores[i] += term_vectors[token]['term_freq']
-                    num_tokens += 1
-            tf_scores[i] /= num_tokens
-        max_index, max_value = max(enumerate(tf_scores), key=operator.itemgetter(1))
-        if len(set(tf_scores)) == 1:
-            if "anders" in values:
-                assignment = {'value': "anders", 'evidence': "no preference. anders possible"}
-            else:
-                if self.when_no_preference == "random":
-                    rand = random.randint(0, len(tf_scores)-1)
-                    assignment = {'value': values[rand], 'evidence': "no preference. random assignment"}
+        try:
+            tf_scores = [0 for value in values]
+            for i, value in enumerate(values):
+                tf_scores[i] = self.get_tf_score(value, term_vectors)
+            max_index, max_value = max(enumerate(tf_scores), key=operator.itemgetter(1))
+            if len(set(tf_scores)) == 1:
+                if "anders" in values:
+                    assignment = {'value': "anders", 'evidence': "no preference. anders possible"}
                 else:
-                    assignment = {'value': "", 'evidence': "no preference. empty assignment"}
-        else:
-            assignment = {'value': values[max_index], 'evidence': "tf_score is {} and position of tokens {}".format(
-                tf_scores[max_index], "didnt found it")}
-        return assignment
+                    if self.when_no_preference == "random":
+                        rand = random.randint(0, len(tf_scores)-1)
+                        assignment = {'value': values[rand], 'evidence': "no preference. random assignment"}
+                    else:
+                        assignment = {'value': "", 'evidence': "no preference. empty assignment"}
+            else:
+                assignment = {'value': values[max_index], 'evidence': "tf_score is {} and position of tokens {}".format(
+                    tf_scores[max_index], "didnt found it")}
+            return assignment
+        except:
+            print "exception for search_for {}.".format(search_for)
+            return {}
+
+    def get_tf_score(self, query, term_vector):
+        tf_score = 0
+        tokens = query.split(" ")
+        num_tokens = 1
+        for token in tokens:
+            if (token in term_vector.keys()) and not (token in string.punctuation):
+                tf_score += term_vector[token]['term_freq']
+                num_tokens += 1
+        tf_score /= num_tokens
+        return tf_score
+
+    def pick_similar(self, search_for, patient_id):
+
+        try:
+            search_type = settings.global_settings['type_name_s']
+            if patient_id in settings.ids.keys():
+                sentences_scores = [0 for i in range(len(settings.ids[patient_id]))]
+                for i, sentence_id in enumerate(settings.ids[patient_id]):
+                    sentence_term_vectors = self.con.es.termvectors(self.index_name, search_type, sentence_id,
+                                                                    {"fields": ["text"]})
+                    sentences_scores[i] = self.get_tf_score(search_for, sentence_term_vectors)
+                max_index, max_value = max(enumerate(sentences_scores), key=operator.itemgetter(1))
+                if len(set(sentences_scores)) == 1:
+                    if self.when_no_preference == "random":
+                        rand = random.randint(0, len(sentences_scores)-1)
+                        assignment = {'value': self.con.get_doc_source(self.index_name, search_type,
+                                    settings.ids[patient_id][rand]), 'evidence': "no preference. random assignment"}
+                    else:
+                        assignment = {'value': "", 'evidence': "no preference. empty assignment"}
+                else:
+                    do_max_value = self.con.get_doc_source(self.index_name, search_type, settings.ids[patient_id][max_index])
+                    assignment = {'value': do_max_value, 'evidence': "tf_score is {} "
+                                  "and position,date of sentence = {},{}".format(max_value,
+                                  do_max_value['position'], do_max_value['date'])}
+                return assignment
+            else:
+                return {"no indexed sentences on patient"}
+        except:
+            print "exception for patient {} and search_for {}.".format(patient_id, search_for)
+            return {}
+
+
+# TODO: when in zwolle test if sentences could use the m(ulti)termvectors
 
 
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf11.yml", "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+    settings.init("aux_config\\conf12.yml",
+                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
 
     used_forms = settings.global_settings['forms']
     index_name = settings.global_settings['index_name']
@@ -347,7 +382,7 @@ if __name__ == '__main__':
     # note: me to fuzziness apla vriskei kai lexeis pou ine paromies, diladi mispelled, alla genika an to query
     # exei 20 lexeis kai mono mia ine mesa tha to vrei kai xoris fuzziness
 
-    myalgo = TF_Algorithm(con, index_name, "patient_0_1_1_0",
+    myalgo = TF_Algorithm(con, index_name, type_name_pp,
                           settings.get_results_filename(),
                           settings.find_chosen_labels_possible_values(),
                           settings.ids,

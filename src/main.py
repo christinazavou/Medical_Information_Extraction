@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 3:
-        configFilePath = "\\aux_config\\conf11.yml"
+        configFilePath = "\\aux_config\\conf12.yml"
         # resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
         resultsFilePath = "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\"
     else:
@@ -68,7 +68,7 @@ if __name__ == '__main__':
         labels_possible_values = settings.chosen_labels_possible_values
     chosen_labels_possible_values = settings.chosen_labels_possible_values  # ONLY USED FIELDS
     algo_results_name = settings.get_results_filename()
-    evaluationsFilePath = resultsFilePath + '\\evaluation.json'
+    evaluationsFilePath = settings.global_settings['results_path_root'] + 'evaluation.json'
     if os.path.isfile(evaluationsFilePath):
         with open(evaluationsFilePath, 'r') as jfile:
             evaluations_dict = json.load(jfile)
@@ -101,7 +101,7 @@ if __name__ == '__main__':
             myalgo = Algorithm.randomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
                                                labels_possible_values)
             myalgo.assign(chosen_patient_ids, forms_ids)
-        if settings.global_settings['algo'] == "baseline":
+        elif settings.global_settings['algo'] == "baseline":
             if settings.global_settings['with_description']:
                 myalgo = Algorithm.baselineAlgorithm(con, index_name, type_processed_patient,
                                                      algo_results_name, labels_possible_values,
@@ -116,7 +116,7 @@ if __name__ == '__main__':
                                                      settings.global_settings['when_no_preference'],
                                                      settings.global_settings['fuzziness'])
                 myalgo.assign(chosen_patient_ids, forms_ids)
-        if settings.global_settings['algo'] == 'tf':
+        elif settings.global_settings['algo'] == 'tf':
             myalgo = Algorithm.TF_Algorithm(con, index_name, type_processed_patient,
                                             settings.get_results_filename(),
                                             chosen_labels_possible_values,  # CALL IT WITH UNKNOWNS EXCLUDE
