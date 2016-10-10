@@ -288,7 +288,6 @@ class TF_Algorithm(Algorithm):
             else:
                 assignment = self.pick_similar(search_for, patient_id) \
                     if settings.global_settings['unknowns'] == "include" else {"value": ""}
-            print "assign->>",assignment
             assignment['search_for'] = search_for
             patient_form_assign[label] = assignment
         return patient_form_assign
