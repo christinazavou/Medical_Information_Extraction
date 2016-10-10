@@ -272,14 +272,13 @@ class TF_Algorithm(Algorithm):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:
             values = self.labels_possible_values[form_id][label]['values']
-            if values != "unknown":
-                for i in range(len(values)):
-                    values[i] = self.MyPreprocessor.preprocess(values[i])
-                search_for = label
-                if self.with_description:
-                    search_for += " " + self.labels_possible_values[form_id][label]['description']
-                    search_for = self.MyPreprocessor.preprocess(search_for)  # will do the same preprocess as for
-                    # indexing patients
+            for i in range(len(values)):
+                values[i] = self.MyPreprocessor.preprocess(values[i])
+            search_for = label
+            if self.with_description:
+                search_for += " " + self.labels_possible_values[form_id][label]['description']
+                search_for = self.MyPreprocessor.preprocess(search_for)  # will do the same preprocess as for
+                # indexing patients
             if values != "unknown":
                 assignment = self.pick_best(search_for, values, term_vectors)
             else:
