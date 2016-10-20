@@ -53,6 +53,8 @@ def init(configFile, resultsFilePath):
     # ----------------------------------------------excecution config--------------------------------------------------#
     global_settings['read_dossiers'] = doc['read_dossiers']
     global_settings['algo'] = doc['algo']
+    if "min_accept_score" in doc.keys():
+        global_settings['min_accept_score'] = doc['min_accept_score']
     global_settings['run_algo'] = doc['run_algo']
     global_settings['forms'] = []
     for decease in doc['forms']:
