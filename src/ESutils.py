@@ -206,7 +206,10 @@ class ES_connection:
     def documents(self, type_doc, ids):
         current = 0
         while current <= len(ids) - 1:
-            yield self.get_doc_source('medical_info_extraction', type_doc, ids[current])
+            try:
+                yield self.get_doc_source('medical_info_extraction', type_doc, ids[current])
+            except:
+                print "no doc {} {}".format(type_doc, ids[current])
             current += 1
 
     def reports(self, type_doc, ids, preprocessor=None):
@@ -238,7 +241,7 @@ class ES_connection:
 
 if __name__ == "__main__":
     # start_ES()
-    settings.init("aux_config\\conf1.yml",
+    settings.init("aux_config\\conf13.yml",
                   "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
 
     con = ES_connection(settings.global_settings['host'])
@@ -264,9 +267,13 @@ if __name__ == "__main__":
     pname = 'preprocessor_0_1_1_0.p'
     preprocessor = pickle.load(open(pname, "rb"))
     """
-    reps = MyReports(con, 'help_mie', 'patient', ["1", "2"])
-    for r in reps:
-        print r
+    # reps = MyReports(con, 'help_mie', 'patient', ["1", "2"])
+    # for r in reps:
+    #     print r
     # import collections
     # print isinstance(reps, collections.Iterable)
-
+    type_name_pp = settings.global_settings['type_name_pp']
+    col_ids = settings.ids['medical_info_extraction patients\' ids in colorectaal']
+    for i, doc in enumerate(con.documents(type_name_pp, col_ids)):
+        print doc
+    print len(col_ids)

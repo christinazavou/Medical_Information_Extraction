@@ -147,24 +147,61 @@ def annotate(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
     # print "time clock ",time.clock()
 
 
+def annotate_the_missing_ones(con, index, from_type, to_type, id_docs, id_forms, preprocessor):
+    start_time = time.time()
+    for id_doc in id_docs:
+        if con.exists(index, to_type, id_doc):
+            continue
+        source_text = con.get_doc_source(index, from_type, id_doc)
+        preprocessed_text = {}
+        for field in source_text:
+            if field in (['report'] + id_forms):  # insert preprocessed report and filled forms
+                if type(source_text[field]) is list:
+                    l = []
+                    for record in source_text[field]:
+                        rec = {}
+                        for inner_field in record:
+                            processed_text = preprocessor.preprocess(record[inner_field])
+                            rec[inner_field] = processed_text
+                        l.append(rec)
+                    preprocessed_text[field] = l
+                else:
+                    rec = {}
+                    for inner_field in source_text[field]:
+                        processed_text = preprocessor.preprocess(source_text[field][inner_field])
+                        rec[inner_field] = processed_text
+                    preprocessed_text[field] = rec
+            id_doc = int(source_text['patient_nr'])
+        con.index_doc(index, to_type, id_doc, preprocessed_text)
+        print "preprocessed_text for patient ", id_doc
+    print("--- %s seconds for annotate method---" % (time.time() - start_time))
+    # print "time clock ",time.clock()
+
+
 if __name__ == '__main__':
 
-    settings.init("..\\Configurations\\configurations.yml", "values.json", "ids.json")
-    # settings.init("..\\Configurations\\configurations.yml")
+    settings.init("\\aux_config\\conf13.yml", "C:\\Users\\Christina Zavou\\Desktop\\results\\")
     host = settings.global_settings['host']
     con = ES_connection(host)
 
     type_name_pp = settings.global_settings['type_name_pp']
     patient_ids_all = settings.ids['medical_info_extraction patient ids']
     pct = settings.global_settings['patients_pct']
-    import random
-    patient_ids_used = random.sample(patient_ids_all, int(pct * len(patient_ids_all)))
+    # import random
+    # patient_ids_used = random.sample(patient_ids_all, int(pct * len(patient_ids_all)))
 
-    w2vpreprocessor = pickle.load(open(settings.get_preprocessor_file_name(), "rb"))
-    make_word_embeddings(con, type_name_pp, patient_ids_used, settings.get_W2V_name())
-    w2v = WordEmbeddings()
-    w2v.load(settings.get_W2V_name())
-    for a, b in w2v.get_vocab().items():
-        print a, b
+    # w2vpreprocessor = pickle.load(open(settings.get_preprocessor_file_name(), "rb"))
+    # make_word_embeddings(con, type_name_pp, patient_ids_used, settings.get_W2V_name())
+    # w2v = WordEmbeddings()
+    # w2v.load(settings.get_W2V_name())
+    # for a, b in w2v.get_vocab().items():
+    #     print a, b
 
     # structure_sections(con,type_name_p,patient_ids)
+    index = settings.global_settings['index_name']
+    from_type = settings.global_settings['type_name_p']
+    to_type = type_name_pp
+    id_docs = patient_ids_all
+    id_forms = ['colorectaal', 'mamma']
+    preprocessor = pickle.load(open(settings.get_preprocessor_file_name(), "rb"))
+    annotate_the_missing_ones(con, index, from_type, to_type, id_docs, id_forms, preprocessor)
