@@ -274,6 +274,34 @@ if __name__ == "__main__":
     # print isinstance(reps, collections.Iterable)
     type_name_pp = settings.global_settings['type_name_pp']
     col_ids = settings.ids['medical_info_extraction patients\' ids in colorectaal']
-    for i, doc in enumerate(con.documents(type_name_pp, col_ids)):
-        pass
-    print len(col_ids)
+    # for i, doc in enumerate(con.documents(type_name_pp, col_ids)):
+    #     pass
+    # print len(col_ids)
+
+    highlight_search_body = {
+        "query": {
+            "bool": {
+                "must": {
+                    "match": {
+                        "report.description": {
+                            "query": "mx onbekend",
+                            "fuzziness": 0
+                        }
+                    }
+                },
+                "filter": {
+                    "term": {
+                        "_id": '1719417'
+                    }
+                }
+            }
+        },
+        "highlight": {
+            "order": "score",
+            "fields": {"report.description": {}},
+            "fragment_size": 100,
+            "number_of_fragments": 10
+        }
+    }
+    res = con.search(settings.global_settings['index_name'], body=highlight_search_body, doc_type=type_name_pp)
+    print res['hits']['hits'][0]['highlight']

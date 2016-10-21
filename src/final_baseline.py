@@ -5,6 +5,7 @@ Takes as Input: The fields of the form to be filled-in
 Algo_Output: Randomly assigns terms / randomly choose 4914 out of k
 """
 
+import re
 import numpy as np
 import re
 import types
@@ -24,6 +25,9 @@ import settings
 import pre_process
 from pre_process import MyPreprocessor
 
+
+# times_pick_similar_baseline = []
+# times_pick_similar_tf = []
 
 thisdir = os.path.dirname(os.path.realpath(__file__))
 pickle_path = os.path.join(thisdir, "trained.model")
@@ -71,21 +75,36 @@ def value_refers_to_patient(patient_reports, value):
     return False, score
 
 
-def description_refers_to_patient(patient_reports, description):
-    description_tokens = description.split()
-    description_tokens = [tok for tok in description_tokens if tok not in string.punctuation]
-    text_to_check = []
+def sentence_refers_to_patient(patient_reports, sentence):
     if isinstance(patient_reports, types.ListType):
         for report in patient_reports:
-            report_description = report['description']
-            for tok in description_tokens:
-                report_description = report_description.replace(tok, "<DIS>")
-            text_to_check.append(report_description)
+            if sentence in report:
+                # replace sentence with <DIS> to search for it
+                correct_reference, score = value_refers_to_patient(report, sentence)
+                break
     else:
-        report_description = patient_reports['description']
-        for tok in description_tokens:
-            report_description = report_description.replace(tok, "<DIS>")
-        text_to_check.append(report_description)
+        if sentence in patient_reports:
+            correct_reference, score = value_refers_to_patient(patient_reports, sentence)
+    if not score:
+        print "something went wrong"
+        return False, 0
+    return correct_reference, score
+
+
+def replace_sentence_tokens(sentence, replace_with):
+    to_return = sentence
+    if replace_with == "<DIS>":
+        m = [re.match("<em>.*</em>", word) for word in sentence.split()]
+        for mi in m:
+            if mi:
+                to_return = to_return.replace(mi.group(), "<DIS>")
+    else:
+        to_return = to_return.replace("<em>", "").replace("</em>","")
+    return to_return
+
+
+def tokens_in_sentence_refers_to_patient(sentence):
+    text_to_check = replace_sentence_tokens(sentence, "<DIS>")
     _, score = predict_prob(clf, text_to_check)
     if score > 0.5:
         return True, score
@@ -203,7 +222,43 @@ class Algorithm:
         else:
             print "OPAAAA"
         assignment['search_for'] = search_for
+        # assignment = self.get_predictions(assignment)
         return assignment
+
+    """
+    # todo: check/do for tfalgo as well
+    def get_predictions(self, assignment):
+        if assignment['search_for'] == "description":  # either pick_it_or_not or pick_similar
+            pick_similar = False
+            if not 'evidence' in assignment.keys():
+                pick_similar = True
+            elif assignment['evidence'] == "didn't find something similar.":
+                pick_similar = True
+            if pick_similar:
+                pass  # todo
+            else:  # pick_it_or_not
+                pass  # todo
+        elif assignment['search_for'] == "one possible value":  # pick_best
+            if type(assignment['evidence']) == list:  # we found evidence for a value
+                print "yep2"
+                if assignment['value'] == "":
+                    print "hmm..evidence but no value?"
+                else:
+                    assignment['evidence_sentence_refers_to_patient'] = []
+                    assignment['evidence_tokens_refer_to_patient'] = []
+                    for evidence_found in assignment['evidence']:
+                        correct_evidence, _ = sentence_refers_to_patient(patient_reports, evidence_found)
+                        assignment['evidence_sentence_refers_to_patient'] += correct_evidence
+                        correct_evidence, _ = tokens_in_sentence_refers_to_patient(evidence_found)
+                        assignment['evidence_tokens_refer_to_patient'] += correct_evidence
+            else:
+                if assignment['evidence'] != "":
+                    print list(assignment['evidence'].rstrip("]").lstrip("[").split("u'"))
+                pass  # no evidence found i think so do nothing.
+        else:
+            pass  # search_for is nothing due to condition unsat. do noth
+        return assignment
+    """
 
 
 class RandomAlgorithm(Algorithm):
@@ -294,7 +349,7 @@ class BaselineAlgorithm(Algorithm):
             if score and evidence:
                 if score >= self.min_accept_score:
                     value_to_assign = "yes" if "Yes" in values else "ja"
-                    assignment = combine_assignment(value_to_assign, "{} with score {}".format(evidence, score))
+                    assignment = combine_assignment(value_to_assign, evidence, score)
                 elif onbekend_exist:
                     assignment = combine_assignment('onbekend', "low description score. onbekend available")
                 else:
@@ -328,8 +383,7 @@ class BaselineAlgorithm(Algorithm):
                     rand = random.randint(0, len(scores) - 1)
                     assignment = combine_assignment(values[rand], "random from ties: {}".format(evidences[rand]))
                 else:
-                    assignment = combine_assignment(values[max_index], "{} with score {}".format(evidences[max_index],
-                                                                                                 scores[max_index]))
+                    assignment = combine_assignment(values[max_index], evidences[max_index], scores[max_index])
             else:  # no accepted scores
                 if anders_exist:
                     # check whether description can be found, to put "anders" otherwise put "" ?
@@ -359,7 +413,7 @@ class BaselineAlgorithm(Algorithm):
             # todo: check min_accept_score
             assignment = combine_assignment(correct_hit['highlight']['report.description'][0])
         else:
-            assignment =combine_assignment("", "didn't find something similar.")
+            assignment = combine_assignment("", "didn't find something similar.")
         return assignment
 
 
@@ -534,7 +588,7 @@ class TfAlgorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf14.yml",
+    settings.init("aux_config\\conf15.yml",
                   "C:\\Users\\Christina Zavou\\Desktop\\results\\")
 
     used_forms = settings.global_settings['forms']
