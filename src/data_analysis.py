@@ -111,6 +111,14 @@ def get_results_distribution(results_df, fields_dict):
     return with_counts_dict
 
 
+def analyze_predictions():
+    # will make a dict {fieldd1:{val1:x times, val2: y times, evidences:(a,b,c,d)}}, abcd is number of each ev.
+    # evidences available:
+    # condition unsatisfied., **found evidence**, no hit on description., no accepted scores. empty assignment,
+    # no accepted scores. random assignment
+    pass
+
+
 if __name__ == "__main__":
     values_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\values.json"
     ids_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\ids.json"

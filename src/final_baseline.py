@@ -195,6 +195,9 @@ class Algorithm:
         elif values == "unknown":
             search_for = "description"
             assignment = self.pick_similar(patient_id, description)
+            if not assignment:
+                print "ep3: ", assignment
+                assignment = {'value':'','evidence':'no index sentences yet :(('}
         else:
             print "OPAAAA"
         assignment['search_for'] = search_for
@@ -513,7 +516,9 @@ class TfAlgorithm(Algorithm):
                 else:
                     assignment = combine_assignment("", "no similar sentence with accepted score.")
                 return assignment
-            return {}
+            else:
+                print "none?"
+                return {}
         except:
             print "exception for patient {} and search_for {}.".format(patient_id, description)
             return {}
