@@ -72,23 +72,37 @@ def value_refers_to_patient(patient_reports, value):
 
 
 # todo: if gives errors use []form_id] first
-def condition_satisfied(golden_truth, fields_possible_values, current_form, field_to_be_filled):
-    condition = fields_possible_values[current_form][field_to_be_filled]['condition']
+# def condition_satisfied(golden_truth, fields_possible_values, current_form, field_to_be_filled):
+#     condition = fields_possible_values[current_form][field_to_be_filled]['condition']
+#     if condition == "":
+#         return True
+#     conditioned_field, condition_expression = re.split(' !?= ', condition)
+#     if "!=" in condition:
+#         if golden_truth[conditioned_field] != condition_expression:
+#             return True
+#         else:
+#             if golden_truth[field_to_be_filled] != "":
+#                 print "the golden truth is problematic"
+#             return False
+#     if golden_truth[conditioned_field] == condition_expression:
+#         return True
+#     else:
+#         if golden_truth[field_to_be_filled] != "":
+#             print "the golden truth is problematic"
+#         return False
+def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled, preprocessor):
+    condition = labels_possible_values[current_form][field_to_be_filled]['condition']
     if condition == "":
         return True
     conditioned_field, condition_expression = re.split(' !?= ', condition)
+    condition_expression = preprocessor.preprocess(condition_expression)
     if "!=" in condition:
         if golden_truth[conditioned_field] != condition_expression:
             return True
-        else:
-            if golden_truth[field_to_be_filled] != "":
-                print "the golden truth is problematic"
-            return False
-    if golden_truth[conditioned_field] == condition_expression:
-        return True
+    elif "==" in condition:
+        if golden_truth[conditioned_field] == condition_expression:
+            return True
     else:
-        if golden_truth[field_to_be_filled] != "":
-            print "the golden truth is problematic"
         return False
 
 
@@ -126,7 +140,7 @@ class Algorithm:
     __metaclass__ = ABCMeta
 
     def __init__(self, con, index_name, search_type, results_jfile, algo_labels_possible_values,
-                 min_accept_score, with_unknowns):
+                 min_accept_score, with_unknowns, preprocessor_file):
         self.con = con
         self.index_name = index_name
         self.search_type = search_type
@@ -136,6 +150,7 @@ class Algorithm:
         self.algo_assignments = {}
         self.min_accept_score = min_accept_score
         self.with_unknowns = with_unknowns
+        self.MyPreprocessor = pickle.load(open(preprocessor_file, "rb"))
 
     @abstractmethod
     def assign(self, assign_patients, assign_forms):
@@ -144,7 +159,7 @@ class Algorithm:
     def assign_patient_form(self, patient_id, form_id, doc):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:
-            if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, label):
+            if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, label, self.MyPreprocessor):
                 values = self.labels_possible_values[form_id][label]['values']
                 if not self.with_unknowns and values == "unknown":
                     continue
@@ -231,11 +246,11 @@ class RandomAlgorithm(Algorithm):
 class BaselineAlgorithm(Algorithm):
 
     def __init__(self, connection, index, search_type, results_jfile, algo_labels_possible_values, min_accept_score,
-                 with_unknowns, when_no_preference, fuzziness=0, preprocessor_file=None):
+                 with_unknowns, preprocessor_file, when_no_preference, fuzziness=0):
         super(BaselineAlgorithm, self).__init__(connection, index, search_type, results_jfile,
-                                                algo_labels_possible_values, min_accept_score, with_unknowns)
+                                                algo_labels_possible_values, min_accept_score, with_unknowns,
+                                                preprocessor_file)
         self.fuzziness = fuzziness
-        self.MyPreprocessor = pickle.load(open(preprocessor_file, "rb"))
         self.when_no_preference = when_no_preference
 
     def get_score_and_evidence(self, value, patient_id):
@@ -344,13 +359,11 @@ class BaselineAlgorithm(Algorithm):
 class TfAlgorithm(Algorithm):
 
     def __init__(self, con, index_name, search_type, results_jfile, algo_labels_possible_values, min_accpet_score,
-                 with_unknowns, ids, when_no_preference, sentence_type, preprocessorfile=None, with_description=None):
-        print "preeee",preprocessorfile
+                 with_unknowns, preprocessor_file, ids, when_no_preference, sentence_type, with_description=None):
         super(TfAlgorithm, self).__init__(con, index_name, search_type, results_jfile, algo_labels_possible_values,
-                                          min_accpet_score, with_unknowns)
+                                          min_accpet_score, with_unknowns, preprocessor_file)
         self.ids = ids
         self.sentence_type = sentence_type
-        self.MyPreprocessor = pickle.load(open(preprocessorfile, "rb"))
         self.with_description = with_description
         self.when_no_preference = when_no_preference
 
@@ -444,7 +457,7 @@ class TfAlgorithm(Algorithm):
             if max_score and max_index:
                 if len(set(tf_scores)) == 1:
                     rand = random.randint(0, len(tf_scores) - 1)
-                    assignment = combine_assignment(values[rand])
+                    assignment = combine_assignment(values[rand], "ties.random choose", tf_scores[rand])
                 else:
                     assignment = combine_assignment(values[max_index], score=tf_scores[max_index])
             else:
@@ -485,9 +498,10 @@ class TfAlgorithm(Algorithm):
                     else:
                         do_max_value = self.con.get_doc_source(self.index_name, self.sentence_type,
                                                                self.ids[patient_id][max_index])
-                        assignment = combine_assignment(do_max_value,"tf_score is {} and position,date of sentence: {},"
-                                                        "{}".format(max_value, do_max_value['position'],
-                                                        do_max_value['date']))
+                        assignment = combine_assignment(do_max_value, "tf_score is {} and position,date of sentence: "
+                                                                      "{},{}".format(max_value,
+                                                                                     do_max_value['position'],
+                                                                                     do_max_value['date']))
                 else:
                     assignment = combine_assignment("", "no similar sentence with accepted score.")
         except:
@@ -501,8 +515,8 @@ class TfAlgorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf12.yml",
-                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+    settings.init("aux_config\\conf14.yml",
+                  "C:\\Users\\Christina Zavou\\Desktop\\results\\")
 
     used_forms = settings.global_settings['forms']
     index_name = settings.global_settings['index_name']
@@ -510,19 +524,24 @@ if __name__ == '__main__':
     type_name_s = settings.global_settings['type_name_s']
     type_name_pp = settings.global_settings['type_name_pp']
     labels_possible_values = settings.labels_possible_values
-    used_patients = settings.ids['medical_info_extraction patient ids']
+    used_patients = settings.find_used_ids()
+    print "tot patiens:{}, some patients:{}".format(len(used_patients), used_patients[0:8])
+    pct = settings.global_settings['patients_pct']
+    import random
+    used_patients = random.sample(used_patients, int(pct * len(used_patients)))
+    print "after pct applied: tot patiens:{}, some patients:{}".format(len(used_patients), used_patients[0:8])
+
     con = ES_connection(settings.global_settings['host'])
     with_unknowns = settings.global_settings['unknowns'] = "include"
 
     # myalgo = RandomAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
-    #                          0, with_unknowns)
+    #                          0, with_unknowns, settings.get_preprocessor_file_name())
     # ass = myalgo.assign(used_patients, used_forms)
 
     # myalgo = BaselineAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
-    #                            0, with_unknowns,
+    #                            0, with_unknowns, settings.get_preprocessor_file_name(),
     #                            settings.global_settings['when_no_preference'],
-    #                            settings.global_settings['fuzziness'],
-    #                            settings.get_preprocessor_file_name())
+    #                            settings.global_settings['fuzziness'])
     # ass = myalgo.assign(used_patients, used_forms)
 
     # note: me to fuzziness apla vriskei kai lexeis pou ine paromies, diladi mispelled, alla genika an to query
@@ -530,9 +549,9 @@ if __name__ == '__main__':
 
     myalgo = TfAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(),
                          settings.find_chosen_labels_possible_values(), 0, with_unknowns,
+                         settings.get_preprocessor_file_name(),
                          settings.ids,
                          settings.global_settings['when_no_preference'],
                          settings.global_settings['type_name_s'],
-                         settings.get_preprocessor_file_name(),
                          settings.global_settings['with_description'])
     ass = myalgo.assign(used_patients, used_forms)

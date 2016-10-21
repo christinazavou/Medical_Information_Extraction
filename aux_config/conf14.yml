@@ -18,7 +18,7 @@ run_algo: True
 forms: ["colorectaal"] #,"mamma"]
 eval_algo: True
 eval_file: "" # if run_algo is false give which file to eval
-patients_pct: 0.01 # 0.01 # percentage of patients to work with
+patients_pct: 0.02 # 0.01 # percentage of patients to work with
 
 preprocess: [] # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
 # if empty preprocess then take type_name_pp as is
