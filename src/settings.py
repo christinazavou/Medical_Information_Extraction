@@ -168,6 +168,16 @@ def find_chosen_labels_possible_values():
     return chosen_labels_possible_values
 
 
+def find_used_ids():
+    global global_settings
+    global ids
+    used_forms = global_settings['forms']
+    used_patients = []
+    for form in used_forms:
+        used_patients += ids['medical_info_extraction patients\' ids in '+form]
+    return list(set(used_patients))
+
+
 def get_W2V_name():
     W2Vname = global_settings['results_path_root']+"W2V"+global_settings['patient_W2V']+".p"
     return W2Vname
