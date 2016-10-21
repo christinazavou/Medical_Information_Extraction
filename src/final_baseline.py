@@ -382,6 +382,9 @@ class TfAlgorithm(Algorithm):
         for patient_id in assign_patients:
             body = {"fields": ["report.description"]}
             res = self.con.es.termvectors(self.index_name, self.search_type, patient_id, body)
+            if res['found'] == False:
+                print "couldnt find patient {} {}".format(self.search_type, patient_id)
+                continue
             patient_forms = {}
             # ind = numbers.index(patient_id)
             # patient_term_vectors = res['docs'][ind]['term_vectors']['report.description']['terms']
@@ -516,7 +519,7 @@ class TfAlgorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf14.yml",
+    settings.init("aux_config\\conf15.yml",
                   "C:\\Users\\Christina Zavou\\Desktop\\results\\")
 
     used_forms = settings.global_settings['forms']
@@ -535,24 +538,24 @@ if __name__ == '__main__':
     con = ES_connection(settings.global_settings['host'])
     with_unknowns = settings.global_settings['unknowns'] = "include"
 
-    # myalgo = RandomAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
-    #                          0, with_unknowns, settings.get_preprocessor_file_name())
-    # ass = myalgo.assign(used_patients, used_forms)
-
-    # myalgo = BaselineAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
-    #                            0, with_unknowns, settings.get_preprocessor_file_name(),
-    #                            settings.global_settings['when_no_preference'],
-    #                            settings.global_settings['fuzziness'])
-    # ass = myalgo.assign(used_patients, used_forms)
-
+    if settings.global_settings['algo'] == 'random':
+        myalgo = RandomAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
+                                 0, with_unknowns, settings.get_preprocessor_file_name())
+        ass = myalgo.assign(used_patients, used_forms)
+    elif settings.global_settings['algo'] == 'baseline':
+        myalgo = BaselineAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(), labels_possible_values,
+                                   0, with_unknowns, settings.get_preprocessor_file_name(),
+                                   settings.global_settings['when_no_preference'],
+                                   settings.global_settings['fuzziness'])
+        ass = myalgo.assign(used_patients, used_forms)
+    elif settings.global_settings['algo'] == 'tf':
+        myalgo = TfAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(),
+                             settings.find_chosen_labels_possible_values(), 0, with_unknowns,
+                             settings.get_preprocessor_file_name(),
+                             settings.ids,
+                             settings.global_settings['when_no_preference'],
+                             settings.global_settings['type_name_s'],
+                             settings.global_settings['with_description'])
+        ass = myalgo.assign(used_patients, used_forms)
     # note: me to fuzziness apla vriskei kai lexeis pou ine paromies, diladi mispelled, alla genika an to query
     # exei 20 lexeis kai mono mia ine mesa tha to vrei kai xoris fuzziness
-
-    myalgo = TfAlgorithm(con, index_name, type_name_pp, settings.get_results_filename(),
-                         settings.find_chosen_labels_possible_values(), 0, with_unknowns,
-                         settings.get_preprocessor_file_name(),
-                         settings.ids,
-                         settings.global_settings['when_no_preference'],
-                         settings.global_settings['type_name_s'],
-                         settings.global_settings['with_description'])
-    ass = myalgo.assign(used_patients, used_forms)
