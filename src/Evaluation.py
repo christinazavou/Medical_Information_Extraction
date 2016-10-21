@@ -77,10 +77,12 @@ class Evaluation:
                     else:
                         res = predictions[field]
                     if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
+                        # score for : one out of k
                         if res == targets[field]:
                             score += 1.0
                             self.chosen_labels_accuracy[form_id][field] += 1.0
                     else:
+                        # score for : open-question (BLEU)
                         res_tokens = res.split(" ")
                         trgt_tokens = targets[field]
                         tmp_score = 0
@@ -92,15 +94,17 @@ class Evaluation:
             score /= len(chosen_labels)
             if random.random() < 0.01:
                 print "a pair score is {} and has {} empty targets out of {} not {}".format(score, empties,
-                                                                                    len(chosen_labels), len(predictions))
+                                                                                            len(chosen_labels),
+                                                                                            len(predictions))
             return score
         except:
+            print "some exception in eval score"
             return 0.0
 
 if __name__ == '__main__':
     # start_ES()
-    settings.init("aux_config\\conf12.yml",
-                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+    settings.init("aux_config\\conf14.yml",
+                  "C:\\Users\\Christina Zavou\\Desktop\\results\\")
 
     host = settings.global_settings['host']
     index_name = settings.global_settings['index_name']

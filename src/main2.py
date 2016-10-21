@@ -21,9 +21,9 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 3:
-        configFilePath = "\\aux_config\\conf12.yml"
-        # resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
-        resultsFilePath = "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+        configFilePath = "\\aux_config\\conf14.yml"
+        resultsFilePath = "C:\\Users\\Christina\\Desktop\\results\\"
+        # resultsFilePath = "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\"
     else:
         configFilePath = sys.argv[1]
         resultsFilePath = sys.argv[2]
@@ -62,7 +62,10 @@ if __name__ == '__main__':
     """-------------------------------------------set params--------------------------------------------------------"""
 
     settings.find_chosen_labels_possible_values()
-    patient_ids_all = settings.ids['medical_info_extraction patient ids']
+    # patient_ids_all = settings.ids['medical_info_extraction patient ids']
+    patient_ids_all = settings.find_used_ids()
+    print "tot used patiens:{}".format(len(patient_ids_all))
+
     pct = settings.global_settings['patients_pct']
     with_unknowns = settings.global_settings['unknowns'] == "include"
     min_accept_score = settings.global_settings['min_accept_score']
@@ -104,7 +107,8 @@ if __name__ == '__main__':
     # test if values need update:
     for form in labels_possible_values:
         for field in labels_possible_values[form]:
-            if 'condition' in labels_possible_values[form][field]:
+            if not 'condition' in labels_possible_values[form][field]:
+                print "will update values"
                 store.update_form_values("colorectaal",
                                          settings.global_settings['source_path_root'] + "Configurations" +
                                          "\\important_fields\\important_fields_colorectaal.json")
@@ -117,22 +121,22 @@ if __name__ == '__main__':
     if settings.global_settings['run_algo']:
         if settings.global_settings['algo'] == "random":
             myalgo = final_baseline.randomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
-                                                    labels_possible_values, min_accept_score, with_unknowns)
+                                                    labels_possible_values, min_accept_score, with_unknowns,
+                                                    settings.get_preprocessor_file_name())
             myalgo.assign(chosen_patient_ids, forms_ids)
         elif settings.global_settings['algo'] == "baseline":
             myalgo = final_baseline.baselineAlgorithm(con, index_name, type_processed_patient, algo_results_name,
                                                       labels_possible_values, min_accept_score, with_unknowns,
+                                                      settings.get_preprocessor_file_name(),
                                                       settings.global_settings['when_no_preference'],
-                                                      settings.global_settings['fuzziness'],
-                                                      settings.get_preprocessor_file_name())
+                                                      settings.global_settings['fuzziness'])
             myalgo.assign(chosen_patient_ids, forms_ids)
         else:
             myalgo = final_baseline.TfAlgorithm(con, index_name, type_processed_patient, algo_results_name,
                                                 labels_possible_values, min_accept_score, with_unknowns,
-                                                settings.ids,
+                                                settings.get_preprocessor_file_name(), settings.ids,
                                                 settings.global_settings['when_no_preference'],
                                                 settings.global_settings['type_name_s'],
-                                                settings.get_preprocessor_file_name(),
                                                 settings.global_settings['with_description'])
             myalgo.assign(chosen_patient_ids, forms_ids)
         print "Finish assigning values."

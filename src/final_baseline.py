@@ -482,6 +482,7 @@ class TfAlgorithm(Algorithm):
         # evidence_found, evidence_score = value_refers_to_patient(self.current_reports, values[idx])
 
     def pick_similar(self, patient_id, description):
+        assignment = {}
         try:
             if patient_id in self.ids.keys():
                 sentences_scores = [0 for i in range(len(self.ids[patient_id]))]
