@@ -405,6 +405,9 @@ class TfAlgorithm(Algorithm):
             if golden_truth == {}:
                 print "couldn't find golden truth for patient {}.".format(patient_id)
                 continue
+            if not 'report.description' in res['term_vectors'].keys():
+                print "res doesnt have report description {}".format(res)
+                continue
             patient_term_vectors = res['term_vectors']['report.description']['terms']
             for form_id in assign_forms:
                 if patient_id in self.ids["medical_info_extraction patients' ids in "+form_id]:
@@ -519,7 +522,7 @@ class TfAlgorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf15.yml",
+    settings.init("aux_config\\conf14.yml",
                   "C:\\Users\\Christina Zavou\\Desktop\\results\\")
 
     used_forms = settings.global_settings['forms']
