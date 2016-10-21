@@ -33,13 +33,27 @@ def combine_all_ids(ids, dict_key, dict_key1, dict_key2):
     return ids
 
 
-current_ids = fix_ids_of_decease(current_ids, 'colorectaal')
-current_ids = fix_ids_of_decease(current_ids, 'mamma')
-dict_key = "medical_info_extraction patient ids"
-dict_key1 = "medical_info_extraction patients' ids in colorectaal"
-dict_key2 = "medical_info_extraction patients' ids in mamma"
-combine_all_ids(current_ids, dict_key, dict_key1, dict_key2)
+# current_ids = fix_ids_of_decease(current_ids, 'colorectaal')
+# current_ids = fix_ids_of_decease(current_ids, 'mamma')
+# dict_key = "medical_info_extraction patient ids"
+# dict_key1 = "medical_info_extraction patients' ids in colorectaal"
+# dict_key2 = "medical_info_extraction patients' ids in mamma"
+# combine_all_ids(current_ids, dict_key, dict_key1, dict_key2)
+#
+# with open("C:\\Users\\Christina Zavou\\Desktop\\results\\accepted_ids.json", "w") as write_file:
+#     data = json.dumps(current_ids, separators=[',', ':'], indent=4, sort_keys=True)
+#     write_file.write(data)
 
+# open file with all ids and their sentences
+with open("C:\\Users\\Christina Zavou\\Desktop\\results\\ids.json", "r") as read_file:
+    ids_with_sentences = json.load(read_file, encoding='utf-8')
+# open file with accepted ids but no sentences
+with open("C:\\Users\\Christina Zavou\\Desktop\\results\\accepted_ids.json", "r") as read_file:
+    ids_no_sentences = json.load(read_file, encoding='utf-8')
+# fill in accepted ids their sentences
+for id in ids_with_sentences['medical_info_extraction patient ids']:
+    ids_no_sentences[id] = ids_with_sentences[id]
+# write the new ids file
 with open("C:\\Users\\Christina Zavou\\Desktop\\results\\accepted_ids.json", "w") as write_file:
-    data = json.dumps(current_ids, separators=[',', ':'], indent=4, sort_keys=True)
+    data = json.dumps(ids_no_sentences, separators=[',', ':'], indent=4, sort_keys=True)
     write_file.write(data)

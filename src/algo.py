@@ -97,18 +97,11 @@ def condition_satisfied(golden_truth, labels_possible_values, current_form, fiel
             # if golden_truth[conditioned_field] != condition_expression:
             if golden_truth[current_form][conditioned_field] != condition_expression:
                 return True
-            else:
-                # if golden_truth[field_to_be_filled] != "":
-                if golden_truth[current_form][field_to_be_filled] != "":
-                    print "the golden truth is problematic"
-                return False
-    # if golden_truth[conditioned_field] == condition_expression:
-    if golden_truth[current_form][conditioned_field] == condition_expression:
-        return True
+    elif "==" in condition:
+        # if golden_truth[conditioned_field] == condition_expression:
+        if golden_truth[current_form][conditioned_field] == condition_expression:
+            return True
     else:
-        # if golden_truth[field_to_be_filled] != "":
-        if golden_truth[current_form][field_to_be_filled] != "":
-            print "the golden truth is problematic"
         return False
 
 
@@ -295,6 +288,9 @@ class TfAlgorithm(Algorithm):
         for patient_id in assign_patients:
             body = {"fields": ["report.description"]}
             res = self.con.es.termvectors(self.index_name, self.search_type, patient_id, body)
+            if res['found'] == False:
+                print "couldnt find patient {} {}".format(self.search_type, patient_id)
+                continue
             patient_forms = {}
             # ind = numbers.index(patient_id)
             # patient_term_vectors = res['docs'][ind]['term_vectors']['report.description']['terms']
@@ -439,11 +435,18 @@ class TfAlgorithm(Algorithm):
 # TODO: when in zwolle test if sentences could use the m(ulti)termvectors
 
 
+def find_used_ids(used_forms, ids_dict):
+    used_patients = []
+    for form in used_forms:
+        used_patients += ids_dict['medical_info_extraction patients\' ids in '+form]
+    return used_patients
+
+
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf12.yml",
-                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+    settings.init("aux_config\\conf13.yml",
+                  "C:\\Users\\Christina Zavou\\Desktop\\results\\")
 
     used_forms = settings.global_settings['forms']
     index_name = settings.global_settings['index_name']
@@ -452,6 +455,9 @@ if __name__ == '__main__':
     type_name_pp = settings.global_settings['type_name_pp']
     labels_possible_values = settings.labels_possible_values
     used_patients = settings.ids['medical_info_extraction patient ids']
+    print "tot patiens:{}, some patients:{}".format(len(used_patients), used_patients[0:8])
+    used_patients = find_used_ids(used_forms, settings.ids)
+    print "tot patiens:{}, some patients:{}".format(len(used_patients), used_patients[0:8])
     con = ES_connection(settings.global_settings['host'])
 
     # myalgo = RandomAlgorithm(con, index_name, type_name_pp,
