@@ -71,25 +71,27 @@ def value_refers_to_patient(patient_reports, value):
     return False, score
 
 
-# todo: if gives errors use []form_id] first
-# def condition_satisfied(golden_truth, fields_possible_values, current_form, field_to_be_filled):
-#     condition = fields_possible_values[current_form][field_to_be_filled]['condition']
-#     if condition == "":
-#         return True
-#     conditioned_field, condition_expression = re.split(' !?= ', condition)
-#     if "!=" in condition:
-#         if golden_truth[conditioned_field] != condition_expression:
-#             return True
-#         else:
-#             if golden_truth[field_to_be_filled] != "":
-#                 print "the golden truth is problematic"
-#             return False
-#     if golden_truth[conditioned_field] == condition_expression:
-#         return True
-#     else:
-#         if golden_truth[field_to_be_filled] != "":
-#             print "the golden truth is problematic"
-#         return False
+def description_refers_to_patient(patient_reports, description):
+    description_tokens = description.split()
+    description_tokens = [tok for tok in description_tokens if tok not in string.punctuation]
+    text_to_check = []
+    if isinstance(patient_reports, types.ListType):
+        for report in patient_reports:
+            report_description = report['description']
+            for tok in description_tokens:
+                report_description = report_description.replace(tok, "<DIS>")
+            text_to_check.append(report_description)
+    else:
+        report_description = patient_reports['description']
+        for tok in description_tokens:
+            report_description = report_description.replace(tok, "<DIS>")
+        text_to_check.append(report_description)
+    _, score = predict_prob(clf, text_to_check)
+    if score > 0.5:
+        return True, score
+    return False, score
+
+
 def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled, preprocessor):
     condition = labels_possible_values[current_form][field_to_be_filled]['condition']
     if condition == "":
@@ -284,10 +286,10 @@ class BaselineAlgorithm(Algorithm):
         return self.algo_assignments
 
     def pick_it_or_not(self, patient_id, values, description):  # yes or no (or onbekend)
-        # choose onbekend if score not good
-        onbekend_exist = "Onbekend" in values
-        description = self.MyPreprocessor.preprocess(description)  # same pre-process as for indexing patients
         try:
+            # choose onbekend if score not good
+            onbekend_exist = "Onbekend" in values
+            description = self.MyPreprocessor.preprocess(description)  # same pre-process as for indexing patients
             score, evidence = self.get_score_and_evidence(description, patient_id)
             if score and evidence:
                 if score >= self.min_accept_score:
@@ -303,48 +305,50 @@ class BaselineAlgorithm(Algorithm):
                 assignment = combine_assignment(value_to_assign, "no hit on description.")
             else:
                 assignment = combine_assignment("", "no hit on description.")
+            return assignment
         except:
             print "some error in {}".format(__name__)
-        return assignment
+            return {}
 
     def pick_best(self, patient_id, values, description):
-        anders_exist = "Anders" in values
-        if anders_exist:
-            idx_to_delete = values.index("Anders")
-            del values[idx_to_delete]
-        scores = [0 for value in values]
-        evidences = [None for value in values]
-        for i in range(len(values)):
-            values[i] = self.MyPreprocessor.preprocess(values[i])
         try:
-            for i, value in enumerate(values):
-                scores[i], evidences[i] = self.get_score_and_evidence(value, patient_id)
+            anders_exist = "Anders" in values
+            if anders_exist:
+                idx_to_delete = values.index("Anders")
+                del values[idx_to_delete]
+            scores = [0 for value in values]
+            evidences = [None for value in values]
+            for i in range(len(values)):
+                values[i] = self.MyPreprocessor.preprocess(values[i])
+                for i, value in enumerate(values):
+                    scores[i], evidences[i] = self.get_score_and_evidence(value, patient_id)
+            max_value, max_index = self.pick_score_and_index(scores)
+            if max_value and max_index:
+                if len(set(scores)) == 1:
+                    rand = random.randint(0, len(scores) - 1)
+                    assignment = combine_assignment(values[rand], "random from ties: {}".format(evidences[rand]))
+                else:
+                    assignment = combine_assignment(values[max_index], "{} with score {}".format(evidences[max_index],
+                                                                                                 scores[max_index]))
+            else:  # no accepted scores
+                if anders_exist:
+                    # check whether description can be found, to put "anders" otherwise put "" ?
+                    description = self.MyPreprocessor.preprocess(description)
+                    score_for_anders, evidence_for_anders = self.get_score_and_evidence(description, patient_id)
+                    if score_for_anders and evidence_for_anders:
+                        assignment = combine_assignment("anders", "no accpeted scores. description found. anders available")
+                    else:
+                        assignment = combine_assignment("", "no accepted scores. description not found.")
+                else:
+                    if self.when_no_preference == "random":
+                        rand = random.randint(0, len(scores)-1)
+                        assignment = combine_assignment(values[rand], "no accpeted scores. random assignment")
+                    else:
+                        assignment = combine_assignment("", "no accepted scores. empty assignment")
+            return assignment
         except:
             print "some error in {}".format(__name__)
-        max_value, max_index = self.pick_score_and_index(scores)
-        if max_value and max_index:
-            if len(set(scores)) == 1:
-                rand = random.randint(0, len(scores) - 1)
-                assignment = combine_assignment(values[rand], "random from ties: {}".format(evidences[rand]))
-            else:
-                assignment = combine_assignment(values[max_index], "{} with score {}".format(evidences[max_index],
-                                                                                             scores[max_index]))
-        else:  # no accepted scores
-            if anders_exist:
-                # check whether description can be found, to put "anders" otherwise put "" ?
-                description = self.MyPreprocessor.preprocess(description)
-                score_for_anders, evidence_for_anders = self.get_score_and_evidence(description, patient_id)
-                if score_for_anders and evidence_for_anders:
-                    assignment = combine_assignment("anders", "no accpeted scores. description found. anders available")
-                else:
-                    assignment = combine_assignment("", "no accepted scores. description not found.")
-            else:
-                if self.when_no_preference == "random":
-                    rand = random.randint(0, len(scores)-1)
-                    assignment = combine_assignment(values[rand], "no accpeted scores. random assignment")
-                else:
-                    assignment = combine_assignment("", "no accepted scores. empty assignment")
-        return assignment
+            return {}
 
     def pick_similar(self, patient_id, description):
         description = self.MyPreprocessor.preprocess(description)

@@ -191,7 +191,7 @@
                 "properties": {
                   "condition":"",
                   "description": "Patiënt zal chirurgisch worden behandeld",
-                  "possible_values": ["Ya","Nee"]
+                  "possible_values": ["Ja","Nee"]
                 }
              },
             "geenresectie_irres":{
