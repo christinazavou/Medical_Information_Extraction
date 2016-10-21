@@ -275,5 +275,5 @@ if __name__ == "__main__":
     type_name_pp = settings.global_settings['type_name_pp']
     col_ids = settings.ids['medical_info_extraction patients\' ids in colorectaal']
     for i, doc in enumerate(con.documents(type_name_pp, col_ids)):
-        print doc
+        pass
     print len(col_ids)
