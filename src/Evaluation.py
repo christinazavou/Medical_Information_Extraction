@@ -73,6 +73,8 @@ class Evaluation:
                     if targets[field] == "":
                         empties += 1
                     if type(predictions[field]) == dict:
+                        if 'value' not in predictions[field].keys():
+                            print "predictions[field] with {} is {}".format(field, predictions[field])
                         res = predictions[field]['value']
                     else:
                         res = predictions[field]

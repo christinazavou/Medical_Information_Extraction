@@ -425,10 +425,10 @@ class TfAlgorithm(Algorithm):
         return self.algo_assignments
 
     def pick_it_or_not(self, patient_id, values, description):  # yes or no (or onbekend)
-        # choose onbekend if score not good
-        onbekend_exist = "Onbekend" in values
-        description = self.MyPreprocessor.preprocess(description)  # same pre-process as for indexing patients
         try:
+            # choose onbekend if score not good
+            onbekend_exist = "Onbekend" in values
+            description = self.MyPreprocessor.preprocess(description)  # same pre-process as for indexing patients
             score = get_tf_score(description, self.current_term_vectors)
             if score >= self.min_accept_score:
                 value_to_assign = "yes" if "Yes" in values else "ja"
@@ -440,9 +440,10 @@ class TfAlgorithm(Algorithm):
                 assignment = combine_assignment(value_to_assign, "no hit on description.")
             else:
                 assignment = combine_assignment("", "no hit on description.")
+            return assignment
         except:
             print "some error in {}".format(__name__)
-        return assignment
+            return {}
 
     def pick_best(self, patient_id, values, description):
         # with_evidence = False
@@ -482,13 +483,13 @@ class TfAlgorithm(Algorithm):
                         assignment = combine_assignment(values[rand], "no accpeted scores. random assignment")
                     else:
                         assignment = combine_assignment("", "no accepted scores. empty assignment")
+            return assignment
         except:
             print "kapoio prob"
-        return assignment
+            return {}
         # evidence_found, evidence_score = value_refers_to_patient(self.current_reports, values[idx])
 
     def pick_similar(self, patient_id, description):
-        assignment = {}
         try:
             if patient_id in self.ids.keys():
                 sentences_scores = [0 for i in range(len(self.ids[patient_id]))]
@@ -511,9 +512,11 @@ class TfAlgorithm(Algorithm):
                                                                                      do_max_value['date']))
                 else:
                     assignment = combine_assignment("", "no similar sentence with accepted score.")
+                return assignment
+            return {}
         except:
             print "exception for patient {} and search_for {}.".format(patient_id, description)
-        return assignment
+            return {}
 
 
 # TODO: when in zwolle test if sentences could use the m(ulti)termvectors
