@@ -120,12 +120,12 @@ if __name__ == '__main__':
     print "use ", len(chosen_patient_ids)
     if settings.global_settings['run_algo']:
         if settings.global_settings['algo'] == "random":
-            myalgo = final_baseline.randomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
+            myalgo = final_baseline.RandomAlgorithm(con, index_name, type_processed_patient, algo_results_name,
                                                     labels_possible_values, min_accept_score, with_unknowns,
                                                     settings.get_preprocessor_file_name())
             myalgo.assign(chosen_patient_ids, forms_ids)
         elif settings.global_settings['algo'] == "baseline":
-            myalgo = final_baseline.baselineAlgorithm(con, index_name, type_processed_patient, algo_results_name,
+            myalgo = final_baseline.BaselineAlgorithm(con, index_name, type_processed_patient, algo_results_name,
                                                       labels_possible_values, min_accept_score, with_unknowns,
                                                       settings.get_preprocessor_file_name(),
                                                       settings.global_settings['when_no_preference'],
