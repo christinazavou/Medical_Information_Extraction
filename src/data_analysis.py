@@ -1,9 +1,15 @@
+# -*- coding: utf-8 -*-
+
+import pickle
 from pandas import DataFrame, read_csv
 import pandas as pd
 import os
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+
+import pre_process
+from pre_process import MyPreprocessor
 
 
 def get_golden_truth_distribution(data_file, fields_dict, accepted_ids):
@@ -100,7 +106,6 @@ def get_results_distribution(results_df, fields_dict):
         else:
             if len(possible_values) > 3:
                 names = ['v'+str(i) for i in range(len(possible_values))]
-                print names
             else:
                 names = possible_values
             for i, possible_value in enumerate(possible_values):
@@ -111,26 +116,63 @@ def get_results_distribution(results_df, fields_dict):
     return with_counts_dict
 
 
-def analyze_predictions():
-    # will make a dict {fieldd1:{val1:x times, val2: y times, evidences:(a,b,c,d)}}, abcd is number of each ev.
+def analyze_predictions(predictions_file, fields_dict, form, preprocessor):
+    # will make a dict {field1:{val1:x times, val2: y times, evidences:(a,b,c,d)}}, abcd is number of each ev.
     # evidences available:
     # condition unsatisfied., **found evidence**, no hit on description., no accepted scores. empty assignment,
     # no accepted scores. random assignment
-    pass
+
+    # make a dict: {field1:val1:x times ...}
+    names_dict = {}  # for many values ...
+    with_counts_dict = {}
+    for field in fields_dict:
+        with_counts_dict[field] = {}
+        possible_values = fields_dict[field]['values']
+        if possible_values == "unknown":
+            with_counts_dict[field][possible_values] = 0
+        else:
+            for val in possible_values:
+                v = preprocessor.preprocess(val)
+                with_counts_dict[field][v] = 0
+            # if len(possible_values) > 3:
+            #     names_dict[field] = {}
+            #     for i, v in enumerate(possible_values):
+            #         names_dict[field][v] = 'v' + str(v)
+        with_counts_dict[field][""] = 0
+    with open(predictions_file, "r") as read_file:
+        predictions = json.load(read_file, encoding='utf-8')
+    for patient in predictions:
+        if form in predictions[patient]:
+            for predicted_field in predictions[patient][form]:
+                v = predictions[patient][form][predicted_field]['value']
+                if type(fields_dict[predicted_field]['values']) == list:  # 1-ok-K
+                    with_counts_dict[predicted_field][v] += 1  # if v is "" then key "" takes one
+                else:  # open-question (unknown)
+                    if v == "":
+                        with_counts_dict[predicted_field][v] += 1
+                    else:
+                        with_counts_dict[predicted_field]["unknown"] += 1
+    return with_counts_dict
 
 
 if __name__ == "__main__":
     values_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\values.json"
     ids_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\ids.json"
     results_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\conf13_results.json"
-    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions\\"
+    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions15\\"
 
     decease_dict = json.load(open(values_file), encoding='utf-8')['colorectaal']
     decease_ids = json.load(open(ids_file), encoding='utf-8')["medical_info_extraction patients' ids in colorectaal"]
 
     colorectaal_fields = decease_dict.keys()
-    results_df = from_json_results_to_pandas(results_file, 'colorectaal', colorectaal_fields)
-    # print results_df
-    results_counts = get_results_distribution(results_df, decease_dict)
-    # print results_counts
-    plot_counts(results_counts, results_folder)
+    # results_df = from_json_results_to_pandas(results_file, 'colorectaal', colorectaal_fields)
+    # results_counts = get_results_distribution(results_df, decease_dict)
+    # plot_counts(results_counts, results_folder)
+
+    predictions_file = "C:\\Users\\Christina\\Desktop\\conf15_results.json"
+    preprocessor_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
+                        "preprocessor_0_1_1_0.p"
+    preprocessor = pickle.load(open(preprocessor_file, "rb"))
+    predicted_counts = analyze_predictions(predictions_file, decease_dict, 'colorectaal', preprocessor)
+    print "with_counts_dict:\n{}".format(predicted_counts)
+    plot_counts(predicted_counts, results_folder)
