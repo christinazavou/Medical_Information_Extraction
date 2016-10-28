@@ -95,25 +95,23 @@ class EsConnection:
         if_exist="discard" or "keep"
         shards and replicas should be given in case of Big Data
         """
-        try:
-            if if_exist == "discard":
-                if self.es.indices.exists(index_name):
-                    print("deleting '%s' index..." % index_name)
-                    self.es.indices.delete(index=index_name)
-            request_body = {
-                "settings": {
-                    "number_of_shards": shards,
-                    "number_of_replicas": replicas
-                }
+        if if_exist == "discard":
+            if self.es.indices.exists(index_name):
+                print("deleting '%s' index..." % index_name)
+                self.es.indices.delete(index=index_name)
+        request_body = {
+            "settings": {
+                "number_of_shards": shards,
+                "number_of_replicas": replicas
             }
-            if body:
-                request_body = body
-            print("creating '%s' index..." % index_name)
-            self.es.indices.create(index=index_name, body=request_body)
-            ind = self.es.indices.get(index_name)
-            return ind
-        except:
-            raise Exception("some exception occurred while creating an index")
+        }
+        if body:
+            request_body = body
+        print("creating '%s' index..." % index_name)
+        print request_body
+        self.es.indices.create(index=index_name, body=request_body)
+        ind = self.es.indices.get(index_name)
+        return ind
 
     def index_doc(self, index_name, type_name, id_doc, body_data):
         """
@@ -145,6 +143,9 @@ class EsConnection:
         """
         Updates a doc of an ES index, given the partial dictionary to be updated and doc_or_script="doc" or "script"
         """
+        if not self.exists(index_name, type_name, id_doc):
+            print "wont update {} cause not exist".format(id_doc)
+            return
         if doc_or_script == "doc":
             update_body = {"doc": update_dict}
         else:

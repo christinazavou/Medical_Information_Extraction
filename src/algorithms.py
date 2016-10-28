@@ -204,6 +204,7 @@ def get_highlight_search_body(query, patient_id, field=None, pre_tags=None, post
             "post_tags": post_tags,
             "order": "score",
             "fields": {field: {}},
+            "type": "fvh",
             "fragment_size": 150,
             "number_of_fragments": 5
         }
@@ -383,9 +384,13 @@ class BaselineAlgorithm(Algorithm):
         res = self.con.search(index=self.index_name, body=highlight_search_body, doc_type=self.search_type)
         correct_hit = res['hits']['hits'][0] if res['hits']['total'] > 0 else None
         if correct_hit:
-            score = correct_hit['_score']
-            evidence = correct_hit['highlight'][field_name]
-            return score, evidence
+            try:
+                score = correct_hit['_score']
+                evidence = correct_hit['highlight'][field_name]
+                return score, evidence
+            except:
+                print "correct_hit", correct_hit
+                print "body:", highlight_search_body
         return None, None
 
     def assign(self, assign_patients, assign_forms):

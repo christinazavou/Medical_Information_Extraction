@@ -35,7 +35,7 @@ def remove_tokens(source_text, to_remove=None):
 
 def pre_process_patient(patient_dict):
     if type(patient_dict['report']) == type([]):
-        for i in range(patient_dict['report']):
+        for i in range(len(patient_dict['report'])):
             patient_dict['report'][i]['description'] = remove_tokens(remove_codes(
                                                                      patient_dict['report'][i]['description']))
     else:
@@ -75,7 +75,10 @@ class Decease:
         if f:  # given file to index document
             with open(f, 'r') as json_file:
                 body_data = json.load(json_file, encoding='utf-8')
-                print "becomes ", pre_process_patient(body_data)
+                if 'report' not in body_data.keys():
+                    print "won't index patient {} cause no report".format(patient_id)
+                    return
+                body_data = pre_process_patient(body_data)
                 body_data["forms"] = [self.name]
                 self.con.index_doc(self.index, self.patients_type, patient_id, body_data)
             return
@@ -163,6 +166,7 @@ def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directo
         decease.index_es_patients(existing_patients_ids)  # index patients of that decease training set
         decease.index_form()
         decease.put_form_in_patients()
+        # todo: should fix it from reading to storing ...
         # if decease_name == decease_folders[len(decease_folders) - 1]:
         #     existing_patients_ids = con.get_type_ids(index_name, type_name_p) #finally...to get ids of last form saved
         my_deceases.append(decease)
@@ -229,7 +233,7 @@ if __name__ == '__main__':
     # start_es()
 
     settings.init("Configurations\\configurations.yml",
-                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+                  "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\")
 
     map_jfile = settings.global_settings['map_jfile']
     host = settings.global_settings['host']
@@ -270,3 +274,14 @@ if __name__ == '__main__':
            "geen reuma in familie. Met vriendelijke groet, NEWLINE Dr. Zallenga, reumatoloog"
     print remove_tokens(remove_codes(text))
     """
+
+    # now to fix if not existing patient:
+    dict_key = settings.global_settings['index_name'] + " patient ids"
+    dict_key1 = settings.global_settings['index_name'] + " patients' ids in colorectaal"
+    new_list = []
+    for id_ in settings.ids[dict_key]:
+        if connection.exists(index_name, type_name_p, id_):
+            new_list.append(id_)
+    settings.ids[dict_key] = new_list
+    settings.ids[dict_key1] = new_list
+    settings.update_ids()
