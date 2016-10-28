@@ -143,6 +143,9 @@ class EsConnection:
         """
         Updates a doc of an ES index, given the partial dictionary to be updated and doc_or_script="doc" or "script"
         """
+        if not self.exists(index_name, type_name, id_doc):
+            print "wont update {} cause not exist".format(id_doc)
+            return
         if doc_or_script == "doc":
             update_body = {"doc": update_dict}
         else:

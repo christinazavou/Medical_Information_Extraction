@@ -73,3 +73,4 @@ if __name__ == '__main__':
     # if index_sent:
     # index_sentences(con, index_name, type_processed_patient, type_sentence,
     #                 settings.ids['medical_info_extraction patient ids'])
+

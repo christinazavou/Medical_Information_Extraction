@@ -137,6 +137,7 @@ def init(config_file, results_file_path):
     else:
         labels_possible_values = {}
     ids_config_file = global_settings['results_path_root'] + "ids_" + global_settings['index_name'] + ".json"
+    print "yoooo ", ids_config_file
     if os.path.isfile(ids_config_file):
         with open(ids_config_file, 'r') as json_file:
             ids = json.load(json_file, encoding='utf-8')
