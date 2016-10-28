@@ -25,8 +25,6 @@ import time
 from predict import predict_prob
 from ESutils import EsConnection, start_es
 import settings
-import pre_process
-from pre_process import MyPreprocessor
 
 
 # times_pick_similar_baseline = []
@@ -53,18 +51,6 @@ def combine_assignment(value, evidence=None, score=None):
     if score:
         assignment['score'] = score
     return assignment
-
-
-# def get_tf_score(query, term_vector):
-#     tf_score = 0
-#     tokens = query.split(" ")
-#     num_tokens = 1
-#     for token in tokens:
-#         if (token in term_vector.keys()) and not (token in string.punctuation):
-#             tf_score += term_vector[token]['term_freq']
-#             num_tokens += 1
-#     tf_score /= num_tokens
-#     return tf_score
 
 
 """------------------------todo: check all these predictions....this way or something else?--------------------------"""

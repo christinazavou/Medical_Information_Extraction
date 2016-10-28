@@ -8,7 +8,7 @@ import nltk
 import re
 
 import settings
-from ESutils import ES_connection
+from ESutils import EsConnection
 # from aux_lib.term_lookup import term_lookup
 from term_lookup import term_lookup
 from text_analysis import RosetteApi

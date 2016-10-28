@@ -96,7 +96,7 @@ def init(config_file, results_file_path):
 
     global_settings['unknowns'] = doc['unknowns']
     global_settings['when_no_preference'] = doc['when_no_preference']
-    if 'fuziness' in doc.keys():
+    if 'fuzziness' in doc.keys():
         global_settings['fuzziness'] = doc['fuzziness']
     if 'with_description' in doc.keys():
         global_settings['with_description'] = doc['with_description']
