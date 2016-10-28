@@ -6,9 +6,41 @@ import json
 import csv
 import os
 import time
+import re
 
 from ESutils import EsConnection, start_es
 import settings
+
+
+def remove_codes(source_text):
+    # copied from pre_process to just remove codes before index the docs
+    s = source_text.split(' ')
+    m = [re.match("\(%.*%\)", word) for word in s]
+    to_return = source_text
+    for m_i in m:
+        if m_i:
+            to_return = to_return.replace(m_i.group(), "")
+    m = [re.match("\[.*\]", word) for word in s]
+    for m_i in m:
+        if m_i:
+            to_return = to_return.replace(m_i.group(), "")
+    return to_return
+
+
+def remove_tokens(source_text, to_remove=None):
+    if not to_remove:
+        to_remove = ['newlin', 'newline', 'NEWLINE', 'NEWLIN']
+    return " ".join([word for word in source_text.split() if word not in to_remove])
+
+
+def pre_process_patient(patient_dict):
+    if type(patient_dict['report']) == type([]):
+        for i in range(patient_dict['report']):
+            patient_dict['report'][i]['description'] = remove_tokens(remove_codes(
+                                                                     patient_dict['report'][i]['description']))
+    else:
+        patient_dict['report']['description'] = remove_tokens(remove_codes(patient_dict['report']['description']))
+    return patient_dict
 
 
 class Decease:
@@ -43,6 +75,7 @@ class Decease:
         if f:  # given file to index document
             with open(f, 'r') as json_file:
                 body_data = json.load(json_file, encoding='utf-8')
+                print "becomes ", pre_process_patient(body_data)
                 body_data["forms"] = [self.name]
                 self.con.index_doc(self.index, self.patients_type, patient_id, body_data)
             return
@@ -207,7 +240,7 @@ if __name__ == '__main__':
     type_name_f = settings.global_settings['type_name_f']
 
     connection = EsConnection(host)
-
+    #
     # data_path = settings.global_settings['data_path']
     # MyDeceases = store_deceases(connection, index_name, type_name_p, type_name_f, data_path,
     #                             settings.global_settings['directory_p'], settings.global_settings['directory_f'],
@@ -218,6 +251,7 @@ if __name__ == '__main__':
     #                 settings.ids['medical_info_extraction patient ids'])
     # print "Finished sentence indexing after {} minutes.".format((time.time() - start_time) / 60.0)
 
+    """
     update_form_values("colorectaal", settings.global_settings['source_path_root'] + "Configurations" +
                        "\\important_fields\\important_fields_colorectaal.json")
 
@@ -227,3 +261,12 @@ if __name__ == '__main__':
     # todo: for mamma also
     settings.ids[dict_key] = settings.ids[dict_key1]
     settings.update_ids()
+
+    text = "(%o_postnummer%) NEWLINE (%o_instelling%) NEWLINE (%o_aanhef%) NEWLINE (%o_titel%) (%o_naam_1%), " \
+           "(%o_beroep%) NEWLINE (%o_adres%) NEWLINE (%o_postkode%)  (%o_plaats%) NEWLINE Zwolle, 27 oktober 2009 " \
+           "NEWLINE Ref.: MB NEWLINE Betreft: NEWLINE Dhr. [BIRTHDATE] ([PATIENTID] ) NEWLINE [LOCATION] Geachte " \
+           "collega, NEWLINE Reden van verwijzing: arthritis of reuma? NEWLINE Anamnese: patient heeft veel pijn aan" \
+           " de polsen en uitslag op meerdere plaatse. Deze uitslag is onlangs op komen zetten. Familie-anamnese: " \
+           "geen reuma in familie. Met vriendelijke groet, NEWLINE Dr. Zallenga, reumatoloog"
+    print remove_tokens(remove_codes(text))
+    """
