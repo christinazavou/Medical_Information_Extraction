@@ -111,6 +111,7 @@ def tokens_in_sentence_refers_to_patient(sentence):
 
 
 def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled):
+    # note that values are not pre processed anywhere... i just check them as is
     # for a given patient(the golden truth) check whether the field to be field satisfies its condition(if exist) or not
     condition = labels_possible_values[current_form][field_to_be_filled]['condition']
     if condition == "":
