@@ -284,3 +284,4 @@ if __name__ == '__main__':
             new_list.append(id_)
     settings.ids[dict_key] = new_list
     settings.ids[dict_key1] = new_list
+    settings.update_ids()

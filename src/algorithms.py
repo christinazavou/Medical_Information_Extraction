@@ -204,6 +204,7 @@ def get_highlight_search_body(query, patient_id, field=None, pre_tags=None, post
             "post_tags": post_tags,
             "order": "score",
             "fields": {field: {}},
+            "type": "fvh",
             "fragment_size": 150,
             "number_of_fragments": 5
         }
