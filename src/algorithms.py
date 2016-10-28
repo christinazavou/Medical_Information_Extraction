@@ -110,13 +110,13 @@ def tokens_in_sentence_refers_to_patient(sentence):
 """-----------------------------------------------------------------------------------------------------------------"""
 
 
-def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled, preprocessor):
+def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled):
+    # note that values are not pre processed anywhere... i just check them as is
     # for a given patient(the golden truth) check whether the field to be field satisfies its condition(if exist) or not
     condition = labels_possible_values[current_form][field_to_be_filled]['condition']
     if condition == "":
         return True
     conditioned_field, condition_expression = re.split(' !?= ', condition)
-    condition_expression = preprocessor.preprocess(condition_expression)
     if "!=" in condition:
         if golden_truth[conditioned_field] != condition_expression:
             return True
@@ -215,7 +215,7 @@ class Algorithm:
     __metaclass__ = ABCMeta
 
     def __init__(self, con, index_name, search_type, results_file, algo_labels_possible_values,
-                 min_accept_score, with_unknowns, preprocessor_file):
+                 min_accept_score, with_unknowns):
         self.con = con
         self.index_name = index_name
         self.search_type = search_type
@@ -223,7 +223,6 @@ class Algorithm:
         self.labels_possible_values = algo_labels_possible_values
         self.min_accept_score = min_accept_score
         self.with_unknowns = with_unknowns
-        self.MyPreprocessor = pickle.load(open(preprocessor_file, "rb"))
         self.assignments = {}
 
     @abstractmethod
@@ -233,7 +232,7 @@ class Algorithm:
     def assign_patient_form(self, patient_id, form_id, doc):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:  # for each field in form
-            if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, label, self.MyPreprocessor):
+            if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, label):
                 values = self.labels_possible_values[form_id][label]['values']
                 # todo: change it, one for 1-of-k and one for open-questions MAYBE..or just remove WITH_UNKNOWNS option
                 if not self.with_unknowns and values == "unknown":
@@ -364,10 +363,9 @@ class RandomAlgorithm(Algorithm):
 class BaselineAlgorithm(Algorithm):
 
     def __init__(self, con, index_name, search_type, results_file, algo_labels_possible_values, min_accept_score,
-                 with_unknowns, preprocessor_file, when_no_preference, fuzziness=0, tf=False):
+                 with_unknowns, when_no_preference, fuzziness=0, tf=False):
         super(BaselineAlgorithm, self).__init__(con, index_name, search_type, results_file,
-                                                algo_labels_possible_values, min_accept_score, with_unknowns,
-                                                preprocessor_file)
+                                                algo_labels_possible_values, min_accept_score, with_unknowns)
         self.fuzziness = fuzziness
         self.when_no_preference = when_no_preference
         if tf:
@@ -484,7 +482,6 @@ class BaselineAlgorithm(Algorithm):
         """
         # for open-questions
         # todo: highlight description search or index sentences ??!!
-        description = self.MyPreprocessor.preprocess(description)
         highlight_search_body = get_highlight_search_body(str(description), self.fuzziness, patient_id)
         res = self.con.search(index=self.index_name, body=highlight_search_body, doc_type=self.search_type)
         correct_hit = res['hits']['hits'][0] if res['hits']['total'] > 0 else None
@@ -526,13 +523,13 @@ if __name__ == '__main__':
 
     if settings.global_settings['algo'] == 'random':
         my_algorithm = RandomAlgorithm(connection, index, type_name_pp, settings.get_results_filename(),
-                                       possible_values, 0, unknowns, settings.get_preprocessor_file_name())
+                                       possible_values, 0, unknowns)
         ass = my_algorithm.assign(used_patients, used_forms)
     else:
         tf = settings.global_settings['algo'] == 'tf'
         print "tf: ", tf
         # using patient_type !!!
         my_algorithm = BaselineAlgorithm(connection, index, type_name_p, settings.get_results_filename(),
-                                         possible_values, 0, unknowns, settings.get_preprocessor_file_name(),
+                                         possible_values, 0, unknowns,
                                          settings.global_settings['when_no_preference'], tf=tf)
         ass = my_algorithm.assign(used_patients, used_forms)
