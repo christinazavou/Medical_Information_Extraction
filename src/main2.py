@@ -8,13 +8,12 @@ import json
 import time
 import random
 
-from ESutils import ES_connection, start_ES
-from read_data import readPatients
-from store_data import store_deceases, index_sentences
+from ESutils import EsConnection, start_es
+from read_data import read_patients
+from store_data import store_deceases, index_sentences, update_form_values
 import settings
 import final_baseline
 import Evaluation
-import store
 
 
 if __name__ == '__main__':
@@ -35,25 +34,42 @@ if __name__ == '__main__':
     type_form = settings.global_settings['type_name_f']
     type_sentence = settings.global_settings['type_name_s']
     type_processed_patient = settings.global_settings['type_name_pp']
-    con = ES_connection(settings.global_settings['host'])
+    con = EsConnection(settings.global_settings['host'])
+
+    # todo: make main's parts as functions as well
 
     """-----------------------------------------read_dossiers--------------------------------------------------------"""
 
     if settings.global_settings['read_dossiers']:
-        path_root_indossiers = settings.global_settings['path_root_indossiers']
-        path_root_outdossiers = settings.global_settings['path_root_outdossiers']
+        path_root_in_dossiers = settings.global_settings['path_root_in_dossiers']
+        path_root_out_dossiers = settings.global_settings['path_root_out_dossiers']
         for decease in settings.global_settings['forms']:
-            path_indossiers = path_root_indossiers.replace('decease', decease)
-            path_outdossiers = path_root_outdossiers.replace('decease', decease)
+            path_in_dossiers = path_root_in_dossiers.replace('decease', decease)
+            path_out_dossiers = path_root_out_dossiers.replace('decease', decease)
             # convert all csv dossiers into json files (one for each patient)
-            readPatients(path_indossiers, path_outdossiers)
+            read_patients(path_in_dossiers, path_out_dossiers)
+
         # store dossiers into an index of ES
-        con.createIndex(index_name, if_exist="discard")
-        con.put_map(settings.global_settings['map_jfile'], index_name, type_patient)
+        if 'new_indexed_body' in settings.global_settings['map_jfile']:
+            with open(settings.global_settings['map_jfile'], "r") as json_file:
+                index_body = json.load(json_file, encoding='utf-8')
+            con.create_index(index_name=index_name, body=index_body)
+        else:
+            con.createIndex(index_name)
+            con.put_map(settings.global_settings['map_jfile'], index_name, type_patient)
+
         data_path = settings.global_settings['data_path']
         MyDeceases = store_deceases(con, index_name, type_patient, type_form, data_path,
-                                    settings.global_settings['directory_p'], settings.global_settings['directory_f'])
+                                    settings.global_settings['directory_p'], settings.global_settings['directory_f'],
+                                    settings.global_settings['forms'])
         print "Finished importing Data."
+
+    print "should fix ids file"
+    dict_key = settings.global_settings['index_name']+" patient ids"
+    dict_key1 = settings.global_settings['index_name']+" patients' ids in colorectaal"
+    # todo: for mamma also
+    settings.ids[dict_key] = settings.ids[dict_key1]
+    settings.update_ids()
 
     # if index_sent:
     # index_sentences(con, index_name, type_processed_patient, type_sentence,
@@ -109,11 +125,10 @@ if __name__ == '__main__':
         for field in labels_possible_values[form]:
             if not 'condition' in labels_possible_values[form][field]:
                 print "will update values"
-                store.update_form_values("colorectaal",
-                                         settings.global_settings['source_path_root'] + "Configurations" +
-                                         "\\important_fields\\important_fields_colorectaal.json")
-                store.update_form_values("mamma", settings.global_settings['source_path_root'] + "Configurations" +
-                                         "\\important_fields\\important_fields_mamma.json")
+                update_form_values("colorectaal", settings.global_settings['source_path_root'] + "Configurations" +
+                                   "\\important_fields\\important_fields_colorectaal.json")
+                update_form_values("mamma", settings.global_settings['source_path_root'] + "Configurations" +
+                                   "\\important_fields\\important_fields_mamma.json")
             break
         break
 

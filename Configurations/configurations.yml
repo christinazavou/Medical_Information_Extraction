@@ -5,8 +5,8 @@
 host: {"host": "localhost", "port": 9200}
 json_forms_directory: "important_fields\\"
 csv_forms_directory: "decease\\"
-path_indossiers: "decease\\patients_selection_decease\\"
-path_outdossiers: "decease\\patients_selection_decease_json\\"
+path_in_dossiers: "decease\\patients_selection_decease\\"
+path_out_dossiers: "decease\\patients_selection_decease_json\\"
 data_path_root: "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction"  # or "C:\Users\Christina Zavou\Documents"
 results_path_root: "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"  # or "C:\Users\Christina Zavou\Documents\\results"
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -46,8 +46,8 @@ fields_colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klach
 #               'resec_pallther_chemo','resec_geenresectie_anders']
 # ---------------------------------------------------------------------------------------------------------------------#
 # --------------------------------------------------naming config------------------------------------------------------#
-index_name: "medical_info_extraction"
-initmap_jfile: "mapping.json"
+index_name: "mie"
+initmap_jfile: "new_indexed_body.json"
 type_name_p: "patient"
 type_name_f: "form"
 type_name_s: "report_description_sentence"

@@ -140,8 +140,30 @@ def condition_satisfied(golden_truth, labels_possible_values, current_form, fiel
 
 # todo: put in query a minimum match score and the way to calculate score, and proximity as well
 
+def phrase_match_body(query, slop=0):
+    body = {
+        "match_phrase": {
+            "report.description": {
+                "query": query,
+                "slop": slop
+            }
+        }
+    }
+    # can also add "boost":boost_number
+    return body
 
-def get_highlight_search_body(query, fuzziness, patient_id):
+
+def get_highlight_search_body(query, fuzziness, patient_id, pre_tags=None, post_tags=None, should_body=None):
+
+    if not pre_tags:
+        pre_tags = ["<em>"]
+    if not post_tags:
+        post_tags = ["</em>"]
+    if not should_body:  # the should_body refers to the phrase_match boost
+        should_body = {}
+    # note: minimum_should_match can be ignored...so only if the should_body (in this case is a phrase-proximity
+    # appears it only boosts the score of that!)
+
     highlight_search_body = {
         "query": {
             "bool": {
@@ -153,6 +175,7 @@ def get_highlight_search_body(query, fuzziness, patient_id):
                         }
                     }
                 },
+                "should": should_body,
                 "filter": {
                     "term": {
                         "_id": patient_id
@@ -161,10 +184,12 @@ def get_highlight_search_body(query, fuzziness, patient_id):
             }
         },
         "highlight": {
+            "pre_tags": pre_tags,
+            "post_tags": post_tags,
             "order": "score",
             "fields": {"report.description": {}},
-            "fragment_size": 100,
-            "number_of_fragments": 10
+            "fragment_size": 150,
+            "number_of_fragments": 5
         }
     }
     return highlight_search_body

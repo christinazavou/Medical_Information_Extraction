@@ -4,24 +4,29 @@ import json
 import yaml
 import os
 
+# todo: use the below code to make paths
+# import os
+# thisdir = os.path.dirname(os.path.realpath(__file__))
+# body_file = os.path.join(thisdir.replace("src", "Configurations"), "mapping_nested_description")
 
-def init(configFile, resultsFilePath):
-    configFile = os.path.dirname(os.path.realpath(__file__)).replace("src", "") + configFile
+
+def init(config_file, results_file_path):
+    config_file = os.path.dirname(os.path.realpath(__file__)).replace("src", "") + config_file
     global labels_possible_values
     global ids
     global chosen_labels_possible_values
     global global_settings
     global_settings = {}
-    with open(configFile, 'r') as f:
+    with open(config_file, 'r') as f:
         doc = yaml.load(f)
     global_settings['source_path_root'] = os.path.dirname(os.path.realpath(__file__)).replace("src", "")
-    global_settings['configFile'] = configFile
+    global_settings['configFile'] = config_file
     # -----------------------------------------------paths-------------------------------------------------------------#
     global_settings['host'] = doc['host']
     tmp_json_dir = doc['json_forms_directory']
     global_settings['csv_forms_directory'] = doc['csv_forms_directory']
-    tmp_path_in = doc['path_indossiers']
-    tmp_path_out = doc['path_outdossiers']
+    tmp_path_in = doc['path_in_dossiers']
+    tmp_path_out = doc['path_out_dossiers']
     global_settings['data_path_root'] = doc['data_path_root']
     if not os.path.isdir(doc['data_path_root']):
         if os.path.isdir("C:\\Users\\Christina Zavou\\Documents"):
@@ -37,19 +42,19 @@ def init(configFile, resultsFilePath):
     global_settings['directory_p'] = global_settings['data_path_root'] + '\\Data\\' + tmp_path_out
     global_settings['directory_f'] = global_settings['source_path_root'] + 'Configurations\\' + tmp_json_dir
     global_settings['data_path'] = global_settings['data_path_root'] + '\\Data\\'
-    global_settings['path_root_indossiers'] = global_settings['data_path'] + tmp_path_in
-    global_settings['path_root_outdossiers'] = global_settings['data_path'] + tmp_path_out
-    if not os.path.isdir(resultsFilePath):
+    global_settings['path_root_in_dossiers'] = global_settings['data_path'] + tmp_path_in
+    global_settings['path_root_out_dossiers'] = global_settings['data_path'] + tmp_path_out
+    if not os.path.isdir(results_file_path):
         if os.path.isdir("C:\\Users\\Christina Zavou\\Desktop\\results"):
-            resultsFilePath = "C:\\Users\\Christina Zavou\\Desktop\\results\\"
-            print "wrong configuration. will use as results path root: {}".format(resultsFilePath)
+            results_file_path = "C:\\Users\\Christina Zavou\\Desktop\\results\\"
+            print "wrong configuration. will use as results path root: {}".format(results_file_path)
         else:
             if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results"):
-                resultsFilePath = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
-                print "wrong configuration. will use as result path root: {}".format(resultsFilePath)
+                results_file_path = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+                print "wrong configuration. will use as result path root: {}".format(results_file_path)
             else:
                 print "a correct results path root is unspecified."
-    global_settings['results_path_root'] = resultsFilePath
+    global_settings['results_path_root'] = results_file_path
     # ----------------------------------------------excecution config--------------------------------------------------#
     global_settings['read_dossiers'] = doc['read_dossiers']
     global_settings['algo'] = doc['algo']
@@ -91,8 +96,12 @@ def init(configFile, resultsFilePath):
 
     global_settings['unknowns'] = doc['unknowns']
     global_settings['when_no_preference'] = doc['when_no_preference']
-    global_settings['fuzziness'] = doc['fuzziness']
-    global_settings['with_description'] = doc['with_description']
+    if 'fuziness' in doc.keys():
+        global_settings['fuzziness'] = doc['fuzziness']
+    if 'with_description' in doc.keys():
+        global_settings['with_description'] = doc['with_description']
+
+    # todo: make a loop parsing doc keys with doc values in the global_settings dict ! and then make changes
 
     if "with_evidence" in doc.keys():
         global_settings['with_evidence'] = doc['with_evidence']
@@ -121,30 +130,30 @@ def init(configFile, resultsFilePath):
     if not os.path.isdir(global_settings['results_path_root']):
         print "wrong results path"
         exit(-1)
-    fieldsconfigFile = global_settings['results_path_root'] + "values.json"
-    if os.path.isfile(fieldsconfigFile):
-        with open(fieldsconfigFile, 'r') as json_file:
+    fields_config_file = global_settings['results_path_root'] + "values_" + global_settings['index_name'] + ".json"
+    if os.path.isfile(fields_config_file):
+        with open(fields_config_file, 'r') as json_file:
             labels_possible_values = json.load(json_file, encoding='utf-8')
     else:
         labels_possible_values = {}
-    idsconfigFile = global_settings['results_path_root'] + "ids.json"
-    if os.path.isfile(idsconfigFile):
-        with open(idsconfigFile, 'r') as json_file:
+    ids_config_file = global_settings['results_path_root'] + "ids_" + global_settings['index_name'] + ".json"
+    if os.path.isfile(ids_config_file):
+        with open(ids_config_file, 'r') as json_file:
             ids = json.load(json_file, encoding='utf-8')
     else:
         ids = {}
 
 
 def update_values():
-    file = global_settings['results_path_root'] + "\\values.json"
-    with open(file, "w") as json_file:
+    f = global_settings['results_path_root'] + "\\values_" + global_settings['index_name'] + ".json"
+    with open(f, "w") as json_file:
         data = json.dumps(labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 
 def update_ids():
-    file = global_settings['results_path_root'] + "\\ids.json"
-    with open(file, "w") as json_file:
+    f = global_settings['results_path_root'] + "\\ids_" + global_settings['index_name'] + ".json"
+    with open(f, "w") as json_file:
         data = json.dumps(ids, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
@@ -174,7 +183,7 @@ def find_used_ids():
     used_forms = global_settings['forms']
     used_patients = []
     for form in used_forms:
-        used_patients += ids['medical_info_extraction patients\' ids in '+form]
+        used_patients += ids[global_settings['index_name']+' patients\' ids in '+form]
     return list(set(used_patients))
 
 
@@ -184,8 +193,8 @@ def get_W2V_name():
 
 
 def get_preprocessor_file_name():
-    preprocessor_name = global_settings['results_path_root']+("preprocessor_" + global_settings['type_name_pp']
-                                                              + ".p").replace("patient_", "")
+    preprocessor_name = global_settings['results_path_root']+("preprocessor_" + global_settings['type_name_pp'] + ".p")\
+                                                              .replace("patient_", "")
     return preprocessor_name
 
 
@@ -211,8 +220,10 @@ def get_run_description():
     description['type_name_pp'] = global_settings['type_name_pp']
     description['unknowns'] = global_settings['unknowns']
     description['when_no_preference'] = global_settings['when_no_preference']
-    description['fuzziness'] = global_settings['fuzziness']
-    description['with_description'] = global_settings['with_description']
+    if 'fuzziness' in global_settings.keys():
+        description['fuzziness'] = global_settings['fuzziness']
+    if 'with_description' in global_settings.keys():
+        description['with_description'] = global_settings['with_description']
     description['assign_all'] = global_settings['assign_all']
     # for form_id in global_settings['forms']:
     #    description[form_id] = global_settings[form_id]
