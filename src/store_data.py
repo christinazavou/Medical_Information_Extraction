@@ -35,7 +35,7 @@ def remove_tokens(source_text, to_remove=None):
 
 def pre_process_patient(patient_dict):
     if type(patient_dict['report']) == type([]):
-        for i in range(patient_dict['report']):
+        for i in range(len(patient_dict['report'])):
             patient_dict['report'][i]['description'] = remove_tokens(remove_codes(
                                                                      patient_dict['report'][i]['description']))
     else:
@@ -75,7 +75,6 @@ class Decease:
         if f:  # given file to index document
             with open(f, 'r') as json_file:
                 body_data = json.load(json_file, encoding='utf-8')
-                print "becomes ", pre_process_patient(body_data)
                 body_data["forms"] = [self.name]
                 self.con.index_doc(self.index, self.patients_type, patient_id, body_data)
             return

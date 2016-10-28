@@ -46,6 +46,7 @@ if __name__ == '__main__':
             path_out_dossiers = path_root_out_dossiers.replace('decease', decease)
             # convert all csv dossiers into json files (one for each patient)
             read_patients(path_in_dossiers, path_out_dossiers)
+        print "read patients."
 
         # store dossiers into an index of ES
         if 'new_indexed_body' in settings.global_settings['map_jfile']:

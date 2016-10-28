@@ -95,25 +95,23 @@ class EsConnection:
         if_exist="discard" or "keep"
         shards and replicas should be given in case of Big Data
         """
-        try:
-            if if_exist == "discard":
-                if self.es.indices.exists(index_name):
-                    print("deleting '%s' index..." % index_name)
-                    self.es.indices.delete(index=index_name)
-            request_body = {
-                "settings": {
-                    "number_of_shards": shards,
-                    "number_of_replicas": replicas
-                }
+        if if_exist == "discard":
+            if self.es.indices.exists(index_name):
+                print("deleting '%s' index..." % index_name)
+                self.es.indices.delete(index=index_name)
+        request_body = {
+            "settings": {
+                "number_of_shards": shards,
+                "number_of_replicas": replicas
             }
-            if body:
-                request_body = body
-            print("creating '%s' index..." % index_name)
-            self.es.indices.create(index=index_name, body=request_body)
-            ind = self.es.indices.get(index_name)
-            return ind
-        except:
-            raise Exception("some exception occurred while creating an index")
+        }
+        if body:
+            request_body = body
+        print("creating '%s' index..." % index_name)
+        print request_body
+        self.es.indices.create(index=index_name, body=request_body)
+        ind = self.es.indices.get(index_name)
+        return ind
 
     def index_doc(self, index_name, type_name, id_doc, body_data):
         """
