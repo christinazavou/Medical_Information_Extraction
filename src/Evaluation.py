@@ -67,19 +67,22 @@ class Evaluation:
                 continue
 
             doc = self.con.get_doc_source(self.index_name, self.type_name_p, patient_id)
+
             for form_id in eval_forms:
                 if form_id in doc.keys() and form_id in predictions[patient_id].keys():  # double check
                     patient_form_predictions = predictions[patient_id][form_id]
                     patient_form_targets = doc[form_id]
                     self.get_score(patient_form_predictions, patient_form_targets, form_id)
 
-            num = 0
-            for form_id in eval_forms:
-                for field in self.chosen_labels_accuracy[form_id]:
+        num = 0
+        for form_id in eval_forms:
+            for field in self.chosen_labels_accuracy[form_id]:
+                if not self.chosen_labels_num[form_id][field] == 0:
+                    # print self.chosen_labels_accuracy[form_id][field], " ", self.chosen_labels_num[form_id][field]
                     self.chosen_labels_accuracy[form_id][field] /= self.chosen_labels_num[form_id][field]
                     num += 1
                     self.accuracy += self.chosen_labels_accuracy[form_id][field]
-            self.accuracy /= num
+        self.accuracy /= num
 
         print("score %f" % self.accuracy)
         print("--- %s seconds for eval method---" % (time.time() - start_time))
@@ -91,24 +94,16 @@ class Evaluation:
             if len(predictions) == 0:
                 print "no predictions"
                 return
-            score = 0.0
             for field in predictions:
                 if field in chosen_labels:
                     if condition_satisfied(targets, self.chosen_labels_possible_values, form_id, field):
 
-                        if type(predictions[field]) == dict:
-                            if 'value' not in predictions[field].keys():
-                                print "predictions[field] with {} is {}".format(field, predictions[field])
-                            res = predictions[field]['value']
-                        else:
-                            res = predictions[field]
-
+                        res = predictions[field]['value']
                         self.chosen_labels_num[form_id][field] += 1
 
                         if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
                             # score for : one out of k
                             if res == targets[field]:
-                                score += 1.0
                                 self.chosen_labels_accuracy[form_id][field] += 1.0
                         else:
                             pass
@@ -149,9 +144,11 @@ if __name__ == '__main__':
                     settings.find_chosen_labels_possible_values())
     score, fields_score = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
     evaluations_dict = {}
-    evaluations_dict['evaluation'] += [{'description': settings.get_run_description(), 'file': eval_file,
-                                        'score': score, 'fields_score': fields_score,
-                                        'dte-time': time.strftime("%c")}]
+    evaluations_dict['description'] = settings.get_run_description()
+    evaluations_dict['file'] = eval_file
+    evaluations_dict['score'] = score
+    evaluations_dict['fields_score'] = fields_score
+    evaluations_dict['dte-time'] = time.strftime("%c")
 
     with open(evaluationsFilePath, 'w') as jfile:
         json.dump(evaluations_dict, jfile, indent=4)
