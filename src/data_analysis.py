@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import operator
 import pickle
 from pandas import DataFrame, read_csv
 import pandas as pd
@@ -25,6 +26,24 @@ def values_names_dict(fields_dict):
 
 
 """--------------------------------------golden truth visual analysis------------------------------------------------"""
+
+
+def get_majority_assignment_score(counts_dict, num_assign_patients):
+    # for one form
+    # counts_dict format: {'field1':{'v1':x times, 'v2':y times..}'field2':{}...}
+    # majority_score_dict format: {'field1': score, 'field2':score...}
+    # where each score is found as counts of most occurring value / num of patients assigned
+
+    avg_score = 0.0
+    majority_score_dict = {}
+    for field in counts_dict.keys():
+        counts = counts_dict[field].values()
+        max_idx, max_val = max(enumerate(counts), key=operator.itemgetter(1))
+        majority_score_dict[field] = float(max_val/num_assign_patients)
+        avg_score += majority_score_dict[field]
+
+    avg_score /= len(counts_dict.keys())
+    return majority_score_dict, avg_score
 
 
 def get_golden_truth_distribution(data_file, fields_dict, accepted_ids, names_dict):
@@ -197,11 +216,13 @@ if __name__ == "__main__":
     decease_file = "C:\\Users\\Christina\\Documents\\Ads_Ra_0\\selection_colon.csv"
     results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions_t\\"
     # true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, results_folder)
-
     # analyze_golden_truth("C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv",
     #                      "<missing>", decease_ids, decease_names_dict,
     #                      "C:\\Users\\Christina Zavou\\Documents\\data_distributions\\")
 
+    # maj_dict, maj_score = get_majority_assignment_score(true_counts, len(decease_ids))
+    # print maj_dict
+    # print maj_score
     """--------------------------------------predictions  visual analysis--------------------------------------------"""
     results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions16\\"
     # preprocessor_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
