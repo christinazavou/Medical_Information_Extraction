@@ -12,17 +12,39 @@ import pre_process
 from pre_process import MyPreprocessor
 
 
-def get_golden_truth_distribution(data_file, fields_dict, accepted_ids):
+def values_names_dict(fields_dict):
+    # it's only for one form
+    names_dict = {}  # dict to store v1,v2 etc if values are more than 3
+    for field in fields_dict.keys():
+        possible_values = fields_dict[field]['values']
+        if len(possible_values) > 3:
+            names_dict[field] = {}
+            for i, v in enumerate(possible_values):
+                names_dict[field][v] = 'v' + str(i)
+    return names_dict
+
+
+"""--------------------------------------golden truth visual analysis------------------------------------------------"""
+
+
+def get_golden_truth_distribution(data_file, fields_dict, accepted_ids, names_dict):
+    # receives the csv of the (golden truth) decease's values and returns a distribution of the counts
+    # note: also receives the ids used in predictions
+    # noe: also receives a dictionary to trreplace values with shorter names
+
     fields_list = ['PatientNr']
     fields_data_types = {'PatientNr': str}
     with_counts_dict = {}
+
     for field in fields_dict:
         fields_list.append(str(field))
         fields_data_types[field] = str
         with_counts_dict[field] = {}
+
     num_accepted_patients = len(accepted_ids)
     df = pd.read_csv(data_file, usecols=fields_list, dtype=fields_data_types)
-    accepted_df = df[df['PatientNr'].isin(accepted_ids)]
+    accepted_df = df[df['PatientNr'].isin(accepted_ids)]  # remove unused patients
+
     for field in fields_list[1:]:
         possible_values = fields_dict[field]['values']
         field_total = 0
@@ -32,20 +54,20 @@ def get_golden_truth_distribution(data_file, fields_dict, accepted_ids):
             field_total += counts_field_nan
             with_counts_dict[field][possible_values] = num_accepted_patients - field_total
         else:
-            if len(possible_values) > 3:
-                names = ['v'+str(i) for i in range(len(possible_values))]
-                print names
-            else:
-                names = possible_values
             for i, possible_value in enumerate(possible_values):
                 counts_field_value = accepted_df[accepted_df[field] == possible_value].shape[0]
-                with_counts_dict[field][names[i]] = counts_field_value
+                if field in names_dict.keys():
+                    with_counts_dict[field][names_dict[field][possible_value]] = counts_field_value
+                else:
+                    with_counts_dict[field][possible_value] = counts_field_value
                 field_total += counts_field_value
                 with_counts_dict[field]['NaN'] = num_accepted_patients - field_total
     return with_counts_dict
 
 
 def plot_counts(form_fields_counts, destination):
+    # receives the dict of counts on values (names in dict are with shortcuts where needed!)
+    # and the folder to save all the fields plots
     for field, field_counts in form_fields_counts.items():
         plt.figure()
         X = np.arange(len(field_counts))
@@ -55,23 +77,22 @@ def plot_counts(form_fields_counts, destination):
         plt.ylim(0, ymax)
         plt.title(field)
         plt.savefig(destination + field + '.png')
+        plt.close()
 
 
-def analyze_golden_truth():
-    decease_file = "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv"
-    decease_dict = json.load(open("C:\\Users\\Christina Zavou\\Desktop\\results\\values.json"),
-                             encoding='utf-8')['colorectaal']
-    decease_ids = json.load(open("C:\\Users\\Christina Zavou\\Desktop\\results\\ids.json"),
-                            encoding='utf-8')["medical_info_extraction patients' ids in colorectaal"]
-    decease_counts = get_golden_truth_distribution(decease_file, decease_dict, decease_ids)
-    print decease_counts
-    out_file = "C:\\Users\\Christina Zavou\\Documents\\data_distributions\\"
-    plot_counts(decease_counts, out_file)
+def analyze_golden_truth(data_file, fields_dict, accepted_ids, names_dict, out_folder):
+    decease_counts = get_golden_truth_distribution(data_file, fields_dict, accepted_ids, names_dict)
+    plot_counts(decease_counts, out_folder)
+    return decease_counts
 
 
-def from_json_results_to_pandas(json_file, form_id, fields):
-    # only for one form
-    results_to_analyze = {}  # we want it in the form : {'field1':'value of patient1','value of..','field2':..}
+"""--------------------------------------predictions  visual analysis------------------------------------------------"""
+
+
+def from_json_predictions_to_pandas(json_file, form_id, fields, preprocessor=None):
+    # given results (for one decease/form) in a json file transform them in DataFrame representation
+    results_to_analyze = {}  # we want it in the form : {'field1':['value of patient1','value of..'],'field2':[..], ..}
+
     with open(json_file, 'r') as f:
         results = json.load(f, encoding='utf-8')
 
@@ -79,22 +100,32 @@ def from_json_results_to_pandas(json_file, form_id, fields):
             for p_id in results.keys():
                 if results[p_id] and results[p_id][form_id]:
                     v = results.get(p_id, {}).get(form_id, {}).get(field, {}).get('value')
+                    v = 'Yes' if v == 'yes' else v
+                    v = 'Nee' if v == 'nee' else v
+                    v = 'Ja' if v == 'ja' else v
+                    v = 'No' if v == 'no' else v
+                    if preprocessor:
+                        # should check whether a true value equals v and set v to that
+                        pass
                     results_to_analyze.setdefault(field, []).append(v)
 
-    mypd = pd.DataFrame.from_dict(results_to_analyze)
-    return mypd
+    df_results = pd.DataFrame.from_dict(results_to_analyze)
+    return df_results
 
 
-def get_results_distribution(results_df, fields_dict):
+def get_predictions_distribution(results_df, fields_dict, names_dict):
     fields_list = []
     fields_data_types = {}
     with_counts_dict = {}
+
     for field in results_df.columns.values:
         fields_list.append(str(field))
         fields_data_types[field] = str
         with_counts_dict[field] = {}
+
     num_accepted_patients = results_df.shape[0]
     accepted_df = results_df
+
     for field in fields_list:
         possible_values = fields_dict[field]['values']
         field_total = 0
@@ -104,75 +135,80 @@ def get_results_distribution(results_df, fields_dict):
             field_total += counts_field_nan
             with_counts_dict[field][possible_values] = num_accepted_patients - field_total
         else:
-            if len(possible_values) > 3:
-                names = ['v'+str(i) for i in range(len(possible_values))]
-            else:
-                names = possible_values
             for i, possible_value in enumerate(possible_values):
                 counts_field_value = accepted_df[accepted_df[field] == possible_value].shape[0]
-                with_counts_dict[field][names[i]] = counts_field_value
+                if field in names_dict.keys():
+                    with_counts_dict[field][names_dict[field][possible_value]] = counts_field_value
+                else:
+                    with_counts_dict[field][possible_value] = counts_field_value
                 field_total += counts_field_value
                 with_counts_dict[field]['NaN'] = num_accepted_patients - field_total
     return with_counts_dict
 
 
-def analyze_predictions(predictions_file, fields_dict, form, preprocessor):
-    # will make a dict {field1:{val1:x times, val2: y times, evidences:(a,b,c,d)}}, abcd is number of each ev.
-    # evidences available:
-    # condition unsatisfied., **found evidence**, no hit on description., no accepted scores. empty assignment,
-    # no accepted scores. random assignment
+# todo: check distribution of comments (of assignments)
 
-    # make a dict: {field1:val1:x times ...}
-    names_dict = {}  # for many values ...
-    with_counts_dict = {}
-    for field in fields_dict:
-        with_counts_dict[field] = {}
-        possible_values = fields_dict[field]['values']
-        if possible_values == "unknown":
-            with_counts_dict[field][possible_values] = 0
-        else:
-            for val in possible_values:
-                v = preprocessor.preprocess(val)
-                with_counts_dict[field][v] = 0
-            # if len(possible_values) > 3:
-            #     names_dict[field] = {}
-            #     for i, v in enumerate(possible_values):
-            #         names_dict[field][v] = 'v' + str(v)
-        with_counts_dict[field][""] = 0
-    with open(predictions_file, "r") as read_file:
-        predictions = json.load(read_file, encoding='utf-8')
-    for patient in predictions:
-        if form in predictions[patient]:
-            for predicted_field in predictions[patient][form]:
-                v = predictions[patient][form][predicted_field]['value']
-                if type(fields_dict[predicted_field]['values']) == list:  # 1-ok-K
-                    with_counts_dict[predicted_field][v] += 1  # if v is "" then key "" takes one
-                else:  # open-question (unknown)
-                    if v == "":
-                        with_counts_dict[predicted_field][v] += 1
-                    else:
-                        with_counts_dict[predicted_field]["unknown"] += 1
-    return with_counts_dict
+
+def analyze_predictions(results_f, form, fields_dict, names_dict, out_folder):
+    results_pd = from_json_predictions_to_pandas(results_f, form, fields_dict.keys())
+    decease_counts = get_predictions_distribution(results_pd, fields_dict, names_dict)
+    plot_counts(decease_counts, out_folder)
+    return decease_counts
+
+
+def heat_maps_truth_vs_predictions(truth_counts_dict, predicted_counts_dict, out_folder):
+    # counts_dict form : { field1: { v1:x counts,v2:y counts, .. }, .. }
+
+    for field in predicted_counts_dict.keys():
+        x = predicted_counts_dict[field].keys()
+        y = x
+        accuracies = np.zeros((len(x), len(y)))
+        for i, value_i in enumerate(predicted_counts_dict[field].keys()):
+            for j, value_j in enumerate(predicted_counts_dict[field].keys()):
+                # accuracies[i][j] = float(predicted_counts_dict[field][value_j] / truth_counts_dict[field][value_i])
+                accuracies[i][j] = float(predicted_counts_dict[field][value_j])/100  # temporary.to test
+
+        df = DataFrame(accuracies, index=x, columns=y)
+
+        plt.figure()
+        plt.pcolor(df)
+        plt.colorbar()
+        plt.yticks(np.arange(0.5, len(df.index), 1), df.index)
+        plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns)
+        plt.title(field)
+        plt.xlabel('predictions')
+        plt.ylabel('real')
+        plt.savefig(out_folder + field + '.png')
+        plt.close()
 
 
 if __name__ == "__main__":
-    values_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\values.json"
-    ids_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\ids.json"
-    results_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\conf13_results.json"
-    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions15\\"
+    index = 'mie'
+    decease = 'colorectaal'
+    values_file = "D:\\results28oct\\values_index.json".replace('index', index)
+    ids_file = "D:\\results28oct\\ids_index.json".replace('index', index)
+    results_file = "D:\\results28oct\\conf16_results.json"
 
-    decease_dict = json.load(open(values_file), encoding='utf-8')['colorectaal']
-    decease_ids = json.load(open(ids_file), encoding='utf-8')["medical_info_extraction patients' ids in colorectaal"]
+    decease_dict = json.load(open(values_file), encoding='utf-8')[decease]
+    decease_ids = json.load(open(ids_file), encoding='utf-8')[index+" patients' ids in "+decease]
 
-    colorectaal_fields = decease_dict.keys()
-    # results_df = from_json_results_to_pandas(results_file, 'colorectaal', colorectaal_fields)
-    # results_counts = get_results_distribution(results_df, decease_dict)
-    # plot_counts(results_counts, results_folder)
+    """--------------------------------------golden truth visual analysis--------------------------------------------"""
+    decease_names_dict = values_names_dict(decease_dict)
+    decease_file = "C:\\Users\\Christina\\Documents\\Ads_Ra_0\\selection_colon.csv"
+    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions_t\\"
+    # true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, results_folder)
 
-    predictions_file = "C:\\Users\\Christina\\Desktop\\conf15_results.json"
-    preprocessor_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
-                        "preprocessor_0_1_1_0.p"
-    preprocessor = pickle.load(open(preprocessor_file, "rb"))
-    predicted_counts = analyze_predictions(predictions_file, decease_dict, 'colorectaal', preprocessor)
-    print "with_counts_dict:\n{}".format(predicted_counts)
-    plot_counts(predicted_counts, results_folder)
+    # analyze_golden_truth("C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv",
+    #                      "<missing>", decease_ids, decease_names_dict,
+    #                      "C:\\Users\\Christina Zavou\\Documents\\data_distributions\\")
+
+    """--------------------------------------predictions  visual analysis--------------------------------------------"""
+    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions16\\"
+    # preprocessor_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
+    #                     "preprocessor_0_1_1_0.p"
+    # preprocessor = pickle.load(open(preprocessor_file, "rb"))
+    results_counts = analyze_predictions(results_file, decease, decease_dict, decease_names_dict, results_folder)
+
+    """--------------------------------------heat maps visual analysis-----------------------------------------------"""
+    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\heatmap16\\"
+    heat_maps_truth_vs_predictions({}, results_counts, results_folder)
