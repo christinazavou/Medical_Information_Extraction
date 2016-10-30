@@ -1,0 +1,44 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "analysis": {
+      "tokenizer": {
+        "ngram_tokenizer": {
+          "type": "nGram",
+          "min_gram": 4,
+          "max_gram": 4
+        }
+    },
+    "analyzer": {
+      "ngram_tokenizer_analyzer": {
+        "type": "custom",
+        "tokenizer": "ngram_tokenizer"
+      }
+      }
+    }
+  },
+  "mappings": {
+    "patient": {
+      "properties": {
+        "report": {
+          "properties": {
+            "date": {
+              "type": "string"
+            },
+            "type": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string",
+              "term_vector": "yes",
+              "analyzer": "ngram_tokenizer_analyzer"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+from:  https://qbox.io/blog/an-introduction-to-ngrams-in-elasticsearch
+
