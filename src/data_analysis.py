@@ -8,6 +8,7 @@ import os
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
 
 import pre_process
 from pre_process import MyPreprocessor
@@ -95,7 +96,7 @@ def plot_counts(form_fields_counts, destination):
         ymax = max(field_counts.values()) + 1
         plt.ylim(0, ymax)
         plt.title(field)
-        plt.savefig(destination + field + '.png')
+        plt.savefig(os.path.join(destination, field + '.png'))
         plt.close()
 
 
@@ -197,39 +198,53 @@ def heat_maps_truth_vs_predictions(truth_counts_dict, predicted_counts_dict, out
         plt.title(field)
         plt.xlabel('predictions')
         plt.ylabel('real')
-        plt.savefig(out_folder + field + '.png')
+        plt.savefig(os.path.join(out_folder, field + '.png'))
         plt.close()
 
 
 if __name__ == "__main__":
+
     index = 'mie'
     decease = 'colorectaal'
-    values_file = "D:\\results28oct\\values_index.json".replace('index', index)
-    ids_file = "D:\\results28oct\\ids_index.json".replace('index', index)
-    results_file = "D:\\results28oct\\conf16_results.json"
+    this_dir = os.path.dirname(os.path.realpath(__file__))
+
+    values_file = 'values_index.json'.replace('index', index)
+    values_file = os.path.join(this_dir.replace('src', 'results'), values_file)
+    ids_file = 'ids_index.json'.replace('index', index)
+    ids_file = os.path.join(this_dir.replace('src', 'results'), ids_file)
+
+    results_folder = sys.argv[1]
 
     decease_dict = json.load(open(values_file), encoding='utf-8')[decease]
     decease_ids = json.load(open(ids_file), encoding='utf-8')[index+" patients' ids in "+decease]
 
-    """--------------------------------------golden truth visual analysis--------------------------------------------"""
     decease_names_dict = values_names_dict(decease_dict)
-    decease_file = "C:\\Users\\Christina\\Documents\\Ads_Ra_0\\selection_colon.csv"
-    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions_t\\"
-    # true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, results_folder)
-    # analyze_golden_truth("C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv",
-    #                      "<missing>", decease_ids, decease_names_dict,
-    #                      "C:\\Users\\Christina Zavou\\Documents\\data_distributions\\")
 
-    # maj_dict, maj_score = get_majority_assignment_score(true_counts, len(decease_ids))
-    # print maj_dict
-    # print maj_score
-    """--------------------------------------predictions  visual analysis--------------------------------------------"""
-    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\distributions16\\"
+    """--------------------------------------golden truth visual analysis--------------------------------------------"""
+    decease_file = os.path.join(this_dir.replace('src', 'Data'), decease,
+                                "selection_decease.csv".replace('decease', decease))
+    if not os.path.isfile(decease_file):
+        decease_file = "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv"
+    print "decease_file: {}".format(decease_file)
+
+    fol = os.path.join(results_folder, "distributions_t")
+    if not os.path.exists(fol):
+        os.makedirs(fol)
+    true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, fol)
+
+    mj_file = os.path.join(results_folder, 'majority_scores.json')
+    maj_dict, maj_score = get_majority_assignment_score(true_counts, len(decease_ids))
+    with open(mj_file, 'w') as mf:
+        data = json.dumps(maj_dict, separators=[',', ':'], indent=4, sort_keys=True)
+        mf.write(data)
+
+    """---------------------------------------predictions visual analysis--------------------------------------------"""
+    # fol = os.path.join(results_folder, "distributions16")
     # preprocessor_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
     #                     "preprocessor_0_1_1_0.p"
     # preprocessor = pickle.load(open(preprocessor_file, "rb"))
-    results_counts = analyze_predictions(results_file, decease, decease_dict, decease_names_dict, results_folder)
+    # results_counts = analyze_predictions(results_file, decease, decease_dict, decease_names_dict, results_folder)
 
     """--------------------------------------heat maps visual analysis-----------------------------------------------"""
-    results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\heatmap16\\"
-    heat_maps_truth_vs_predictions({}, results_counts, results_folder)
+    # results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\heatmap16\\"
+    # heat_maps_truth_vs_predictions({}, results_counts, results_folder)

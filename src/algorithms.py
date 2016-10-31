@@ -421,7 +421,7 @@ class BaselineAlgorithm(Algorithm):
         score, evidence = self.get_score_and_evidence(description, patient_id, self.q_field, should_body)
         if score and evidence:
             if score >= self.min_accept_score:
-                value_to_assign = "yes" if "Yes" in values else "ja"
+                value_to_assign = "Yes" if "Yes" in values else "Ja"
                 assignment = combine_assignment(value_to_assign, evidence, score)
             #     todo: re-think when to assign onbekend (maybe introduce some randomness)
             elif onbekend_exist:
@@ -429,7 +429,7 @@ class BaselineAlgorithm(Algorithm):
             else:
                 assignment = combine_assignment("", comment="low description score.")
         elif "No" in values or "Nee" in values:
-            value_to_assign = "no" if "No" in values else "nee"
+            value_to_assign = "No" if "No" in values else "Nee"
             assignment = combine_assignment(value_to_assign, comment="no hit on description.")
         else:
             assignment = combine_assignment("", comment="no hit on description.")
