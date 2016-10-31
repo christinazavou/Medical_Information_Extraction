@@ -225,6 +225,8 @@ if __name__ == "__main__":
                                 "selection_decease.csv".replace('decease', decease))
     if not os.path.isfile(decease_file):
         decease_file = "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv"
+    if not os.path.isfile(decease_file):
+        decease_file = "C:\\Users\\Christina\\Documents\\Ads_Ra_0\\selection_colon.csv"
     print "decease_file: {}".format(decease_file)
 
     fol = os.path.join(results_folder, "distributions_t")
