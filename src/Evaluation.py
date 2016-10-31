@@ -4,45 +4,31 @@ Gives Output: Evaluation measure
 i.e. compares outputs with what is on forms
 """
 
+import os
 import re
 import string
 import json
+import time
+import random
 
 import algorithms
 import final_baseline
 from ESutils import start_es, EsConnection
 import settings
-import time, random
+from utils import condition_satisfied
+
 
 labels_correct_values = {}  # for one patient!!
 
 
-def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled):
-    # copied from algorithms
-    # note that values are not pre processed anywhere... i just check them as is
-    # for a given patient(the golden truth) check whether the field to be field satisfies its condition(if exist) or not
-    condition = labels_possible_values[current_form][field_to_be_filled]['condition']
-    if condition == "":
-        return True
-    conditioned_field, condition_expression = re.split(' !?= ', condition)
-    if "!=" in condition:
-        if golden_truth[conditioned_field] != condition_expression:
-            return True
-    elif "==" in condition:
-        if golden_truth[conditioned_field] == condition_expression:
-            return True
-    else:
-        return False
-
-
 class Evaluation:
-    def __init__(self, con, index_name, type_name_p, type_name_f, file, chosen_labels_possible_values):
+    def __init__(self, con, index_name, type_patient, type_form, ev_file, chosen_labels_possible_values):
         self.con = con
         self.index_name = index_name
-        self.type_name_p = type_name_p
-        self.type_name_f = type_name_f
+        self.type_name_p = type_patient
+        self.type_name_f = type_form
         self.accuracy = 0.0
-        self.file = file
+        self.file = ev_file
         self.chosen_labels_possible_values = chosen_labels_possible_values
         self.chosen_labels_accuracy = {}
         self.chosen_labels_num = {}  # here i save how many patients were assign a value for that label
@@ -59,8 +45,8 @@ class Evaluation:
         both predictions and targets are of the form: {"label1":"value1","label2":"value2"}
         """
         start_time = time.time()
-        with open(self.file) as jfile:
-            predictions = json.load(jfile, encoding='utf-8')
+        with open(self.file) as f:
+            predictions = json.load(f, encoding='utf-8')
 
         for patient_id in patients_ids:
             if not (patient_id in predictions.keys()):
@@ -78,7 +64,6 @@ class Evaluation:
         for form_id in eval_forms:
             for field in self.chosen_labels_accuracy[form_id]:
                 if not self.chosen_labels_num[form_id][field] == 0:
-                    # print self.chosen_labels_accuracy[form_id][field], " ", self.chosen_labels_num[form_id][field]
                     self.chosen_labels_accuracy[form_id][field] /= self.chosen_labels_num[form_id][field]
                     num += 1
                     self.accuracy += self.chosen_labels_accuracy[form_id][field]
@@ -86,7 +71,7 @@ class Evaluation:
 
         print("score %f" % self.accuracy)
         print("--- %s seconds for eval method---" % (time.time() - start_time))
-        return self.accuracy, self.chosen_labels_accuracy
+        return self.accuracy, self.chosen_labels_accuracy, self.chosen_labels_num
 
     def get_score(self, predictions, targets, form_id):
         try:
@@ -122,33 +107,32 @@ class Evaluation:
 
 
 if __name__ == '__main__':
-    # start_ES()
-    settings.init("aux_config\\conf16.yml",
-                  "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+    start_es()
+    settings.init("Configurations\\configurations.yml",
+                  "..\\Data",
+                  "..\\results")
 
     host = settings.global_settings['host']
-    index_name = settings.global_settings['index_name']
+    index = settings.global_settings['index_name']
     type_name_p = settings.global_settings['type_name_p']
     type_name_f = settings.global_settings['type_name_f']
     type_name_s = settings.global_settings['type_name_s']
     type_name_pp = settings.global_settings['type_name_pp']
-    con = EsConnection(host)
+    connection = EsConnection(host)
 
-    eval_file = "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
-                "conf16_results.json"
-    evaluationsFilePath = "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
-                          "evaluations.json"
+    eval_file = "C:\\Users\\Christina\\Documents\\temp_mie\\conf16_results.json"
+    evaluationsFilePath = os.path.join(settings.global_settings['results_path'], "evaluations.json")
 
     # note: on type_name_p now
-    ev = Evaluation(con, index_name, type_name_p, type_name_f, settings.get_results_filename(),
-                    settings.find_chosen_labels_possible_values())
-    score, fields_score = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
+    ev = Evaluation(connection, index, type_name_p, type_name_f, eval_file, settings.labels_possible_values)
+    score, fields_score, fields_num = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
     evaluations_dict = {}
     evaluations_dict['description'] = settings.get_run_description()
     evaluations_dict['file'] = eval_file
     evaluations_dict['score'] = score
     evaluations_dict['fields_score'] = fields_score
     evaluations_dict['dte-time'] = time.strftime("%c")
+    evaluations_dict['nums'] = fields_num
 
     with open(evaluationsFilePath, 'w') as jfile:
         json.dump(evaluations_dict, jfile, indent=4)

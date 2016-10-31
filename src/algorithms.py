@@ -25,17 +25,14 @@ import nltk
 from abc import ABCMeta, abstractmethod
 import time
 
-from predict import predict_prob
+from ctcue import predict
 from ESutils import EsConnection, start_es
 import settings
 
 
-# times_pick_similar_baseline = []
-# times_pick_similar_tf = []
-
 """-----------------------------------------Load CtCue prediction model----------------------------------------------"""
 thisdir = os.path.dirname(os.path.realpath(__file__))
-pickle_path = os.path.join(thisdir, "trained.model")
+pickle_path = os.path.join(thisdir, 'ctcue', "trained.model")
 clf = None
 try:
     with open(pickle_path, "rb") as pickle_file:
@@ -69,7 +66,7 @@ def value_refers_to_patient(patient_reports, value):
             text_to_check.append(report_description.replace(value, "<DIS>"))
     else:
         text_to_check.append(patient_reports['description'].replace(value, "<DIS>"))
-    _, score = predict_prob(clf, text_to_check)
+    _, score = predict.predict_prob(clf, text_to_check)
     if score > 0.5:
         return True, score
     return False, score
@@ -105,7 +102,7 @@ def replace_sentence_tokens(sentence, replace_with):
 
 def tokens_in_sentence_refers_to_patient(sentence):
     text_to_check = replace_sentence_tokens(sentence, "<DIS>")
-    _, score = predict_prob(clf, text_to_check)
+    _, score = predict.predict_prob(clf, text_to_check)
     if score > 0.5:
         return True, score
     return False, score

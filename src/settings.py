@@ -3,8 +3,7 @@
 import json
 import yaml
 import os
-
-# todo: use dict traverse for settings with doc
+import random
 
 global labels_possible_values
 global ids
@@ -13,29 +12,25 @@ global global_settings
 
 
 def get_data_path_root():
-    global global_settings
-    if os.path.isdir("C:\\Users\\Christina Zavou\\Documents"):
-        global_settings['data_path_root'] = "C:\\Users\\Christina Zavou\\Documents"
+    if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
+        return "C:\\Users\\Christina Zavou\\Documents\\Data"
     else:
-        if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction"):
-            global_settings['data_path_root'] = \
-                "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction"
+        if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\Data"):
+            return "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\Data"
         else:
             print "a correct data path root is unspecified."
+            exit(-1)
 
 
-def get_results_file_path(results_file_path):
+def get_results_path():
     if os.path.isdir("C:\\Users\\Christina Zavou\\Desktop\\results"):
-        results_file_path = "C:\\Users\\Christina Zavou\\Desktop\\results\\"
+        return "C:\\Users\\Christina Zavou\\Desktop\\results\\"
     else:
         if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results"):
-            results_file_path = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+            return "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
         else:
             print "a correct results path root is unspecified."
-    if not os.path.isdir(global_settings['results_path_root']):
-        print "wrong results path"
-        exit(-1)
-    return results_file_path
+            exit(-1)
 
 
 def get_preprocess_patient_name():
@@ -48,7 +43,7 @@ def get_preprocess_patient_name():
             global_settings['type_name_pp'] = global_settings['type_name_pp'].replace(value, 0)
 
 
-def init(config_file, results_file_path):
+def init(config_file, data_path, results_path):
     global labels_possible_values
     global ids
     global chosen_labels_possible_values
@@ -57,105 +52,90 @@ def init(config_file, results_file_path):
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
     config_file = os.path.join(this_dir.replace("src", ""), config_file)
+    global_settings['configFile'] = config_file
+
+    if not os.path.isdir(data_path):
+        data_path = get_data_path_root()
+    global_settings['data_path'] = data_path
+
+    if not os.path.isdir(results_path):
+        results_path = get_results_path()
+    global_settings['results_path'] = results_path
 
     with open(config_file, 'r') as f:
         doc = yaml.load(f)
 
+    config_path = os.path.dirname(os.path.realpath(__file__)).replace('src', 'Configurations')
+
     for key, value in doc.items():
         global_settings[key] = value
+        if isinstance(value, basestring):
+            global_settings[key] = global_settings[key].replace("Configurations_path", config_path)
+            global_settings[key] = global_settings[key].replace("Data_path", data_path)
+            global_settings[key] = global_settings[key].replace("Results_path", results_path)
 
-    # -----------------------------------------------fix paths---------------------------------------------------------#
-    global_settings['configFile'] = config_file
-    global_settings['source_path_root'] = this_dir.replace("src", "")
-
-    tmp_json_dir = doc['json_forms_directory']
-    global_settings['directory_f'] = os.path.join(global_settings['source_path_root'], "Configurations", tmp_json_dir)
-
-    if not os.path.isdir(doc['data_path_root']):
-        get_data_path_root()
-    tmp_path_in = doc['path_in_dossiers']
-    tmp_path_out = doc['path_out_dossiers']
-    global_settings['directory_p'] = os.path.join(global_settings['data_path_root'], "Data", tmp_path_out)
-    global_settings['directory_f'] = os.path.join(global_settings['source_path_root'], 'Configurations', tmp_json_dir)
-    global_settings['data_path'] = os.path.join(global_settings['data_path_root'], 'Data\\')
-    global_settings['path_root_in_dossiers'] = os.path.join(global_settings['data_path'], tmp_path_in)
-    global_settings['path_root_out_dossiers'] = os.path.join(global_settings['data_path'], tmp_path_out)
-
-    if not os.path.isdir(results_file_path):
-        results_file_path = get_results_file_path(results_file_path)
-    global_settings['results_path_root'] = results_file_path  # note: ignore results_file_path written in conf file
-
-    # -----------------------------------------------fix execution config----------------------------------------------#
-    global_settings['forms'] = []
-    for decease in doc['forms']:
-        if os.path.isdir(os.path.join(global_settings['data_path'], decease)):
-            global_settings['forms'].append(decease)
-        else:
-            print "no directory for input decease ", decease, " exists."
-
-    global_settings['eval_file'] = os.path.join(global_settings['results_path_root'], doc['eval_file'])
+    # --------------------------------------------fix some configurations----------------------------------------------#
 
     if len(global_settings['preprocess']) > 0:
         get_preprocess_patient_name()
 
-    # -------------------------------------------fix fields config ----------------------------------------------------#
-    for field in doc.keys():
-        if field.__contains__("fields"):
-            name = field.split("_")
-            name = name[1]
-            global_settings[name] = doc[field]
+    global_settings['type_name_s_preprocessed'] = (doc['type_name_s'] + global_settings['type_name_pp']).\
+        replace("patient", "")
 
-    # -----------------------------------------------fix naming config-------------------------------------------------#
-    tmp_map = doc['initmap_jfile']
-    global_settings['map_jfile'] = os.path.join(global_settings['source_path_root'], 'Configurations', tmp_map)
-    global_settings['type_name_s'] = (doc['type_name_s'] + global_settings['type_name_pp']).replace("patient", "")
-
-    # ----------------------------------------------extra config-------------------------------------------------------#
     if global_settings['patient_W2V'] == "":
         global_settings['patient_W2V'] = global_settings['type_name_pp']
 
     # ---------------------------------------ids and labels_possible_values--------------------------------------------#
-    fields_config_file = global_settings['results_path_root'] + "values_" + global_settings['index_name'] + ".json"
+
+    fields_config_file = os.path.join(global_settings['results_path'],
+                                      "fields_index.json".replace("index", global_settings['index_name']))
     if os.path.isfile(fields_config_file):
         with open(fields_config_file, 'r') as json_file:
             labels_possible_values = json.load(json_file, encoding='utf-8')
     else:
         labels_possible_values = {}
-    ids_config_file = global_settings['results_path_root'] + "ids_" + global_settings['index_name'] + ".json"
+    global_settings['fields_config_file'] = fields_config_file
+
+    ids_config_file = os.path.join(global_settings['results_path'],
+                                   "ids_index.json".replace("index", global_settings['index_name']))
     if os.path.isfile(ids_config_file):
         with open(ids_config_file, 'r') as json_file:
             ids = json.load(json_file, encoding='utf-8')
     else:
         ids = {}
+    global_settings['ids_config_file'] = ids_config_file
 
 
 def update_values():
-    f = global_settings['results_path_root'] + "\\values_" + global_settings['index_name'] + ".json"
-    with open(f, "w") as json_file:
+    global global_settings
+    global labels_possible_values
+    with open(global_settings['fields_config_file'], "w") as json_file:
         data = json.dumps(labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 
 def update_ids():
-    f = global_settings['results_path_root'] + "\\ids_" + global_settings['index_name'] + ".json"
-    with open(f, "w") as json_file:
+    global global_settings
+    global ids
+    with open(global_settings['ids_config_file'], "w") as json_file:
         data = json.dumps(ids, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
 
 
 def find_chosen_labels_possible_values():
+    global global_settings
     global chosen_labels_possible_values
     global labels_possible_values
-    chosen_labels_possible_values = {}
-    for form in global_settings['forms']:
-        chosen_labels_possible_values[form] = {}
-        full_dict = labels_possible_values[form]
-        for field in full_dict:
-            if global_settings['unknowns'] == "exclude" and full_dict[field]['values'] == "unknown":
-                continue
-            if global_settings[form].__contains__(field):
-                chosen_labels_possible_values[form][field] = full_dict[field]
-    f = os.path.dirname(os.path.realpath(__file__)) + "\\chosen_fields.json"
+    chosen_labels_possible_values = labels_possible_values
+    for form in labels_possible_values.keys():
+        if form not in global_settings['forms']:
+            del chosen_labels_possible_values[form]
+        else:
+            for field in labels_possible_values[form].keys():
+                if field not in global_settings[form]:
+                    del chosen_labels_possible_values[form][field]
+
+    f = global_settings['fields_config_file'].replace('fields', "chosen_fields")
     with open(f, "w") as json_file:
         data = json.dumps(chosen_labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
         json_file.write(data)
@@ -165,63 +145,61 @@ def find_chosen_labels_possible_values():
 def find_used_ids():
     global global_settings
     global ids
-    used_forms = global_settings['forms']
     used_patients = []
-    for form in used_forms:
+    for form in global_settings['forms']:
         used_patients += ids[global_settings['index_name']+' patients\' ids in '+form]
-    return list(set(used_patients))
+
+    used_patients = list(set(used_patients))
+    used_patients = random.sample(used_patients, int(global_settings['patients_pct'] * len(used_patients)))
+    return used_patients
 
 
-def get_W2V_name():
-    W2Vname = global_settings['results_path_root']+"W2V"+global_settings['patient_W2V']+".p"
-    return W2Vname
+def get_w2v_name():
+    global global_settings
+    w2v_name = os.path.join(global_settings['results_path'],
+                            "w2v_patient.p".replace("patient", global_settings['patient_W2V']))
+    global_settings['patient_W2V'] = w2v_name
+    return w2v_name
 
 
 def get_preprocessor_file_name():
-    preprocessor_name = global_settings['results_path_root']+("preprocessor_" + global_settings['type_name_pp'] + ".p")\
-                                                              .replace("patient_", "")
+    global global_settings
+    preprocessor_name = os.path.join(global_settings['results_path'],
+                                     "preprocessor_patient.p".replace("patient", global_settings['type_name_pp'])
+                                                             .replace("patient_", ""))
+    global_settings['preprocessor_name'] = preprocessor_name
     return preprocessor_name
 
 
 def get_results_filename():
-    # re.findall('\d+', s)
-    results_filename = global_settings['results_path_root'] + "conf" + \
-                       filter(str.isdigit, global_settings['configFile']) + "_results.json"
-    if global_settings['eval_file'] == global_settings['results_path_root']:
-        if global_settings['run_algo'] is False:
-            print "kanonika eprepe na doso arxio"
-        global_settings['eval_file'] = results_filename
+    global global_settings
+    num = filter(str.isdigit, global_settings['configFile'])
+    results_filename = os.path.join(global_settings['results_path'], "confnum_results.json".replace("num", num))
+    if global_settings['eval_file'] == global_settings['results_path']:
+        if global_settings['run_algo']:
+            global_settings['eval_file'] = results_filename
+        else:
+            print "no given evaluation file"
+            exit(-1)
+    global_settings['results_filename'] = results_filename
     return results_filename
 
 
 def get_run_description():
-    description = dict()
-    description['results_file'] = get_results_filename()
-    description['run_algo'] = global_settings['run_algo']
-    description['forms'] = global_settings['forms']
-    description['patients_pct'] = global_settings['patients_pct']
-    description['preprocessor_name'] = get_preprocessor_file_name()
-    description['to_remove'] = global_settings['to_remove']
-    description['type_name_pp'] = global_settings['type_name_pp']
-    description['unknowns'] = global_settings['unknowns']
-    description['when_no_preference'] = global_settings['when_no_preference']
-    if 'fuzziness' in global_settings.keys():
-        description['fuzziness'] = global_settings['fuzziness']
-    if 'with_description' in global_settings.keys():
-        description['with_description'] = global_settings['with_description']
-    description['assign_all'] = global_settings['assign_all']
-    # for form_id in global_settings['forms']:
-    #    description[form_id] = global_settings[form_id]
-    return description
+    global global_settings
+    return global_settings
 
 
 if __name__ == "__main__":
 
-    init("aux_config\\conf15.yml", "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+    init("Configurations\\configurations.yml",
+         "..\\Data",
+         "..\\results")
 
     find_chosen_labels_possible_values()
-    print get_W2V_name()
-    print get_preprocessor_file_name()
-    print find_chosen_labels_possible_values()
+    get_w2v_name()
+    get_preprocessor_file_name()
+    find_chosen_labels_possible_values()
+    get_results_filename()
 
-    print global_settings
+    print get_run_description()

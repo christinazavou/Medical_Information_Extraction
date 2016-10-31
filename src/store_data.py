@@ -10,21 +10,7 @@ import re
 
 from ESutils import EsConnection, start_es
 import settings
-
-
-def remove_codes(source_text):
-    # copied from pre_process to just remove codes before index the docs
-    s = source_text.split(' ')
-    m = [re.match("\(%.*%\)", word) for word in s]
-    to_return = source_text
-    for m_i in m:
-        if m_i:
-            to_return = to_return.replace(m_i.group(), "")
-    m = [re.match("\[.*\]", word) for word in s]
-    for m_i in m:
-        if m_i:
-            to_return = to_return.replace(m_i.group(), "")
-    return to_return
+from utils import remove_codes
 
 
 def remove_tokens(source_text, to_remove=None):
@@ -34,7 +20,7 @@ def remove_tokens(source_text, to_remove=None):
 
 
 def pre_process_patient(patient_dict):
-    if type(patient_dict['report']) == type([]):
+    if isinstance(patient_dict['report'], types.ListType):
         for i in range(len(patient_dict['report'])):
             patient_dict['report'][i]['description'] = remove_tokens(remove_codes(
                                                                      patient_dict['report'][i]['description']))
@@ -44,17 +30,19 @@ def pre_process_patient(patient_dict):
 
 
 class Decease:
-    def __init__(self, name, connection, index_name, decease_type_name, patients_type_name, patients_directory,
-                 csv_form_directory, json_form_directory):
+    def __init__(self, name, con, index, decease_type_name, patients_type_name,
+                 patients_directory, csv_form, json_form_directory):
         self.name = name
         self.patients = []
-        self.con = connection
-        self.index = index_name
+        self.con = con
+        self.index = index
         self.decease_type = decease_type_name
         self.patients_type = patients_type_name
         self.patients_directory = patients_directory.replace('decease', self.name)
-        self.csv_form = csv_form_directory + "selection_" + self.name + ".csv"
-        self.json_form = json_form_directory + "important_fields_" + self.name + ".json"
+        self.csv_form = csv_form.replace('decease', self.name)
+        self.json_form = os.path.join(json_form_directory,
+                                      "important_fields_decease.json".replace('decease', self.name))
+        self.possible_values = {}
 
     def index_es_patients(self, existing_patients_ids):
         """
@@ -65,10 +53,13 @@ class Decease:
             for f in files:
                 patient_id = f.replace(".json", "")
                 if patient_id in existing_patients_ids:
+                    # only update it with "form:[]"
                     self.index_es_patient(patient_id)
                 else:
+                    # index the patient doc
                     self.index_es_patient(patient_id, self.patients_directory+f)
                 self.patients.append(patient_id)
+        # store all form's patients ids
         self.store_patients_ids()
 
     def index_es_patient(self, patient_id, f=None):
@@ -91,6 +82,7 @@ class Decease:
         name = self.index + " patients' ids in " + self.name
         settings.ids[name] = self.patients
         settings.update_ids()
+        # if the form is indexed update it to insert the patients ids
         if self.con.exists(self.index, self.decease_type, self.name):
             self.con.update_es_doc(self.index, self.decease_type, self.name, "doc",
                                    update_dict={"patients": self.patients})
@@ -114,8 +106,8 @@ class Decease:
         body_data = {"name": form_name, "fields": fields_dict}
         if self.patients:
             body_data['patients'] = self.patients
+        # also store the attributes of fields
         fields = [i for i in fields_dict]
-        self.possible_values = {}
         for field in fields:
             values = fields_dict[field]['properties']['possible_values']
             description = fields_dict[field]['properties']['description']
@@ -123,21 +115,15 @@ class Decease:
             self.possible_values[field] = {'values': values, 'description': description, 'condition': condition}
         return body_data
 
-    def store_possible_values(self, from_es=False):
-        if from_es:
-            print "should read from es first...and save it to self.possible values"
+    def store_possible_values(self):
         settings.labels_possible_values[self.name] = self.possible_values
         settings.update_values()
 
-    def put_form_in_patients(self, get_patients=False):
+    def put_form_in_patients(self):
         """
         Accepts the .csv file to be read and updates patients docs of this decease
         """
         id_form = self.name
-        if get_patients:
-            # self.con.get_type_ids(self.index,self.patients_type)
-            print "vlepo se poious astheneis grafei to decease sto doc tous"
-            # ananeono to self.patientsids kai settigngs2 ids...
         fields = self.possible_values.keys()
         with open(self.csv_form) as form_file:
             reader = csv.DictReader(form_file)
@@ -153,22 +139,19 @@ class Decease:
                     print 'patient\'s id, ', id_patient, ' not in ', self.name, ' form\'s Data'
 
 
-def store_deceases(con, index_name, type_name_p, type_name_f, data_path, directory_p, directory_f,
+def store_deceases(con, index, type_name_p, type_name_f, data_path, directory_p, directory_f, csv_file,
                    decease_folders=None):
     start_time = time.time()
     my_deceases = []
     if not decease_folders:
         decease_folders = [name for name in os.listdir(data_path) if os.path.isdir(os.path.join(data_path, name))]
     for decease_name in decease_folders:
-        existing_patients_ids = con.get_type_ids(index_name, type_name_p)  # all indexed patients
-        directory = data_path + decease_name + "\\"
-        decease = Decease(decease_name, con, index_name, type_name_f, type_name_p, directory_p, directory, directory_f)
+        existing_patients_ids = con.get_type_ids(index, type_name_p)  # all indexed patients
+        csv_file = csv_file.replace('decease', decease_name)
+        decease = Decease(decease_name, con, index, type_name_f, type_name_p, directory_p, csv_file, directory_f)
         decease.index_es_patients(existing_patients_ids)  # index patients of that decease training set
         decease.index_form()
         decease.put_form_in_patients()
-        # todo: should fix it from reading to storing ...
-        # if decease_name == decease_folders[len(decease_folders) - 1]:
-        #     existing_patients_ids = con.get_type_ids(index_name, type_name_p) #finally...to get ids of last form saved
         my_deceases.append(decease)
     print("--- %s seconds for annotate method---" % (time.time() - start_time))
     return my_deceases
@@ -179,11 +162,16 @@ def split_into_sentences(source_text):
     return list_of_sententces
 
 
-def index_sentences(connection, index_name, patient_type, sentence_type, patients_ids):
+def index_sentences(con, index, patient_type, sentence_type, patients_ids):
+    """
+    reads the indexed patients specified and split all of its reports into sentences to index them
+    also updates ids to include sentences of each patient
+    """
+    start_time = time.time()
     sentence_id = 0
     for patient_id in patients_ids:
         settings.ids[patient_id] = []
-        patient_doc = connection.get_doc_source(index_name, patient_type, patient_id)
+        patient_doc = con.get_doc_source(index, patient_type, patient_id)
         patient_reports = patient_doc['report'] if "report" in patient_doc.keys() else None
         if isinstance(patient_reports, types.ListType):
             for report in patient_reports:
@@ -192,7 +180,7 @@ def index_sentences(connection, index_name, patient_type, sentence_type, patient
                 for i, sentence in enumerate(report_sentences):
                     sentence_id += 1
                     body_data = {"text": sentence, "patient": patient_id, "date": date, "position": i}
-                    connection.index_doc(index_name, sentence_type, sentence_id, body_data)
+                    con.index_doc(index, sentence_type, sentence_id, body_data)
                     settings.ids[patient_id] = settings.ids[patient_id].__add__([sentence_id])
         elif isinstance(patient_reports, types.DictionaryType):
             report_sentences = split_into_sentences(patient_reports['description'])
@@ -200,42 +188,22 @@ def index_sentences(connection, index_name, patient_type, sentence_type, patient
             for i, sentence in enumerate(report_sentences):
                 sentence_id += 1
                 body_data = {"text": sentence, "patient": patient_id, "date": date, "position": i}
-                connection.index_doc(index_name, sentence_type, sentence_id, body_data)
+                con.index_doc(index, sentence_type, sentence_id, body_data)
                 settings.ids[patient_id] = settings.ids[patient_id].__add__([sentence_id])
         if int(patient_id) % 100 == 0:
             print "sentences of patient {} has been indexed.".format(patient_id)
     settings.update_ids()
-
-
-def update_form_values(form_name, fields_file):
-    current_values = settings.labels_possible_values
-    for label in current_values[form_name]:
-        if "condition" in current_values[form_name][label].keys():
-            print "already updated form values(conditions included)"
-            return
-    try:
-        with open(fields_file, "r") as ff:
-            trgt_values = json.load(ff, encoding='utf-8')
-            if form_name in current_values.keys():
-                for field in current_values[form_name].keys():
-                    current_values[form_name][field]['condition'] = \
-                        trgt_values['properties'][form_name]['properties'][field]['properties']['condition']
-                settings.labels_possible_values = current_values
-                settings.update_values()
-            else:
-                raise Exception
-    except:
-        print "error. couldn't update values file for {}".format(form_name)
-    return
+    print "Finished sentence indexing after {} minutes.".format((time.time() - start_time) / 60.0)
 
 
 if __name__ == '__main__':
     # start_es()
 
     settings.init("Configurations\\configurations.yml",
-                  "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+                  "..\\Data",
+                  "..\\results")
 
-    map_jfile = settings.global_settings['map_jfile']
+    map_file = settings.global_settings['initmap_jfile']
     host = settings.global_settings['host']
     index_name = settings.global_settings['index_name']
     type_name_pp = settings.global_settings['type_name_pp']
@@ -244,27 +212,14 @@ if __name__ == '__main__':
     type_name_f = settings.global_settings['type_name_f']
 
     connection = EsConnection(host)
-    #
-    # data_path = settings.global_settings['data_path']
-    # MyDeceases = store_deceases(connection, index_name, type_name_p, type_name_f, data_path,
-    #                             settings.global_settings['directory_p'], settings.global_settings['directory_f'],
-    #                             settings.global_settings['forms'])
 
-    # start_time = time.time()
-    # index_sentences(connection, index_name, type_name_pp, type_name_s,
-    #                 settings.ids['medical_info_extraction patient ids'])
-    # print "Finished sentence indexing after {} minutes.".format((time.time() - start_time) / 60.0)
+    data_path = settings.global_settings['data_path']
 
-    """
-    update_form_values("colorectaal", settings.global_settings['source_path_root'] + "Configurations" +
-                       "\\important_fields\\important_fields_colorectaal.json")
-
-    print "should fix ids file"
-    dict_key = settings.global_settings['index_name']+" patient ids"
-    dict_key1 = settings.global_settings['index_name']+" patients' ids in colorectaal"
-    # todo: for mamma also
-    settings.ids[dict_key] = settings.ids[dict_key1]
-    settings.update_ids()
+    MyDeceases = store_deceases(connection, index_name, type_name_p, type_name_f,
+                                data_path, settings.global_settings['directory_p'],
+                                settings.global_settings['directory_f'],
+                                settings.global_settings['csv_form_path'],
+                                settings.global_settings['forms'])
 
     text = "(%o_postnummer%) NEWLINE (%o_instelling%) NEWLINE (%o_aanhef%) NEWLINE (%o_titel%) (%o_naam_1%), " \
            "(%o_beroep%) NEWLINE (%o_adres%) NEWLINE (%o_postkode%)  (%o_plaats%) NEWLINE Zwolle, 27 oktober 2009 " \
@@ -273,15 +228,5 @@ if __name__ == '__main__':
            " de polsen en uitslag op meerdere plaatse. Deze uitslag is onlangs op komen zetten. Familie-anamnese: " \
            "geen reuma in familie. Met vriendelijke groet, NEWLINE Dr. Zallenga, reumatoloog"
     print remove_tokens(remove_codes(text))
-    """
 
-    # now to fix if not existing patient:
-    dict_key = settings.global_settings['index_name'] + " patient ids"
-    dict_key1 = settings.global_settings['index_name'] + " patients' ids in colorectaal"
-    new_list = []
-    for id_ in settings.ids[dict_key]:
-        if connection.exists(index_name, type_name_p, id_):
-            new_list.append(id_)
-    settings.ids[dict_key] = new_list
-    settings.ids[dict_key1] = new_list
-    settings.update_ids()
+    index_sentences(connection, index_name, type_name_p, type_name_s, settings.ids[index_name+' patient ids'])

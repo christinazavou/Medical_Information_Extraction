@@ -208,44 +208,50 @@ if __name__ == "__main__":
     decease = 'colorectaal'
     this_dir = os.path.dirname(os.path.realpath(__file__))
 
-    values_file = 'values_index.json'.replace('index', index)
-    values_file = os.path.join(this_dir.replace('src', 'results'), values_file)
+    fields_file = 'fields_index.json'.replace('index', index)
+    fields_file = os.path.join(this_dir.replace('src', 'results'), fields_file)
     ids_file = 'ids_index.json'.replace('index', index)
     ids_file = os.path.join(this_dir.replace('src', 'results'), ids_file)
 
     results_folder = sys.argv[1]
+    if len(sys.argv) > 2:
+        prediction_file = sys.argv[2]
+        folder_res_file = os.path.join(results_folder,
+                                       "distributionsnum".replace('num', filter(str.isdigit, prediction_file)))
 
-    decease_dict = json.load(open(values_file), encoding='utf-8')[decease]
+    decease_dict = json.load(open(fields_file), encoding='utf-8')[decease]
     decease_ids = json.load(open(ids_file), encoding='utf-8')[index+" patients' ids in "+decease]
 
     decease_names_dict = values_names_dict(decease_dict)
 
     """--------------------------------------golden truth visual analysis--------------------------------------------"""
-    decease_file = os.path.join(this_dir.replace('src', 'Data'), decease,
-                                "selection_decease.csv".replace('decease', decease))
-    if not os.path.isfile(decease_file):
-        decease_file = "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv"
-    if not os.path.isfile(decease_file):
-        decease_file = "C:\\Users\\Christina\\Documents\\Ads_Ra_0\\selection_colon.csv"
-    print "decease_file: {}".format(decease_file)
+    # decease_file = os.path.join(this_dir.replace('src', 'Data'), decease,
+    #                             "selection_decease.csv".replace('decease', decease))
+    # if not os.path.isfile(decease_file):
+    #     decease_file = "C:\\Users\\Christina Zavou\\Documents\\Data\\colorectaal\\selection_colorectaal.csv"
+    # if not os.path.isfile(decease_file):
+    #     decease_file = "C:\\Users\\Christina\\Documents\\Ads_Ra_0\\selection_colon.csv"
+    # print "decease_file: {}".format(decease_file)
 
-    fol = os.path.join(results_folder, "distributions_t")
-    if not os.path.exists(fol):
-        os.makedirs(fol)
-    true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, fol)
+    # fol = os.path.join(results_folder, "distributions_t")
+    # if not os.path.exists(fol):
+    #     os.makedirs(fol)
+    # true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, fol)
 
-    mj_file = os.path.join(results_folder, 'majority_scores.json')
-    maj_dict, maj_score = get_majority_assignment_score(true_counts, len(decease_ids))
-    with open(mj_file, 'w') as mf:
-        data = json.dumps(maj_dict, separators=[',', ':'], indent=4, sort_keys=True)
-        mf.write(data)
+    # mj_file = os.path.join(results_folder, 'majority_scores.json')
+    # maj_dict, maj_score = get_majority_assignment_score(true_counts, len(decease_ids))
+    # with open(mj_file, 'w') as mf:
+    #     data = json.dumps(maj_dict, separators=[',', ':'], indent=4, sort_keys=True)
+    #     mf.write(data)
 
     """---------------------------------------predictions visual analysis--------------------------------------------"""
-    # fol = os.path.join(results_folder, "distributions16")
     # preprocessor_file = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\" \
     #                     "preprocessor_0_1_1_0.p"
     # preprocessor = pickle.load(open(preprocessor_file, "rb"))
-    # results_counts = analyze_predictions(results_file, decease, decease_dict, decease_names_dict, results_folder)
+    if prediction_file and folder_res_file:
+        if not os.path.exists(folder_res_file):
+            os.makedirs(folder_res_file)
+        results_counts = analyze_predictions(prediction_file, decease, decease_dict, decease_names_dict, folder_res_file)
 
     """--------------------------------------heat maps visual analysis-----------------------------------------------"""
     # results_folder = "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\heatmap16\\"
