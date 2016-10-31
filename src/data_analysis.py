@@ -230,6 +230,7 @@ if __name__ == "__main__":
     print "decease_file: {}".format(decease_file)
 
     fol = os.path.join(results_folder, "distributions_t")
+    print "fol: {}".format(fol)
     if not os.path.exists(fol):
         os.makedirs(fol)
     true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, fol)
