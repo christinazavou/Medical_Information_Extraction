@@ -3,6 +3,10 @@ import json
 import ESutils
 import re
 import os
+import pickle
+import types
+
+from ctcue import predict
 
 
 def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled, preprocessor=None):
@@ -22,7 +26,6 @@ def condition_satisfied(golden_truth, labels_possible_values, current_form, fiel
             return True
     else:
         return False
-
 
 
 def not_accepted_patients_decease(decease):
@@ -117,6 +120,83 @@ def fix_ids(index_name, type_name_p):
     settings.update_ids()
 
 
+"""-----------------------------------------------------------------------------------------------------------------"""
+
+"""-----------------------------------------Load CtCue prediction model----------------------------------------------"""
+this_dir = os.path.dirname(os.path.realpath(__file__))
+pickle_path = os.path.join(this_dir, 'ctcue', "trained.model")
+clf = None
+try:
+    with open(pickle_path, "rb") as pickle_file:
+        contents = pickle_file.read().replace("\r\n", "\n")
+        clf = pickle.loads(contents)
+except ImportError:
+    print "Try manual dos2unix conversion of %s" % pickle_path
+"""------------------------------------------------------------------------------------------------------------------"""
+
+
+"""------------------------todo: check all these predictions....this way or something else?--------------------------"""
+
+
+# unchecked. should be checked at Zwolle
+def value_refers_to_patient(patient_reports, value):
+    text_to_check = []
+    if isinstance(patient_reports, types.ListType):
+        for report in patient_reports:
+            report_description = report['description']
+            text_to_check.append(report_description.replace(value, "<DIS>"))
+    else:
+        text_to_check.append(patient_reports['description'].replace(value, "<DIS>"))
+    _, score = predict.predict_prob(clf, text_to_check)
+    if score > 0.5:
+        return True, score
+    return False, score
+
+# todo: should check if a highligh can be sentence starting from a report description and ending at another report
+# description
+
+
+# unchecked.should be checked at Zwolle
+def sentence_refers_to_patient(patient_reports, sentence):
+    if isinstance(patient_reports, types.ListType):
+        for report in patient_reports:
+            if sentence in report:
+                # replace sentence with <DIS> to search for it
+                correct_reference, score = value_refers_to_patient(report, sentence)
+                return correct_reference, score
+    else:
+        if sentence in patient_reports:
+            correct_reference, score = value_refers_to_patient(patient_reports, sentence)
+            return correct_reference, score
+    # if not score:
+    #     print "something went wrong"
+    #     return False, 0
+
+
+def replace_sentence_tokens(sentence, replace_with):
+    """
+    in case ES highlight with pre and post tags <em> and </em> and we want to remove those call
+    function with empty replace_with
+    """
+    to_return = sentence
+    if replace_with == "<DIS>":
+        m = [re.match("<em>.*</em>", word) for word in sentence.split()]
+        for mi in m:
+            if mi:
+                to_return = to_return.replace(mi.group(), "<DIS>")
+    else:
+        to_return = to_return.replace("<em>", "").replace("</em>", "")
+    return to_return
+
+
+def tokens_in_sentence_refers_to_patient(sentence):
+    text_to_check = replace_sentence_tokens(sentence, "<DIS>")
+    _, score = predict.predict_prob(clf, text_to_check)
+    if score > 0.5:
+        return True, score
+    return False, score
+
+
 if __name__ == '__main__':
     """
     update_form_values("colorectaal", settings.global_settings['fields_config_file'])
@@ -134,3 +214,6 @@ if __name__ == '__main__':
     accepted_ids = combine_all_ids(current_ids, dict_key, dict_key1, dict_key2)
     # don't forget sentences ids !
     """
+    txt = "voor start van zesde behandelingsweek. Wordt steeds zwaarder. Vooral bij <em>defaecatie</em> pijnlijk. " \
+          "Niet bij zitten. Vermoeid. Geen rectaal bloedverliers. Geen"
+    print tokens_in_sentence_refers_to_patient(txt)

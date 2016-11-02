@@ -25,22 +25,10 @@ import nltk
 from abc import ABCMeta, abstractmethod
 import time
 
-from ctcue import predict
 from ESutils import EsConnection, start_es
 import settings
-
-
-"""-----------------------------------------Load CtCue prediction model----------------------------------------------"""
-thisdir = os.path.dirname(os.path.realpath(__file__))
-pickle_path = os.path.join(thisdir, 'ctcue', "trained.model")
-clf = None
-try:
-    with open(pickle_path, "rb") as pickle_file:
-        contents = pickle_file.read().replace("\r\n", "\n")
-        clf = pickle.loads(contents)
-except ImportError:
-    print "Try manual dos2unix conversion of %s" % pickle_path
-"""------------------------------------------------------------------------------------------------------------------"""
+from utils import value_refers_to_patient, sentence_refers_to_patient, tokens_in_sentence_refers_to_patient
+from utils import condition_satisfied
 
 
 def combine_assignment(value, evidence=None, score=None, comment=None):
@@ -55,160 +43,16 @@ def combine_assignment(value, evidence=None, score=None, comment=None):
     return assignment
 
 
-"""------------------------todo: check all these predictions....this way or something else?--------------------------"""
-
-
-def value_refers_to_patient(patient_reports, value):
-    text_to_check = []
-    if isinstance(patient_reports, types.ListType):
-        for report in patient_reports:
-            report_description = report['description']
-            text_to_check.append(report_description.replace(value, "<DIS>"))
-    else:
-        text_to_check.append(patient_reports['description'].replace(value, "<DIS>"))
-    _, score = predict.predict_prob(clf, text_to_check)
-    if score > 0.5:
-        return True, score
-    return False, score
-
-
-def sentence_refers_to_patient(patient_reports, sentence):
-    if isinstance(patient_reports, types.ListType):
-        for report in patient_reports:
-            if sentence in report:
-                # replace sentence with <DIS> to search for it
-                correct_reference, score = value_refers_to_patient(report, sentence)
-                break
-    else:
-        if sentence in patient_reports:
-            correct_reference, score = value_refers_to_patient(patient_reports, sentence)
-    if not score:
-        print "something went wrong"
-        return False, 0
-    return correct_reference, score
-
-
-def replace_sentence_tokens(sentence, replace_with):
-    to_return = sentence
-    if replace_with == "<DIS>":
-        m = [re.match("<em>.*</em>", word) for word in sentence.split()]
-        for mi in m:
-            if mi:
-                to_return = to_return.replace(mi.group(), "<DIS>")
-    else:
-        to_return = to_return.replace("<em>", "").replace("</em>","")
-    return to_return
-
-
-def tokens_in_sentence_refers_to_patient(sentence):
-    text_to_check = replace_sentence_tokens(sentence, "<DIS>")
-    _, score = predict.predict_prob(clf, text_to_check)
-    if score > 0.5:
-        return True, score
-    return False, score
 """-----------------------------------------------------------------------------------------------------------------"""
 
 
-def condition_satisfied(golden_truth, labels_possible_values, current_form, field_to_be_filled):
-    # note that values are not pre processed anywhere... i just check them as is
-    # for a given patient(the golden truth) check whether the field to be field satisfies its condition(if exist) or not
-    condition = labels_possible_values[current_form][field_to_be_filled]['condition']
-    if condition == "":
-        return True
-    conditioned_field, condition_expression = re.split(' !?= ', condition)
-    if "!=" in condition:
-        if golden_truth[conditioned_field] != condition_expression:
-            return True
-    elif "==" in condition:
-        if golden_truth[conditioned_field] == condition_expression:
-            return True
-    else:
-        return False
+def interpolate_score(es_score, predict_score):
+    pass
 
-
-def multi_should_body(q_field, value, description):
-    should_body = [
-                  {
-                      "match_phrase": {
-                          q_field: {
-                              "query": value,
-                              "slop": 15
-                          }
-                      }
-                  },
-                  {
-                      "match_phrase": {
-                          q_field: {
-                              "query": description+" "+value,
-                              "slop": 100
-                          }
-                      }
-                  }
-              ]
-    return should_body
 
 # todo: make it more abstract !!
 
 # todo: put in query a minimum match score and the way to calculate score, and proximity as well
-
-
-def phrase_match_body(query, field=None, slop=0):
-    if not field:
-        field = 'report.description'
-    body = {
-        "match_phrase": {
-            field: {
-                "query": query,
-                "slop": slop
-            }
-        }
-    }
-    # can also add "boost":boost_number
-    return body
-
-
-def get_highlight_search_body(query, patient_id, field=None, pre_tags=None, post_tags=None, should_body=None):
-
-    if not field:
-        field = 'report.description'
-    if not pre_tags:
-        pre_tags = ["<em>"]
-    if not post_tags:
-        post_tags = ["</em>"]
-    if not should_body:  # the should_body refers to the phrase_match boost
-        should_body = {}
-    # note: minimum_should_match can be ignored...so only if the should_body (in this case is a phrase-proximity
-    # appears it only boosts the score of that!)
-
-    highlight_search_body = {
-        "query": {
-            "bool": {
-                "must": {
-                    "match": {
-                        field: {
-                            "query": query
-                        }
-                    }
-                },
-                "should": should_body,
-                "filter": {
-                    "term": {
-                        "_id": patient_id
-                    }
-                }
-            }
-        },
-        "highlight": {
-            "pre_tags": pre_tags,
-            "post_tags": post_tags,
-            "order": "score",
-            "fields": {field: {}},
-            "type": "fvh",
-            "fragment_size": 150,
-            "number_of_fragments": 5
-        }
-    }
-    return highlight_search_body
 
 
 class Algorithm:
