@@ -11,8 +11,7 @@ from ESutils import EsConnection, start_es
 import settings
 from utils import check_highlight_relevance
 from utils import condition_satisfied
-from queries import date_query, match_query_with_operator, match_phrase_query, term_query, search_body
-import queries
+from queries import date_query, match_query_with_operator, match_phrase_query, term_query, search_body, highlight_query
 """
 Input:
 Output:
@@ -59,21 +58,29 @@ def interpolate_score(es_score, predict_score):
 
 """-----------------------------------------------------------------------------------------------------------------"""
 
+# todo: search also with synonyms .. but should ignore NormQuery factor
+
 
 class Algorithm:
     __metaclass__ = ABCMeta
 
-    def __init__(self, con, index_name, search_type, results_file, algo_labels_possible_values,
-                 min_accept_score, with_unknowns):
+    def __init__(self, con, index_name, search_type, results_file, algo_labels_possible_values, with_unknowns,
+                 default_field=None, boost_fields=None, patient_relevant=False):
         self.con = con
         self.index_name = index_name
         self.search_type = search_type
         self.results_file = results_file
         self.labels_possible_values = algo_labels_possible_values
-        self.min_accept_score = min_accept_score
         self.with_unknowns = with_unknowns
         self.assignments = {}
         self.current_patient_reports = None
+        self.patient_relevant = patient_relevant
+        if not default_field:
+            default_field = 'report.description'
+        self.default_field = default_field
+        if not boost_fields:
+            boost_fields = []
+        self.boost_fields = boost_fields
 
     @abstractmethod
     def assign(self, assign_patients, assign_forms):
@@ -91,57 +98,87 @@ class Algorithm:
         """
         Check all highlights to see if there is an accepted evidence of assigning the value
         """
+        if self.patient_relevant is False:  # the check if evidences(highlights) are relevant to patient is switched off
+            return 1, None
         if not highlights:
-            return False
-        # todo: check highlights if a variable is set to check the predict model
+            return 0, None
         scores = [0 for highlight in highlights]
         for i, highlight in enumerate(highlights):
             scores[i] = check_highlight_relevance(highlight, self.current_patient_reports, query_text)
         score, idx = self.pick_score_and_index(scores)
         return score, idx
 
+    # todo: find what min_score I should use in queries ... maybe put the number of must queries ?
+
     def pick_score_and_index(self, scores):
+        if not scores:
+            return 0, None
         # return the highest score and its index
         sorted_scores = sorted(scores)
         max_idx = len(sorted_scores) - 1
         idx = scores.index((sorted_scores[max_idx]))
-        # todo: put the min_accept_score in elastic_search query
-        while sorted_scores[max_idx] < self.min_accept_score:
+        while sorted_scores[max_idx] < self.min_score:
             max_idx -= 1
             idx = scores.index(sorted_scores[max_idx])
             if max_idx < 0:
-                return None, None
+                return 0, None
         return scores[idx], idx
 
     def score_and_evidence(self, query_text, search_results, highlight_field):
-        if search_results['hits']['hits']['total'] > 0:
-            score_relevace, h_idx = self.is_accepted(query_text,
-                                                     search_results['hits']['hits'][0]['highlight'][highlight_field])
-            if score_relevace > 0:
-                score_search = search_results['hits']['hits'][0]['_score']
-                evidence_search = search_results['hits']['hits'][0]['highlight'][highlight_field][h_idx]
-                return score_search, evidence_search
+        """
+        note: ES results are inconsistent so check both ways of finding total, highlight and score
+        """
+        # todo: check if only one way
+        total = 0
+        if 'total' in search_results['hits'].keys():
+            total = search_results['hits']['total']
+            # print "total with 1st way"
+        elif 'total' in search_results['hits']['hits'].keys():
+            total = search_results['hits']['hits']['total']
+            # print "total with 2nd way"
+
+        if total > 0:
+            highlights = []
+            if 'highlight' in search_results['hits']['hits'][0].keys():
+                highlights = search_results['hits']['hits'][0]['highlight']
+                # print "highlight with 1st way"
+            elif 'highlight' in search_results['hits']['hits'][0]['_source'].keys():
+                highlights = search_results['hits']['hits'][0]['_source']['highlight']
+                # print "highlight with 2nd way"
+
+            score_relevance, h_idx = self.is_accepted(query_text, highlights[highlight_field])
+            if score_relevance > 0:
+                # results is accepted and we take the query's score (but evidence may be not tested)
+                if '_score' in search_results['hits']['hits'][0].keys():
+                    # print "score with 1st way"
+                    score_search = search_results['hits']['hits'][0]['_score']
+                else:
+                    score_search = search_results['hits']['hits'][0]['_source']['_score']
+                    # print "score with 2nd way"
+                if h_idx:
+                    # evidence is accepted too (from patient relevance model)
+                    evidence_search = highlights[highlight_field][h_idx]
+                    return score_search, evidence_search
+                return score_search, None
+            else:
+                return None, None
         else:
             return None, None
 
 
 class BaseAlgorithm(Algorithm):
 
-    def __init__(self, con, index_name, search_type, results_file, algo_labels_possible_values, min_accept_score,
-                 with_unknowns, tf=False):
-        super(BaseAlgorithm, self).__init__(con, index_name, search_type, results_file,
-                                                algo_labels_possible_values, min_accept_score, with_unknowns)
-        if tf:
-            self.default_field = 'report.description.dutch_tf_description'
-            self.boost_field = 'report.description'
-        else:
-            self.default_field = 'report.description'
-            self.boost_field = 'report.description.dutch_tf_description'
+    def __init__(self, con, index_name, search_type, results_file, algo_labels_possible_values,
+                 with_unknowns, patient_relevant, default_field=None, boost_fields=None, min_score=0):
+        super(BaseAlgorithm, self).__init__(con, index_name, search_type, results_file, algo_labels_possible_values,
+                                            with_unknowns, default_field, boost_fields, patient_relevant)
+        self.min_score = min_score
 
     def assign(self, assign_patients, assign_forms):
         # assign values to all assign_patients for all assign_forms
         start_time = time.time()
         for patient_id in assign_patients:
+            self.con.refresh(self.index_name)
             patient_forms = {}
             doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
             self.current_patient_reports = doc['report']
@@ -163,12 +200,13 @@ class BaseAlgorithm(Algorithm):
                 values = self.labels_possible_values[form_id][label]['values']
                 description = self.labels_possible_values[form_id][label]['description']
                 if values == "unknown":
-                    self.assign_open_question()
+                    label_assignment = self.assign_open_question()
                 else:
-                    self.assign_one_of_k(patient_id, values, description)
+                    label_assignment = self.assign_one_of_k(patient_id, values, description)
+                if label_assignment:
+                    patient_form_assign[label] = label_assignment
             else:  # in case condition is unsatisfied fill it with ""
-                patient_form_assign[label] = {"search_for": 'nothing', "value": '',
-                                              "comment": "condition unsatisfied."}
+                patient_form_assign[label] = combine_assignment('', comment="condition unsatisfied.")
         return patient_form_assign
 
     def make_unary_decision(self, patient_id, value, description):
@@ -181,27 +219,30 @@ class BaseAlgorithm(Algorithm):
         @value is 'Yes' or 'Ja'
         """
         if description == 'Anders':
-            pass
+            print "todo"
+            return None
         elif description == 'Onbekend':
-            pass
+            print "todo"
+            return None
         else:
             must_body = match_query_with_operator(self.default_field, description, operator='OR')
             should_body = list()
             should_body.append(match_query_with_operator(self.default_field, description, operator='AND'))
             should_body.append(match_phrase_query(self.default_field, description, slop=100))
-            should_body.append(match_query_with_operator(self.boost_field, description, operator='OR', boost=0.2))
-            should_body.append(match_query_with_operator(self.boost_field, description, operator='AND', boost=0.2))
-            should_body.append(match_phrase_query(self.boost_field, description, slop=100, boost=0.2))
+            for boost_field in self.boost_fields:
+                should_body.append(match_query_with_operator(boost_field, description, operator='OR', boost=0.2))
+                should_body.append(match_query_with_operator(boost_field, description, operator='AND', boost=0.2))
+                should_body.append(match_phrase_query(boost_field, description, slop=100, boost=0.2))
             filter_body = term_query("_id", patient_id)
-            highlight_body = queries.highlight_body(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-            body = search_body(must_body, should_body, filter_body, highlight_body)
+            highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
+            body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
 
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
             if score_search:
-                combine_assignment(value, evidence_search, score_search)
+                return combine_assignment(value, evidence_search, score_search)
             else:
-                combine_assignment(value="", comment="No evidence found on description")
+                return combine_assignment(value="", comment="No evidence found on description")
 
     def make_binary_and_ternary_decision(self, patient_id, values, description):
         """
@@ -215,42 +256,43 @@ class BaseAlgorithm(Algorithm):
         """
         must_body = list()
         must_body.append(match_phrase_query(self.default_field, description, slop=50))
-        must_body.append(match_phrase_query(self.boost_field, description, slop=50, boost=0.2))
+        for boost_field in self.boost_fields:
+            must_body.append(match_phrase_query(boost_field, description, slop=50, boost=0.2))
         filter_body = term_query("_id", patient_id)
-        highlight_body = queries.highlight_body(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-        body = search_body(must_body, {}, filter_body, highlight_body)
+        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
+        body = search_body(must_body, {}, filter_body, highlight_body, self.min_score)
 
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
         if score_search:
             value = 'Yes' if 'Yes' in values else 'Ja'
-            combine_assignment(value, evidence_search, score_search)
-            return
+            return combine_assignment(value, evidence_search, score_search)
         elif 'Onbekend' in values:
             should_body = list()
             should_body.append(match_query_with_operator(self.default_field, description, operator='AND'))
             should_body.append(match_phrase_query(self.default_field, description, slop=20))
-            should_body.append(match_query_with_operator(self.boost_field, description, operator='AND', boost=0.2))
-            should_body.append(match_phrase_query(self.boost_field, description, slop=20, boost=0.2))
-            body = search_body(must_body, should_body, filter_body, highlight_body)
+            for boost_field in self.boost_fields:
+                should_body.append(match_query_with_operator(boost_field, description, operator='AND', boost=0.2))
+                should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
+            body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
 
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
             if score_search:
-                combine_assignment('Onbekend', evidence_search, score_search, 'onbekend available, relaxed query')
-                return
+                return combine_assignment('Onbekend', evidence_search, score_search, 'onbekend available, relaxed query')
         value = 'No' if 'No' in values else 'Nee'
-        combine_assignment(value, comment='no description match or no onbekend available')
+        return combine_assignment(value, comment='no description match or no onbekend available')
 
     def assign_anders(self, patient_id, description):
         must_body = match_query_with_operator(self.default_field, description, operator='OR')
         should_body = list()
         should_body.append(match_phrase_query(self.default_field, description, slop=20))
-        should_body.append(match_query_with_operator(self.boost_field, description, operator='OR', boost=0.2))
-        should_body.append(match_phrase_query(self.boost_field, description, slop=20, boost=0.2))
+        for boost_field in self.boost_fields:
+            should_body.append(match_query_with_operator(boost_field, description, operator='OR', boost=0.2))
+            should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
         filter_body = term_query("_id", patient_id)
-        highlight_body = queries.highlight_body(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-        body = search_body(must_body, should_body, filter_body, highlight_body)
+        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
+        body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
 
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(description, search_results, self.default_field)
@@ -259,16 +301,18 @@ class BaseAlgorithm(Algorithm):
         must_body = match_query_with_operator(self.default_field, value, operator='AND')
         should_body = list()
         should_body.append(match_phrase_query(self.default_field, value, slop=20))
-        should_body.append(match_query_with_operator(self.boost_field, description, operator='AND', boost=0.2))
-        should_body.append(match_query_with_operator(self.boost_field, description, operator='OR', boost=0.2))
-        should_body.append(match_phrase_query(self.boost_field, description, slop=20, boost=0.2))
         # description search will only make sense if used as phrase match search with the value.
         # otherwise it will add the same score to all value searches
         should_body.append(match_phrase_query(self.default_field, description + " " + value, slop=100))
-        should_body.append(match_phrase_query(self.boost_field, description + " " + value, slop=100, boost=0.2))
+        # todo: instead of list ... do one query with all boost_fields
+        for boost_field in self.boost_fields:
+            should_body.append(match_query_with_operator(boost_field, description, operator='AND', boost=0.2))
+            should_body.append(match_query_with_operator(boost_field, description, operator='OR', boost=0.2))
+            should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
+            should_body.append(match_phrase_query(boost_field, description + " " + value, slop=100, boost=0.2))
         filter_body = term_query("_id", patient_id)
-        highlight_body = queries.highlight_body(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-        body = search_body(must_body, should_body, filter_body, highlight_body)
+        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
+        body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
 
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(value, search_results, self.default_field)
@@ -285,7 +329,7 @@ class BaseAlgorithm(Algorithm):
 
         note: can also use conditions: e.g. if equals in a must, if not equals, in a must_not
         """
-        # todo: use conditions as well
+        # todo: use conditions as well (in queries)
         # todo: could do it with querying all values the same time and pick best, but i didn't find how.. the dis_max
         # could be used ..
 
@@ -302,49 +346,31 @@ class BaseAlgorithm(Algorithm):
                 # ties
                 winner = random.randint(0, len(the_scores) - 1)
                 idx = scores.index(the_scores[winner])
-                combine_assignment(values[idx], evidences[idx], scores[idx], 'random from ties')
-                return
+                return combine_assignment(values[idx], evidences[idx], scores[idx], 'random from ties')
             idx = scores.index(sorted_scores[-1])
-            combine_assignment(values[idx], evidences[idx], scores[idx])
-            return
+            return combine_assignment(values[idx], evidences[idx], scores[idx])
         else:
             if 'Anders' in values:
                 idx_anders = values.index('Anders')
                 scores[idx_anders], evidences[idx_anders] = self.assign_anders(patient_id, description)
                 if scores[idx_anders]:
-                    combine_assignment('Anders', evidences[idx_anders], scores[idx_anders])
-                    return
-        combine_assignment("", comment='no value match score. neither anders')
+                    return combine_assignment('Anders', evidences[idx_anders], scores[idx_anders])
+        return combine_assignment("", comment='no value match score. neither anders')
 
     def assign_one_of_k(self, patient_id, values, description):
         if decision_is_unary(values):
-            self.make_unary_decision(patient_id, values, description)
+            return self.make_unary_decision(patient_id, values, description)
         elif decision_is_binary_and_ternary(values)[0]:
-            self.make_binary_and_ternary_decision(patient_id, values, description)
+            return self.make_binary_and_ternary_decision(patient_id, values, description)
         else:
-            self.pick_value_decision(patient_id, values, description)
+            return self.pick_value_decision(patient_id, values, description)
 
     def assign_open_question(self):
         if not self.with_unknowns:
-            return
-        """
-        # for open-questions
-        # todo: highlight description search or index sentences ??!!
-        highlight_search_body = get_highlight_search_body(str(description), self.fuzziness, patient_id)
-        res = self.con.search(index=self.index_name, body=highlight_search_body, doc_type=self.search_type)
-        correct_hit = res['hits']['hits'][0] if res['hits']['total'] > 0 else None
-        if correct_hit:
-            # todo: replace <em> and </em> of highlighted sentence first !!!!!!
-            # todo: check min_accept_score
-            assignment = combine_assignment(correct_hit['highlight']['report.description'][0])
-        else:
-            assignment = combine_assignment("", "didn't find something similar.")
-        return assignment
-        """
+            return None
+        # todo: either highlight description assignment or index sentences ...
 
-    # todo: search_for = "one possible value" ..
     # TODO: what about "Tx / onbekend" ?
-    # todo: put the min_accept_score in elastic_search query
 
 
 class RandomAlgorithm(Algorithm):
@@ -403,22 +429,18 @@ if __name__ == '__main__':
     index = settings.global_settings['index_name']
     type_name_p = settings.global_settings['type_name_p']
     type_name_s = settings.global_settings['type_name_s']
-    type_name_pp = settings.global_settings['type_name_pp']
     possible_values = settings.labels_possible_values
     used_patients = settings.find_used_ids()
-    print "tot patiens:{}, some patients:{}".format(len(used_patients), used_patients[0:8])
-    pct = settings.global_settings['patients_pct']
-    used_patients = random.sample(used_patients, int(pct * len(used_patients)))
-    print "after pct applied: tot patiens:{}, some patients:{}".format(len(used_patients), used_patients[0:8])
 
     connection = EsConnection(settings.global_settings['host'])
     unknowns = settings.global_settings['unknowns'] == "include"
 
     if settings.global_settings['algo'] == 'random':
-        my_algorithm = RandomAlgorithm(connection, index, type_name_pp, settings.get_results_filename(),
-                                       possible_values, 0, unknowns)
+        my_algorithm = RandomAlgorithm(connection, index, type_name_p, settings.get_results_filename(),
+                                       possible_values, unknowns)
     else:
-        tf = settings.global_settings['algo'] == 'tf'
         my_algorithm = BaseAlgorithm(connection, index, type_name_p, settings.get_results_filename(), possible_values,
-                                     0, unknowns, tf=tf)
+                                     unknowns, settings.global_settings['patient_relevant'],
+                                     settings.global_settings['default_field'],
+                                     settings.global_settings['boost_fields'], settings.global_settings['min_score'])
     ass = my_algorithm.assign(used_patients, used_forms)

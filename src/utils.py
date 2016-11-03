@@ -50,8 +50,10 @@ def fix_ids_of_decease(ids, decease, index):
     return ids
 
 
-def combine_all_ids(ids, dict_key, dict_key1, dict_key2):
-    ids[dict_key] = ids[dict_key1] + ids[dict_key2]
+def combine_all_ids(ids, dict_key, dict_key1, dict_key2=None):
+    ids[dict_key] = ids[dict_key1]
+    if dict_key2:
+        ids[dict_key] += ids[dict_key2]
     ids[dict_key] = list(set(ids[dict_key]))
     return ids
 
@@ -74,7 +76,7 @@ def update_form_values(form_name, fields_file):
     current_values = settings.labels_possible_values
     for label in current_values[form_name]:
         if "condition" in current_values[form_name][label].keys():
-            print "already updated form values(conditions included)"
+            print "already updated form values(conditions included) for {}".format(form_name)
             return
     try:
         with open(fields_file, "r") as ff:

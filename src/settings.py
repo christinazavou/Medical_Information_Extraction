@@ -76,14 +76,23 @@ def init(config_file, data_path, results_path):
 
     # --------------------------------------------fix some configurations----------------------------------------------#
 
-    if len(global_settings['preprocess']) > 0:
+    if 'pre_process' in global_settings.keys() and len(global_settings['pre_process']) > 0:
         get_preprocess_patient_name()
+        global_settings['type_name_s_preprocessed'] = (doc['type_name_s'] + global_settings['type_name_pp']).\
+            replace("patient", "")
 
-    global_settings['type_name_s_preprocessed'] = (doc['type_name_s'] + global_settings['type_name_pp']).\
-        replace("patient", "")
+    if global_settings['map_index_file'].__contains__('new_indexed_body'):
+        if os.path.isdir("C:\\Users\\Christina Zavou"):
+            global_settings['map_index_file'] = global_settings['map_index_file'].replace('5', '2')
+        else:
+            global_settings['map_index_file'] = global_settings['map_index_file'].replace('2', '5')
 
-    if global_settings['patient_W2V'] == "":
-        global_settings['patient_W2V'] = global_settings['type_name_pp']
+    if 'default_field' not in global_settings.keys():
+        global_settings['default_field'] = 'report.description'
+    if 'boost_fields' not in global_settings.keys():
+        global_settings['boost_fields'] = []
+    if 'min_score' not in global_settings.keys():
+        global_settings['min_score'] = 0
 
     # ---------------------------------------ids and labels_possible_values--------------------------------------------#
 
@@ -175,7 +184,7 @@ def get_results_filename():
     global global_settings
     num = filter(str.isdigit, global_settings['configFile'])
     results_filename = os.path.join(global_settings['results_path'], "confnum_results.json".replace("num", num))
-    if global_settings['eval_file'] == global_settings['results_path']:
+    if global_settings['eval_file'] == "":
         if global_settings['run_algo']:
             global_settings['eval_file'] = results_filename
         else:

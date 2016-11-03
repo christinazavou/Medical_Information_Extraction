@@ -1,8 +1,8 @@
 import subprocess
 import time
-import json,string
+import json
 from elasticsearch import Elasticsearch
-from elasticsearch import ImproperlyConfigured, ElasticsearchException, TransportError, SSLError
+from elasticsearch import TransportError, SSLError
 
 import settings
 
@@ -89,16 +89,14 @@ class EsConnection:
         if res['status'] == "red":
             print("health status is %s " % res['status'])
 
-    def create_index(self, index_name, if_exist="discard", shards=5, replicas=1, body=None):  # shards=4914,replicas=0
+    def create_index(self, index_name, shards=5, replicas=1, body=None):
         """
         Create an index in Elastic Search
-        if_exist="discard" or "keep"
-        shards and replicas should be given in case of Big Data
+        (shards and replicas should be given in case of Big Data)
         """
-        if if_exist == "discard":
-            if self.es.indices.exists(index_name):
-                print("deleting '%s' index..." % index_name)
-                self.es.indices.delete(index=index_name)
+        if self.es.indices.exists(index_name):
+            print("deleting '%s' index..." % index_name)
+            self.es.indices.delete(index=index_name)
         request_body = {
             "settings": {
                 "number_of_shards": shards,
@@ -108,8 +106,8 @@ class EsConnection:
         if body:
             request_body = body
         print("creating '%s' index..." % index_name)
-        print request_body
         self.es.indices.create(index=index_name, body=request_body)
+        time.sleep(50)
         ind = self.es.indices.get(index_name)
         return ind
 
@@ -176,13 +174,16 @@ class EsConnection:
 
     def search(self, index, body, doc_type=None):
         if doc_type:
-            res = self.es.search(index=index, doc_type=doc_type,body=body)
+            res = self.es.search(index=index, doc_type=doc_type, body=body)
         else:
             res = self.es.search(index=index, body=body)
         return res
 
     def exists(self, index_name, type_name, id_doc):
         return self.es.exists(index_name, type_name, id_doc)
+
+    def refresh(self, index_name):
+        self.es.indices.refresh(index_name)
 
     def documents(self, type_doc, ids):
         current = 0
@@ -223,15 +224,24 @@ class EsConnection:
 if __name__ == "__main__":
     # start_es()
     settings.init("Configurations\\configurations.yml",
-                  "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\")
+                  "..\\Data",
+                  "..\\results")
 
     con = EsConnection(settings.global_settings['host'])
-    patient_ids = settings.ids['medical_info_extraction patient ids']
+    index_name = settings.global_settings['index_name']
+    type_patient = settings.global_settings['type_name_p']
+    patient_ids = settings.find_used_ids()
     forms_ids = settings.global_settings['forms']
 
-    with open(settings.global_settings['map_jfile'], "r") as json_file:
-        index_body = json.load(json_file, encoding='utf-8')
-    con.create_index(index_name=settings.global_settings['index_name'], body=index_body)
+    # if settings.global_settings['map_index_file'].__contains__('new_indexed_body'):
+    #     with open(settings.global_settings['map_index_file'], "r") as json_file:
+    #         index_body = json.load(json_file, encoding='utf-8')
+    #     con.create_index(index_name=index_name, body=index_body)
+    # else:
+    #     con.create_index(index_name)
+    #     con.put_map(settings.global_settings['map_index_file'], index_name, type_patient)
+
+    con.refresh(index_name)
 
     """
     body = {
@@ -258,8 +268,10 @@ if __name__ == "__main__":
     #     print r
     # import collections
     # print isinstance(reps, collections.Iterable)
-    type_name_pp = settings.global_settings['type_name_pp']
-    col_ids = settings.ids['medical_info_extraction patients\' ids in colorectaal']
+
+    # type_name_pp = settings.global_settings['type_name_pp']
+    # col_ids = settings.ids['medical_info_extraction patients\' ids in colorectaal']
+
     # for i, doc in enumerate(con.documents(type_name_pp, col_ids)):
     #     pass
     # print len(col_ids)

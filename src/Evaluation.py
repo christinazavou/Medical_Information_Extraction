@@ -27,12 +27,12 @@ class Evaluation:
         self.index_name = index_name
         self.type_name_p = type_patient
         self.type_name_f = type_form
-        self.accuracy = 0.0
+        self.accuracy = 0.0  # should be calculated as average of fields accuracy (fields with no assignments ignored)
         self.file = ev_file
         self.chosen_labels_possible_values = chosen_labels_possible_values
         self.chosen_labels_accuracy = {}
-        self.chosen_labels_num = {}  # here i save how many patients were assign a value for that label
-        # since many patients are not assign some label that it's condition is not sat.
+        self.chosen_labels_num = {}  # how many patients were assign a value for each label
+        # (note: many patients are not assign labels due to unsatisfied conditions)
         for form in self.chosen_labels_possible_values:
             self.chosen_labels_accuracy[form] = {}
             self.chosen_labels_num[form] = {}
@@ -74,40 +74,40 @@ class Evaluation:
         return self.accuracy, self.chosen_labels_accuracy, self.chosen_labels_num
 
     def get_score(self, predictions, targets, form_id):
-        try:
-            chosen_labels = [label for label in self.chosen_labels_possible_values[form_id]]
-            if len(predictions) == 0:
-                print "no predictions"
-                return
-            for field in predictions:
-                if field in chosen_labels:
-                    if condition_satisfied(targets, self.chosen_labels_possible_values, form_id, field):
+        # note: in prediction some fields may not appear, whilst in targets all fields appear
+        chosen_labels = [label for label in self.chosen_labels_possible_values[form_id]]
+        if len(predictions) == 0:
+            print "no predictions"
+            return
+        for field in predictions:
+            if field in chosen_labels:
+                # todo: make it as a possibility to check or not conditions
+                if condition_satisfied(targets, self.chosen_labels_possible_values, form_id, field):
 
-                        res = predictions[field]['value']
-                        self.chosen_labels_num[form_id][field] += 1
+                    predicted = predictions[field]['value']
+                    self.chosen_labels_num[form_id][field] += 1
 
-                        if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
-                            # score for : one out of k
-                            if res == targets[field]:
-                                self.chosen_labels_accuracy[form_id][field] += 1.0
-                        else:
-                            pass
-                            # # score for : open-question (BLEU)
-                            # res_tokens = res.split(" ")
-                            # trgt_tokens = targets[field]
-                            # tmp_score = 0
-                            # for token in res_tokens:
-                            #     tmp_score += 1 if (token in trgt_tokens) and not(token in string.punctuation) else 0
-                            # tmp_score /= len(res_tokens)
-                            # score += tmp_score
-                            # self.chosen_labels_accuracy[form_id][field] += tmp_score
-                            # for the moment focus on 1-of-k
-        except:
-            print "some exception in eval score"
+                    if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
+                        # score for : one out of k
+                        if predicted == targets[field]:
+                            self.chosen_labels_accuracy[form_id][field] += 1.0
+                    else:
+                        pass
+                        # todo
+                        # # score for : open-question (BLEU)
+                        # res_tokens = res.split(" ")
+                        # trgt_tokens = targets[field]
+                        # tmp_score = 0
+                        # for token in res_tokens:
+                        #     tmp_score += 1 if (token in trgt_tokens) and not(token in string.punctuation) else 0
+                        # tmp_score /= len(res_tokens)
+                        # score += tmp_score
+                        # self.chosen_labels_accuracy[form_id][field] += tmp_score
+                        # for the moment focus on 1-of-k
 
 
 if __name__ == '__main__':
-    start_es()
+    # start_es()
     settings.init("Configurations\\configurations.yml",
                   "..\\Data",
                   "..\\results")
@@ -117,16 +117,16 @@ if __name__ == '__main__':
     type_name_p = settings.global_settings['type_name_p']
     type_name_f = settings.global_settings['type_name_f']
     type_name_s = settings.global_settings['type_name_s']
-    type_name_pp = settings.global_settings['type_name_pp']
+    # type_name_pp = settings.global_settings['type_name_pp']
     connection = EsConnection(host)
 
-    eval_file = "C:\\Users\\Christina\\Documents\\temp_mie\\conf16_results.json"
+    eval_file = "..\\results\\conf_results.json"
     evaluationsFilePath = os.path.join(settings.global_settings['results_path'], "evaluations.json")
 
-    # note: on type_name_p now
     ev = Evaluation(connection, index, type_name_p, type_name_f, eval_file, settings.labels_possible_values)
     score, fields_score, fields_num = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
-    evaluations_dict = {}
+    print score, fields_score, fields_num
+    evaluations_dict = dict()
     evaluations_dict['description'] = settings.get_run_description()
     evaluations_dict['file'] = eval_file
     evaluations_dict['score'] = score

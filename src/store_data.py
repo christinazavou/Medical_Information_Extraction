@@ -152,7 +152,7 @@ def store_deceases(con, index, type_name_p, type_name_f, data_path, directory_p,
         decease.index_form()
         decease.put_form_in_patients()
         my_deceases.append(decease)
-    print("--- %s seconds for annotate method---" % (time.time() - start_time))
+    print("--- %s seconds for store method---" % (time.time() - start_time))
     return my_deceases
 
 
@@ -197,21 +197,29 @@ if __name__ == '__main__':
                   "..\\Data",
                   "..\\results")
 
-    map_file = settings.global_settings['initmap_jfile']
+    map_file = settings.global_settings['map_index_file']
     host = settings.global_settings['host']
     index_name = settings.global_settings['index_name']
-    type_name_pp = settings.global_settings['type_name_pp']
+    # type_name_pp = settings.global_settings['type_name_pp']
     type_name_p = settings.global_settings['type_name_p']
-    type_name_s = settings.global_settings['type_name_s']
+    # type_name_s = settings.global_settings['type_name_s']
     type_name_f = settings.global_settings['type_name_f']
 
     connection = EsConnection(host)
 
+    if settings.global_settings['map_index_file'].__contains__('new_indexed_body'):
+        with open(settings.global_settings['map_index_file'], "r") as json_file:
+            index_body = json.load(json_file, encoding='utf-8')
+        connection.create_index(index_name=index_name, body=index_body)
+    else:
+        connection.create_index(index_name)
+        connection.put_map(settings.global_settings['map_index_file'], index_name, type_name_p)
+
     data_path = settings.global_settings['data_path']
 
     MyDeceases = store_deceases(connection, index_name, type_name_p, type_name_f,
-                                data_path, settings.global_settings['directory_p'],
-                                settings.global_settings['directory_f'],
+                                data_path, settings.global_settings['out_dossiers_path'],
+                                settings.global_settings['json_forms_directory'],
                                 settings.global_settings['csv_form_path'],
                                 settings.global_settings['forms'])
 
@@ -221,6 +229,6 @@ if __name__ == '__main__':
            "collega, NEWLINE Reden van verwijzing: arthritis of reuma? NEWLINE Anamnese: patient heeft veel pijn aan" \
            " de polsen en uitslag op meerdere plaatse. Deze uitslag is onlangs op komen zetten. Familie-anamnese: " \
            "geen reuma in familie. Met vriendelijke groet, NEWLINE Dr. Zallenga, reumatoloog"
-    print remove_tokens(remove_codes(text))
+    # print remove_tokens(remove_codes(text))
 
-    index_sentences(connection, index_name, type_name_p, type_name_s, settings.ids[index_name+' patient ids'])
+    # index_sentences(connection, index_name, type_name_p, type_name_s, settings.ids[index_name+' patient ids'])

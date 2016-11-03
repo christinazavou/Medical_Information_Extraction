@@ -49,7 +49,7 @@ def term_query(query_field, query_text):
     return body
 
 
-def highlight_body(query_field, pre_tags, post_tags):
+def highlight_query(query_field, pre_tags, post_tags):
     if not pre_tags:
         pre_tags = ["<em>"]
     if not post_tags:
@@ -66,20 +66,22 @@ def highlight_body(query_field, pre_tags, post_tags):
     return body
 
 
-def search_body(must_body=None, should_body=None, filter_body=None, highlight_body=None, min_should_match=0):
+def search_body(must_body=None, should_body=None, filter_body=None, highlight_body=None, min_should_match=0,
+                min_score=0):
 
     # note: minimum_should_match can be ignored...so only if the should_body (in this case is a phrase-proximity
     # appears it only boosts the score of that!)
 
     body = {
+        "min_score": min_score,
         "query": {
             "bool": {
                 "must": must_body,
                 "should": should_body,
-                "filter": filter_body
+                "filter": filter_body,
+                "minimum_should_match": min_should_match
             }
         },
-        "minimum_should_match": min_should_match,
         "highlight": highlight_body
     }
     return body
@@ -90,11 +92,11 @@ if __name__ == "__main__":
     value, description = 'Anamnese', "komen zetten"
     _id = '1504'
     pre_tag, post_tag = ["<em>"], ["</em>"]
-    must_body = match_query_with_operator(field, value, operator='AND')
-    should_body = list()
-    should_body.append(match_phrase_query(field, value, slop=15))
-    should_body.append(match_phrase_query(field, description+" "+value, slop=100))
-    filter_body = term_query("_id", _id)
-    highlight_body = highlight_body(field, pre_tag, post_tag)
+    must = match_query_with_operator(field, value, operator='AND')
+    should = list()
+    should.append(match_phrase_query(field, value, slop=15))
+    should.append(match_phrase_query(field, description+" "+value, slop=100))
+    filter_ = term_query("_id", _id)
+    highlight = highlight_query(field, pre_tag, post_tag)
     import json
-    print json.dumps(search_body(must_body, should_body, filter_body, highlight_body), indent=4)
+    print json.dumps(search_body(must, should, filter_, highlight), indent=4)
