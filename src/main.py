@@ -13,7 +13,7 @@ from read_data import read_patients
 from store_data import store_deceases, index_sentences, update_form_values
 import settings
 import final_baseline
-import Evaluation
+import evaluation
 
 
 if __name__ == '__main__':
@@ -159,7 +159,7 @@ if __name__ == '__main__':
     """---------------------------------------------Evaluate---------------------------------------------------------"""
 
     if settings.global_settings['eval_algo']:
-        myeval = Evaluation.Evaluation(con, index_name, type_patient, type_form, eval_file,
+        myeval = evaluation.Evaluation(con, index_name, type_patient, type_form, eval_file,
                                        chosen_labels_possible_values)
         score, fields_score = myeval.eval(chosen_patient_ids, forms_ids)
         evaluations_dict['evaluation'] += [{'description': settings.get_run_description(), 'file': eval_file,

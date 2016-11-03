@@ -12,7 +12,7 @@ from store_data import store_deceases, index_sentences
 import settings
 from utils import fix_ids_of_decease, combine_all_ids, update_form_values
 import algorithms
-import Evaluation
+import evaluation
 
 
 def read():
@@ -103,14 +103,15 @@ def evaluate_predictions():
     else:
         evaluations_dict = {'evaluation': []}
 
-    my_evaluation = Evaluation.Evaluation(con, index_name, type_patient, type_form,
+    my_evaluation = evaluation.Evaluation(con, index_name, type_patient, type_form,
                                           settings.global_settings['eval_file'],
                                           settings.chosen_labels_possible_values)
-    score, fields_score, fields_num = my_evaluation.eval(patient_ids_used, settings.global_settings['forms'])
+    score1, score2, fields_score, fields_num = my_evaluation.eval(patient_ids_used, settings.global_settings['forms'])
 
     evaluations_dict['evaluation'] += [{'description': settings.get_run_description(),
                                         'file': settings.global_settings['eval_file'],
-                                        'score': score,
+                                        'score_1_of_k': score1,
+                                        'score_open_q': score2,
                                         'fields_score': fields_score,
                                         'dte-time': time.strftime("%c"),
                                         'nums': fields_num}]
