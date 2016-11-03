@@ -66,7 +66,7 @@ def highlight_body(query_field, pre_tags, post_tags):
     return body
 
 
-def search_body(must_body=None, should_body=None, filter_body=None, highlight_body=None):
+def search_body(must_body=None, should_body=None, filter_body=None, highlight_body=None, min_should_match=0):
 
     # note: minimum_should_match can be ignored...so only if the should_body (in this case is a phrase-proximity
     # appears it only boosts the score of that!)
@@ -79,6 +79,7 @@ def search_body(must_body=None, should_body=None, filter_body=None, highlight_bo
                 "filter": filter_body
             }
         },
+        "minimum_should_match": min_should_match,
         "highlight": highlight_body
     }
     return body

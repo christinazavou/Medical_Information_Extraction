@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from nltk import tokenize
 import types
 import json
 import csv
@@ -10,7 +9,7 @@ import re
 
 from ESutils import EsConnection, start_es
 import settings
-from utils import remove_codes
+from utils import remove_codes, split_into_sentences
 
 
 def remove_tokens(source_text, to_remove=None):
@@ -155,11 +154,6 @@ def store_deceases(con, index, type_name_p, type_name_f, data_path, directory_p,
         my_deceases.append(decease)
     print("--- %s seconds for annotate method---" % (time.time() - start_time))
     return my_deceases
-
-
-def split_into_sentences(source_text):
-    list_of_sententces = tokenize.sent_tokenize(source_text)
-    return list_of_sententces
 
 
 def index_sentences(con, index, patient_type, sentence_type, patients_ids):
