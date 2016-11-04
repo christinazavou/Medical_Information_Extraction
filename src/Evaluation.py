@@ -27,7 +27,8 @@ class Evaluation:
         self.index_name = index_name
         self.type_name_p = type_patient
         self.type_name_f = type_form
-        self.accuracy = 0.0  # should be calculated as average of fields accuracy (fields with no assignments ignored)
+        self.accuracy_1ofk = 0.0  # average of fields accuracy (fields with no assignments ignored)
+        self.accuracy_open_q = 0.0
         self.file = ev_file
         self.chosen_labels_possible_values = chosen_labels_possible_values
         self.chosen_labels_accuracy = {}
@@ -60,18 +61,24 @@ class Evaluation:
                     patient_form_targets = doc[form_id]
                     self.get_score(patient_form_predictions, patient_form_targets, form_id)
 
-        num = 0
+        num_1ofk = 0
+        num_open_q = 0
         for form_id in eval_forms:
             for field in self.chosen_labels_accuracy[form_id]:
                 if not self.chosen_labels_num[form_id][field] == 0:
                     self.chosen_labels_accuracy[form_id][field] /= self.chosen_labels_num[form_id][field]
-                    num += 1
-                    self.accuracy += self.chosen_labels_accuracy[form_id][field]
-        self.accuracy /= num
+                    if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
+                        self.accuracy_1ofk += self.chosen_labels_accuracy[form_id][field]
+                        num_1ofk += 1
+                    else:
+                        self.accuracy_open_q += self.chosen_labels_accuracy[form_id][field]
+                        num_open_q += 1
+        self.accuracy_1ofk = self.accuracy_1ofk / num_1ofk if num_1ofk > 0 else None
+        self.accuracy_open_q = self.accuracy_open_q / num_open_q if num_open_q > 0 else None
 
-        print("score %f" % self.accuracy)
+        print"scores {} {}".format(self.accuracy_1ofk, self.accuracy_open_q)
         print("--- %s seconds for eval method---" % (time.time() - start_time))
-        return self.accuracy, self.chosen_labels_accuracy, self.chosen_labels_num
+        return self.accuracy_1ofk, self.accuracy_open_q, self.chosen_labels_accuracy, self.chosen_labels_num
 
     def get_score(self, predictions, targets, form_id):
         # note: in prediction some fields may not appear, whilst in targets all fields appear
@@ -93,17 +100,14 @@ class Evaluation:
                             self.chosen_labels_accuracy[form_id][field] += 1.0
                     else:
                         pass
-                        # todo
-                        # # score for : open-question (BLEU)
-                        # res_tokens = res.split(" ")
-                        # trgt_tokens = targets[field]
-                        # tmp_score = 0
-                        # for token in res_tokens:
-                        #     tmp_score += 1 if (token in trgt_tokens) and not(token in string.punctuation) else 0
-                        # tmp_score /= len(res_tokens)
-                        # score += tmp_score
-                        # self.chosen_labels_accuracy[form_id][field] += tmp_score
-                        # for the moment focus on 1-of-k
+                        # score for : open-question (BLEU)
+                        predicted_tokens = predicted.split(" ")
+                        trgt_tokens = targets[field].split(" ")
+                        tmp_score = 0
+                        for token in trgt_tokens:
+                            tmp_score += 1 if (token in predicted_tokens) and not(token in string.punctuation) else 0
+                        tmp_score /= len(predicted_tokens)
+                        self.chosen_labels_accuracy[form_id][field] += tmp_score
 
 
 if __name__ == '__main__':
@@ -124,12 +128,13 @@ if __name__ == '__main__':
     evaluationsFilePath = os.path.join(settings.global_settings['results_path'], "evaluations.json")
 
     ev = Evaluation(connection, index, type_name_p, type_name_f, eval_file, settings.labels_possible_values)
-    score, fields_score, fields_num = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
-    print score, fields_score, fields_num
+    score1, score2, fields_score, fields_num = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
+    print score1, score2, fields_score, fields_num
     evaluations_dict = dict()
     evaluations_dict['description'] = settings.get_run_description()
     evaluations_dict['file'] = eval_file
-    evaluations_dict['score'] = score
+    evaluations_dict['score_1of_k'] = score1
+    evaluations_dict['score_open_q'] = score2
     evaluations_dict['fields_score'] = fields_score
     evaluations_dict['dte-time'] = time.strftime("%c")
     evaluations_dict['nums'] = fields_num

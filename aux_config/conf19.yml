@@ -9,9 +9,9 @@ in_dossiers_path: "Data_path\\decease\\patients_selection_decease\\"
 out_dossiers_path: "Data_path\\decease\\patients_selection_decease_json\\"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
-read_dossiers: True  # if True -> makes jsons and index them in ES
-store_dossiers: True
-algo: "tf"  # "random" or baseline("tf" or "tf-idf")
+read_dossiers: False  # if True -> makes jsons and index them in ES
+store_dossiers: False
+algo: "tf_tf-idf"  # "random" or baseline("tf" or "tf-idf")
 run_algo: True
 forms: ["colorectaal"]  #,"mamma"]
 eval_algo: True
@@ -22,8 +22,8 @@ patient_relevant: False
 #tf_fields: ["report.description.dutch_tf_description", "report.description.tf_description"]
 #tfidf_fields: ["report.description", "report.description.dutch_description"]
 default_field: "report.description.dutch_tf_description"
-boost_fields: ["report.description.tf_description"]
-min_score: 1
+boost_fields: ["report.description.tf_description", "report.description", "report.description.dutch_description"]
+min_score: 2.5 # <-find it
 
 #pre_process: []  # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
 # if empty preprocess then take type_name_pp as is
