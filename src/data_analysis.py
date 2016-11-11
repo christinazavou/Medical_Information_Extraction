@@ -289,7 +289,7 @@ if __name__ == "__main__":
 
     settings.init("aux_config\\conf17.yml",
                   "C:\\Users\\Christina Zavou\\Documents\\Data",
-                  "C:\Users\Christina Zavou\Documents\\results4Nov")
+                  "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov")
 
     index = settings.global_settings['index_name']
     decease = 'colorectaal'
@@ -307,7 +307,7 @@ if __name__ == "__main__":
     # store_majority_scores(true_counts_)
 
     """---------------------------------------predictions visual analysis--------------------------------------------"""
-    results_counts_ = run_predictions(False)
+    results_counts_ = run_predictions(True)
     print "results counts:\n{}".format(json.dumps(results_counts_))
     """--------------------------------------heat maps visual analysis-----------------------------------------------"""
-    # run_heat_maps(true_counts_, results_counts_)
+    run_heat_maps(true_counts_, results_counts_)
