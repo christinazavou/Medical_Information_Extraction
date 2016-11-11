@@ -22,6 +22,10 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 """
 
 
+global the_current_body
+global comment_relevance
+
+
 def combine_assignment(value, evidence=None, score=None, comment=None):
     # create and return a dictionary assignment = {value:value, evidence:evidence, score:score}
     assignment = {'value': value}
@@ -94,19 +98,35 @@ class Algorithm:
     def assign_one_of_k(self, patient_id, values, description):
         pass
 
+    # def is_accepted(self, query_text, highlights):
+    #     """
+    #     Check all highlights to see if there is an accepted evidence of assigning the value
+    #     """
+    #   if self.patient_relevant is False:  # the check if evidences(highlights) are relevant to patient is switched off
+    #         return 1, None
+    #     if not highlights:
+    #         return 0, None
+    #     scores = [0 for highlight in highlights]
+    #     for i, highlight in enumerate(highlights):
+    #         scores[i] = check_highlight_relevance(highlight, self.current_patient_reports, query_text)
+    #     score, idx = self.pick_score_and_index(scores)
+    #     return score, idx
     def is_accepted(self, query_text, highlights):
         """
         Check all highlights to see if there is an accepted evidence of assigning the value
         """
+        global comment_relevance
         if self.patient_relevant is False:  # the check if evidences(highlights) are relevant to patient is switched off
-            return 1, None
+            return True, None
         if not highlights:
-            return 0, None
-        scores = [0 for highlight in highlights]
+            return False, None
+        scores = [False for highlight in highlights]
         for i, highlight in enumerate(highlights):
-            scores[i] = check_highlight_relevance(highlight, self.current_patient_reports, query_text)
-        score, idx = self.pick_score_and_index(scores)
-        return score, idx
+            scores[i], comment_relevance = check_highlight_relevance(highlight, self.current_patient_reports,
+                                                                     query_text)
+            if scores[i]:
+                return True, i
+        return False, None
 
     # todo: find what min_score I should use in queries ... maybe put the number of must queries ?
 
@@ -135,7 +155,7 @@ class Algorithm:
             # print "total with 1st way"
         elif 'total' in search_results['hits']['hits'].keys():
             total = search_results['hits']['hits']['total']
-            # print "total with 2nd way"
+            print "total with 2nd way"
 
         if total > 0:
             highlights = []
@@ -144,17 +164,20 @@ class Algorithm:
                 # print "highlight with 1st way"
             elif 'highlight' in search_results['hits']['hits'][0]['_source'].keys():
                 highlights = search_results['hits']['hits'][0]['_source']['highlight']
-                # print "highlight with 2nd way"
-
+                print "highlight with 2nd way"
+            if not highlights:
+                print "no highlights: ", the_current_body
+                return None, None
             score_relevance, h_idx = self.is_accepted(query_text, highlights[highlight_field])
-            if score_relevance > 0:
+            # if score_relevance > 0:
+            if score_relevance:
                 # results is accepted and we take the query's score (but evidence may be not tested)
                 if '_score' in search_results['hits']['hits'][0].keys():
                     # print "score with 1st way"
                     score_search = search_results['hits']['hits'][0]['_score']
                 else:
                     score_search = search_results['hits']['hits'][0]['_source']['_score']
-                    # print "score with 2nd way"
+                    print "score with 2nd way"
                 if h_idx:
                     # evidence is accepted too (from patient relevance model)
                     evidence_search = highlights[highlight_field][h_idx]
@@ -175,6 +198,8 @@ class BaseAlgorithm(Algorithm):
         self.min_score = min_score
 
     def assign(self, assign_patients, assign_forms):
+        print "remeinder: todo Anders and Onbekend desription in unary fields."
+        # todo: use thorax/adb search : thorax oor abd
         # assign values to all assign_patients for all assign_forms
         start_time = time.time()
         for patient_id in assign_patients:
@@ -210,6 +235,8 @@ class BaseAlgorithm(Algorithm):
         return patient_form_assign
 
     def make_unary_decision(self, patient_id, value, description):
+        global the_current_body
+
         """
         Search for the description and assign yes if description matches well, otherwise assign NaN.
 
@@ -218,11 +245,12 @@ class BaseAlgorithm(Algorithm):
 
         @value is 'Yes' or 'Ja'
         """
+        global comment_relevance
         if description == 'Anders':
-            print "todo"
+            # print "todo"
             return None
         elif description == 'Onbekend':
-            print "todo"
+            # print "todo"
             return None
         else:
             must_body = match_query_with_operator(self.default_field, description, operator='OR')
@@ -235,16 +263,20 @@ class BaseAlgorithm(Algorithm):
                 should_body.append(match_phrase_query(boost_field, description, slop=100, boost=0.2))
             filter_body = term_query("_id", patient_id)
             highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-            body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
-
+            body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
+            the_current_body = body
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
             if score_search:
+                if evidence_search:
+                    return combine_assignment(value, evidence_search, score_search, comment=comment_relevance)
                 return combine_assignment(value, evidence_search, score_search)
             else:
                 return combine_assignment(value="", comment="No evidence found on description")
 
     def make_binary_and_ternary_decision(self, patient_id, values, description):
+        global the_current_body
+        global comment_relevance
         """
         Search for the description and assign yes if description matches exactly
         Assign no if exact description cannot be found
@@ -255,35 +287,44 @@ class BaseAlgorithm(Algorithm):
         @values to know if 'Yes' or 'Ja' and if 'onbekend'
         """
         must_body = list()
-        must_body.append(match_phrase_query(self.default_field, description, slop=50))
+        must_body.append(match_phrase_query(self.default_field, description, slop=15))
         for boost_field in self.boost_fields:
-            must_body.append(match_phrase_query(boost_field, description, slop=50, boost=0.2))
+            must_body.append(match_phrase_query(boost_field, description, slop=15, boost=0.2))
         filter_body = term_query("_id", patient_id)
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-        body = search_body(must_body, {}, filter_body, highlight_body, self.min_score)
-
+        body = search_body(must_body, {}, filter_body, highlight_body, min_score=self.min_score)
+        the_current_body = body
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
         if score_search:
+            if score_search > 2:
+                print "the current body : ", the_current_body
             value = 'Yes' if 'Yes' in values else 'Ja'
+            if evidence_search:
+                return combine_assignment(value, evidence_search, score_search, comment=comment_relevance)
             return combine_assignment(value, evidence_search, score_search)
         elif 'Onbekend' in values:
             should_body = list()
             should_body.append(match_query_with_operator(self.default_field, description, operator='AND'))
-            should_body.append(match_phrase_query(self.default_field, description, slop=20))
+            should_body.append(match_phrase_query(self.default_field, description, slop=15))
             for boost_field in self.boost_fields:
                 should_body.append(match_query_with_operator(boost_field, description, operator='AND', boost=0.2))
-                should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
-            body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
-
+                should_body.append(match_phrase_query(boost_field, description, slop=15, boost=0.2))
+            body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
+            the_current_body = body
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
             if score_search:
-                return combine_assignment('Onbekend', evidence_search, score_search, 'onbekend available, relaxed query')
+                if evidence_search:
+                    return combine_assignment('Onbekend', evidence_search, score_search,
+                                              'onbekend available, relaxed query' + comment_relevance)
+                return combine_assignment('Onbekend', evidence_search, score_search, 'onbekend available, '
+                                                                                     'relaxed query')
         value = 'No' if 'No' in values else 'Nee'
         return combine_assignment(value, comment='no description match or no onbekend available')
 
     def assign_anders(self, patient_id, description):
+        global the_current_body
         must_body = match_query_with_operator(self.default_field, description, operator='OR')
         should_body = list()
         should_body.append(match_phrase_query(self.default_field, description, slop=20))
@@ -292,12 +333,13 @@ class BaseAlgorithm(Algorithm):
             should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
         filter_body = term_query("_id", patient_id)
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-        body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
-
+        body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
+        the_current_body = body
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(description, search_results, self.default_field)
 
     def get_value_score(self, patient_id, value, description):
+        global the_current_body
         must_body = match_query_with_operator(self.default_field, value, operator='AND')
         should_body = list()
         should_body.append(match_phrase_query(self.default_field, value, slop=20))
@@ -312,8 +354,8 @@ class BaseAlgorithm(Algorithm):
             should_body.append(match_phrase_query(boost_field, description + " " + value, slop=100, boost=0.2))
         filter_body = term_query("_id", patient_id)
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
-        body = search_body(must_body, should_body, filter_body, highlight_body, self.min_score)
-
+        body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
+        the_current_body = body
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(value, search_results, self.default_field)
 

@@ -10,9 +10,18 @@ from ESutils import EsConnection, start_es
 from read_data import read_patients
 from store_data import store_deceases, index_sentences
 import settings
-from utils import fix_ids_of_decease, combine_all_ids, update_form_values
+from utils import fix_ids_of_decease, combine_all_ids, update_form_values, make_ordered_dict_representation
 import algorithms
 import evaluation
+
+ordered_fields = ["LOCPRIM", "LOCPRIM2", "klachten_klacht2", "klachten_klacht3", "klachten_klacht1", "klachten_klacht4",
+                  "klachten_klacht88", "klachten_klacht99", "SCORECT", "SCORECT2", "RESTAG_SCORECT_1",
+                  "RESTAG_SCORECT2_1", "RESTAG_CT", "SCORECN", "SCORECN2", "RESTAG_SCORECN_1", "RESTAG_SCORECN2_1",
+                  "SCORECM", "SCORECM2", "RESTAG_SCORECM_1", "RESTAG_SCORECM2_1", "PROCOK", "mdo_chir",
+                  "geenresectie_irres", "geenresectie_meta", "geenresec_palltherYN", "pall_NO_reden",
+                  "pallther_chemo", "pallther_chemoSTUDIE", "pallther_RT", "pallther_RTstudie", "pallther_chemoRT",
+                  "pallther_chemoRTstudie", "COMORB", "COMORBCAR", "COMORBVAS", "COMORBDIA", "COMORBPUL",
+                  "COMORBNEU", "COMORBMDA", "COMORBURO"]
 
 
 def read():
@@ -112,7 +121,8 @@ def evaluate_predictions():
                                         'file': settings.global_settings['eval_file'],
                                         'score_1_of_k': score1,
                                         'score_open_q': score2,
-                                        'fields_score': fields_score,
+                                        'fields_score': make_ordered_dict_representation(ordered_fields,
+                                                                                         fields_score['colorectaal']),
                                         'dte-time': time.strftime("%c"),
                                         'nums': fields_num}]
 
@@ -137,11 +147,11 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 4:
-        configFilePath = "Configurations\\configurations.yml"
-        dataPath = "..\\Data"
-        # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
-        resultsPath = "..\\results"
-        # resultsPath = "C:\\Users\\Christina Zavou\\PycharmProjects\\Medical_Information_Extraction\\results"
+        configFilePath = "aux_config\\conf23.yml"
+        # dataPath = "..\\Data"
+        dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
+        # resultsPath = "..\\results"
+        resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov"
     else:
         configFilePath = sys.argv[1]
         dataPath = sys.argv[2]
@@ -159,10 +169,10 @@ if __name__ == '__main__':
 
     # todo: check if all patients reports have date so that i'll save the date as date
 
-    if settings.global_settings['read_dossiers']:
-        read()
-    if settings.global_settings['store_dossiers']:
-        store()
+    # if settings.global_settings['read_dossiers']:
+        # read()
+    # if settings.global_settings['store_dossiers']:
+        # store()
 
     """-------------------------------------------set params--------------------------------------------------------"""
     # to ensure we got values with conditions
@@ -187,7 +197,7 @@ if __name__ == '__main__':
     if settings.global_settings['eval_algo']:
         evaluate_predictions()
 
-    # """-----------------------------------------Word Embeddings------------------------------------------------------"""
+    # """---------------------------------------Word Embeddings------------------------------------------------------"""
     #
     # if settings.global_settings['run_W2V']:
     #     make_embeddings()

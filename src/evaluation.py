@@ -15,7 +15,7 @@ import algorithms
 import final_baseline
 from ESutils import start_es, EsConnection
 import settings
-from utils import condition_satisfied
+from utils import condition_satisfied, make_ordered_dict_representation
 
 
 labels_correct_values = {}  # for one patient!!
@@ -142,3 +142,17 @@ if __name__ == '__main__':
     with open(evaluationsFilePath, 'w') as jfile:
         json.dump(evaluations_dict, jfile, indent=4)
     print "Finish evaluating."
+
+    ordered_fields = ["LOCPRIM", "LOCPRIM2", "klachten_klacht2", "klachten_klacht3", "klachten_klacht1",
+                      "klachten_klacht4",
+                      "klachten_klacht88", "klachten_klacht99", "SCORECT", "SCORECT2", "RESTAG_SCORECT_1",
+                      "RESTAG_SCORECT2_1", "RESTAG_CT", "SCORECN", "SCORECN2", "RESTAG_SCORECN_1", "RESTAG_SCORECN2_1",
+                      "SCORECM", "SCORECM2", "RESTAG_SCORECM_1", "RESTAG_SCORECM2_1", "PROCOK", "mdo_chir",
+                      "geenresectie_irres", "geenresectie_meta", "geenresec_palltherYN", "pall_NO_reden",
+                      "pallther_chemo",
+                      "pallther_chemoSTUDIE", "pallther_RT", "pallther_RTstudie", "pallther_chemoRT",
+                      "pallther_chemoRTstudie", "COMORB", "COMORBCAR", "COMORBVAS", "COMORBDIA", "COMORBPUL",
+                      "COMORBNEU",
+                      "COMORBMDA", "COMORBURO"]
+
+    print make_ordered_dict_representation(ordered_fields, fields_score['colorectaal'])

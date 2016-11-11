@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import settings
 import json
 import ESutils
@@ -201,6 +203,8 @@ def report_of_highlight(reports, sentence, value=None):
     if isinstance(reports, types.ListType):
         for report in reports:
             if report.__contains__(replace_sentence_tokens(sentence)):
+                # print "report : {}".format(report.encode('utf-8'))
+                # print "sentence : {}".format(replace_sentence_tokens(sentence).encode('utf-8'))
                 to_return = report
                 if value:
                     for term in value.split(" "):
@@ -220,23 +224,61 @@ def report_of_highlight(reports, sentence, value=None):
     return None
 
 
+# def check_highlight_relevance(highlight, reports, value=None):
+#     """
+#     Gives maximum score achieved from one highlight (retrieved from sentences of highlight)
+#     """
+#     sentences_list = split_into_sentences(replace_sentence_tokens(highlight))
+#     scores = [0.0 for sentence in sentences_list]
+#     for i, sentence in enumerate(sentences_list):
+#         related1, score1 = patient_related(sentence_containing_value(sentence, value))
+#         related2, score2 = patient_related(report_of_highlight(reports, sentence))
+#         related3, score3 = patient_related(report_of_highlight(reports, sentence, value))
+#         if related1 or related1 or related1:
+#             scores[i] += score1 if score1 else 0
+#             scores[i] += score2 if score2 else 0
+#             scores[i] += score3 if score3 else 0
+#             scores[i] /= 3.0
+#     sorted_scores = sorted(scores)
+#     return sorted_scores[-1]
 def check_highlight_relevance(highlight, reports, value=None):
     """
     Gives maximum score achieved from one highlight (retrieved from sentences of highlight)
     """
+    list_reports = reports_as_list(reports)
     sentences_list = split_into_sentences(replace_sentence_tokens(highlight))
     scores = [0.0 for sentence in sentences_list]
     for i, sentence in enumerate(sentences_list):
         related1, score1 = patient_related(sentence_containing_value(sentence, value))
-        related2, score2 = patient_related(report_of_highlight(reports, sentence))
-        related3, score3 = patient_related(report_of_highlight(reports, sentence, value))
-        if related1 or related1 or related1:
-            scores[i] += score1 if score1 else 0
-            scores[i] += score2 if score2 else 0
-            scores[i] += score3 if score3 else 0
-            scores[i] /= 3.0
-    sorted_scores = sorted(scores)
-    return sorted_scores[-1]
+        related2, score2 = patient_related(report_of_highlight(list_reports, sentence))
+        related3, score3 = patient_related(report_of_highlight(list_reports, sentence, value))
+        if related1:
+            return related1, "from value in sentence"
+        if related2:
+            return related2, "from sentence in report"
+        if related3:
+            return related3, "from value in report"
+    return False, None
+
+
+def make_ordered_dict_representation(ordered_fields, unordered_dict):
+    import collections
+    ordered_dict = collections.OrderedDict()
+    for field in ordered_fields:
+        if field in unordered_dict.keys():
+            ordered_dict[field] = unordered_dict[field]
+    return ordered_dict
+
+
+def reports_as_list(reports):
+    to_return = []
+    if isinstance(reports, types.ListType):
+        for report in reports:
+            to_return.append(report['description'])
+        return to_return
+    else:
+        to_return.append(reports['description'])
+        return to_return
 
 
 if __name__ == '__main__':
@@ -323,4 +365,8 @@ if __name__ == '__main__':
                        "weer wat pijn op de borst te hebben . ik wacht de analyse van de cardioloog af en zal eind "
                        "mei a.s. de operatie proberen in te plannen . van de operatie en het postoperatieve beloop "
                        "zult u separaat bericht ontvangen . met vriendelijke groet , dr. v.b . nieuwenhuijs , chirurg"]
-    print "score ", check_highlight_relevance(txt, patient_reports, val)
+
+    # print "score ", check_highlight_relevance(txt, patient_reports, val)
+    txt = "86 jarige patient werd poliklinisch gezien in verband met een veranderd <em>defaecatie</em> patroon en een" \
+          " ijzergebreksanemie, differantiaal diagnostisch werd gedacht"
+    print patient_related(sentence_containing_value(txt, "Veranderde defaecatie"))
