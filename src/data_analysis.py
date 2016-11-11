@@ -139,6 +139,10 @@ def from_json_predictions_to_pandas(json_file, form_id, fields, preprocessor=Non
             for p_id in results.keys():
                 if results[p_id] and results[p_id][form_id]:
                     v = results.get(p_id, {}).get(form_id, {}).get(field, {}).get('value')
+                    if type(v) == list:
+                        v = v[0]
+                        if field == "klachten_klacht1":
+                            print "results[{}][{}][{}][value]={}".format(p_id, form_id, field, v)
                     v = 'Yes' if v == 'yes' else v
                     v = 'Nee' if v == 'nee' else v
                     v = 'Ja' if v == 'ja' else v
@@ -147,7 +151,6 @@ def from_json_predictions_to_pandas(json_file, form_id, fields, preprocessor=Non
                         # should check whether a true value equals v and set v to that
                         pass
                     results_to_analyze.setdefault(field, []).append(v)
-
     df_results = pd.DataFrame.from_dict(results_to_analyze)
     return df_results
 
@@ -281,12 +284,12 @@ def run_heat_maps(true_counts, results_counts):
 if __name__ == "__main__":
 
     true_counts = pickle.load(open('C:\Users\Christina Zavou\Documents\\results4Nov\\true_counts.p', 'rb'))
-    print json.dumps(true_counts)
-    exit()
+    print "true counts:\n{}".format(json.dumps(true_counts))
+    # exit()
 
-    settings.init("aux_config\\conf23.yml",
+    settings.init("aux_config\\conf17.yml",
                   "C:\\Users\\Christina Zavou\\Documents\\Data",
-                  "C:\\Users\\Christina Zavou\\Documents\\results4Nov")
+                  "C:\Users\Christina Zavou\Documents\\results4Nov")
 
     index = settings.global_settings['index_name']
     decease = 'colorectaal'
@@ -304,7 +307,7 @@ if __name__ == "__main__":
     # store_majority_scores(true_counts_)
 
     """---------------------------------------predictions visual analysis--------------------------------------------"""
-    results_counts_ = run_predictions(True)
-
+    results_counts_ = run_predictions(False)
+    print "results counts:\n{}".format(json.dumps(results_counts_))
     """--------------------------------------heat maps visual analysis-----------------------------------------------"""
-    run_heat_maps(true_counts_, results_counts_)
+    # run_heat_maps(true_counts_, results_counts_)
