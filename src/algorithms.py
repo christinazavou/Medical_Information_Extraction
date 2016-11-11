@@ -221,9 +221,7 @@ class BaseAlgorithm(Algorithm):
     def assign_patient_form(self, patient_id, form_id, doc_form):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:  # for each field in form
-            print "for patient {} and field {} check condition.".format(patient_id, label)
             if condition_satisfied(doc_form, self.labels_possible_values, form_id, label):
-                print "satisfied"
                 values = self.labels_possible_values[form_id][label]['values']
                 description = self.labels_possible_values[form_id][label]['description']
                 if values == "unknown":
@@ -233,7 +231,6 @@ class BaseAlgorithm(Algorithm):
                 if label_assignment:
                     patient_form_assign[label] = label_assignment
             else:  # in case condition is unsatisfied fill it with ""
-                print "un-satisfied"
                 patient_form_assign[label] = combine_assignment('', comment="condition unsatisfied.")
         return patient_form_assign
 
@@ -404,7 +401,7 @@ class BaseAlgorithm(Algorithm):
 
     def assign_one_of_k(self, patient_id, values, description):
         if decision_is_unary(values):
-            return self.make_unary_decision(patient_id, values, description)
+            return self.make_unary_decision(patient_id, values[0], description)
         elif decision_is_binary_and_ternary(values)[0]:
             return self.make_binary_and_ternary_decision(patient_id, values, description)
         else:
