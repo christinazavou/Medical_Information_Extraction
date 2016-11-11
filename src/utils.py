@@ -8,6 +8,7 @@ import os
 import pickle
 import types
 from nltk import tokenize
+import numpy as np
 
 from ctcue import predict
 
@@ -140,16 +141,9 @@ except ImportError:
 """------------------------------------------------------------------------------------------------------------------"""
 
 
-"""------------------------todo: check all these predictions....this way or something else?--------------------------"""
-
-
 def split_into_sentences(source_text):
     list_of_sentences = tokenize.sent_tokenize(source_text)
     return list_of_sentences
-
-
-# todo: should check if a highligh can be sentence starting from a report description and ending at another report
-# description
 
 
 def replace_sentence_tokens(sentence, replace_with=None):
@@ -172,92 +166,29 @@ def replace_sentence_tokens(sentence, replace_with=None):
 def patient_related(text_to_check):
     if not text_to_check:
         return None, None
-    # return False, 0
     _, score = predict.predict_prob(clf, text_to_check)
     if score > 0.5:
         return True, score
     return False, score
 
 
-def sentence_containing_value(sentence, value):
-    """
-    To check whether the term in highlighted sentence refer to patient
-    """
-    if not value:
-        return None
-    terms = value.split(" ")
-    for term in terms:
-        if sentence.__contains__(term):
-            sentence = sentence.replace(term, "<DIS>")
-    if sentence.__contains__("<DIS>"):
-        return sentence
-    else:
-        return None
-
-
-def report_of_highlight(reports, sentence, value=None):
-    """
-    To check whether the sentence highlighted in the report it appears refers to the patient,
-    or whether the terms of highlight in the report refer to the patient
-    """
-    if isinstance(reports, types.ListType):
-        for report in reports:
-            if report.__contains__(replace_sentence_tokens(sentence)):
-                # print "report : {}".format(report.encode('utf-8'))
-                # print "sentence : {}".format(replace_sentence_tokens(sentence).encode('utf-8'))
-                to_return = report
-                if value:
-                    for term in value.split(" "):
-                        to_return = to_return.replace(term, "<DIS>")
-                else:
-                    to_return = to_return.replace(sentence, "<DIS>")
-                return to_return
-    else:
-        if reports.__contains__(replace_sentence_tokens(sentence)):
-            to_return = reports
-            if value:
-                for term in value.split(" "):
-                    to_return = to_return.replace(term, "<DIS>")
-                else:
-                    to_return = to_return.replace(sentence, "<DIS>")
-            return to_return
-    return None
-
-
-# def check_highlight_relevance(highlight, reports, value=None):
-#     """
-#     Gives maximum score achieved from one highlight (retrieved from sentences of highlight)
-#     """
-#     sentences_list = split_into_sentences(replace_sentence_tokens(highlight))
-#     scores = [0.0 for sentence in sentences_list]
-#     for i, sentence in enumerate(sentences_list):
-#         related1, score1 = patient_related(sentence_containing_value(sentence, value))
-#         related2, score2 = patient_related(report_of_highlight(reports, sentence))
-#         related3, score3 = patient_related(report_of_highlight(reports, sentence, value))
-#         if related1 or related1 or related1:
-#             scores[i] += score1 if score1 else 0
-#             scores[i] += score2 if score2 else 0
-#             scores[i] += score3 if score3 else 0
-#             scores[i] /= 3.0
-#     sorted_scores = sorted(scores)
-#     return sorted_scores[-1]
-def check_highlight_relevance(highlight, reports, value=None):
-    """
-    Gives maximum score achieved from one highlight (retrieved from sentences of highlight)
-    """
-    list_reports = reports_as_list(reports)
-    sentences_list = split_into_sentences(replace_sentence_tokens(highlight))
-    scores = [0.0 for sentence in sentences_list]
-    for i, sentence in enumerate(sentences_list):
-        related1, score1 = patient_related(sentence_containing_value(sentence, value))
-        related2, score2 = patient_related(report_of_highlight(list_reports, sentence))
-        related3, score3 = patient_related(report_of_highlight(list_reports, sentence, value))
-        if related1:
-            return related1, "from value in sentence"
-        if related2:
-            return related2, "from sentence in report"
-        if related3:
-            return related3, "from value in report"
+def check_highlights_relevance(highlights):
+    text_to_check_highlights = list()
+    max_score = 0
+    max_highlight = ""
+    for i, highlight in enumerate(highlights):
+        highlight_with_dis = replace_sentence_tokens(highlight, "<DIS>")
+        highlight_sentences = split_into_sentences(highlight_with_dis)
+        _, s = patient_related(highlight_sentences)
+        if s > max_score:
+            max_score = s
+            max_highlight = highlight
+        text_to_check_highlights += highlight_sentences
+    relevant, score = patient_related(text_to_check_highlights)
+    if score:
+        return True, highlights
+    if max_score > 0.5:
+        return True, max_highlight
     return False, None
 
 
@@ -303,70 +234,129 @@ if __name__ == '__main__':
           "Niet bij zitten. Vermoeid. Geen rectaal bloedverliers. Geen"
     print tokens_in_sentence_refers_to_patient(txt)
     """
-    txt = "schotelvormige , ulceratieve laesie welke gebiopteerd is . hieruit komt adenocarcinoom . " \
-          "<em>ct</em>-<em>thorax</em>/abdomen : geen aanwijzingen voor long- of levermetastasen"
-    val = "zoals ct thorax"
-    # given the patient reports
-    patient_reports = [",, 5 april 2013 ref : jb betreft : dhr . , geboren , , geachte collega , bovengenoemde "
-                       "patiebnt werd gezien op de polikliniek maag-darm-leverziekten . reden van komst : rectaal "
-                       "bloedverlies . mdl-voorgeschiedenis : 2000 stenotisch traject sigmoid tgv bestraling waarvoor "
-                       "sigmoid resectie . nadien naadlekkage , waarvoor hartmannprocedure . 2001 revisie colostoma "
-                       "van li . naar re . 2005 intermitterende subileus . algemene voorgeschiedenis : 1968 testistumor"
-                       " seminoom li . waarvoor ok en radiotherapie 1986 hypercholesterolemie 1990 dreigend myocard "
-                       "infarct 2012 prostaatcarcinoom waarvoor expectatief beleid . patiebnt catheteriseert zichzelf ."
-                       " anamnese : patiebnt heeft recent e9e9nmaal vrij veel rood bloed uit het colostoma verloren . "
-                       "uitslagen : laboratoriumonderzoek : ur . 8.5 egfrmdrd 58 , kreat . 106 , crp 2 bse 10 , hb 7.6"
-                       " , ery 's 4.9 , hct 0.40 , mcv 81 , wbc 5.9 , thr 192 neutro 3.3 , lymfo 1.4 colonoscopie "
-                       "25-03-2013 : ruimte innemend proces in coecum . drietal poliepen verwijderd . pa : "
-                       "intestinaaltype adenocarcinoom in het coecum . ter plaatse van het colon transversum 2"
-                       " hyperplastische poliepjes . ter plaatse van het colon descendens 1 hyperplastisch poliepje ."
-                       " ct thorax/abdomen : geen aanwijzing voor long- of levermetastasen . gedilateerd pyelocalicieel"
-                       " systeem links , een plomp aspect van het pyelum rechts met beiderzijds plompe ureteren . geen"
-                       "visualisatie van obstruerend moment . geen pathologische lymfadenopathie intra-abdominaal . "
-                       "bespreking : het betreft een 78-jarige man , bij wie sprake blijkt te zijn van een ... ... ... "
-                       "... .. coecumcarcinoom . in de multidisciplinaire oncologievergadering werd besloten dat"
-                       " patiebnt in aanmerking kan komen voor een hemicolectomie rechts . op de ct-scan was dilatatie "
-                       "van de beide ureteren alsmede pyelocalicieel systeem beiderzijds waargenomen . ik had hierover"
-                       " nog contact met zijn behandelend uroloog , collega heerdes , die dit wijt aan een laat gevolg"
-                       " van de bestraling uit de zestiger jaren . de uitslagen werden uitgebreid met patiebnt en zijn"
-                       " echtgenote besproken . ik maakte een poliklinische afspraak bij collega van dalsen op de poli"
-                       " chirurgie . conclusie : coecumcarcinoom . met vriendelijke groet , dr. m.a.c . meijssen ,"
-                       " maag-darm-leverarts wij zijn 24 uur per dag bereikbaar voor spoedoverleg : voor "
-                       "spoedverwijzingen tussen 08.00 en 17.00 uur kunt u rechtstreeks overleggen met de mdl-arts op "
-                       "telefoonnummer . buiten kantooruren en in het weekend wordt u via het algemene nummer "
-                       "rechtstreeks doorverbonden met de dienstdoende mdl-arts ", ", o_postnummer , 22 april 2013 "
-                       "betreft : dhr. geb.datum : pat.nr : /ab/edi bsn-nr : geachte collega , op 19 april 2013 zag ik"
-                       " bovengenoemde patiebnt op mijn spreekuur in verband met een coloncarcinoom . voorgeschiedenis"
-                       " : 1960 : orchidectomie rechts met postoperatieve radiotherapie vanwege testiscarcinoom . 1990"
-                       " : ptca in verband met angina pectoris . 2000 : sigmoefdresectie vanwege een radiatiestenose in"
-                       " het sigmoefd , postoperatief gecompliceerd door naadlekkage met ontkoppelen naad en "
-                       "eindstandig colostoma . 2001 : correctie parastomale hernia door het stoma van links naar "
-                       "rechts te verplaatsen . 2002 : correctie littekenbreuk met mat . 2012 : prostaatcarcinoom "
-                       "waarvoor een poging tot prostatectomie in duitsland , welke mislukt is door adhesies bestraling"
-                       " evenmin mogelijk vanwege de hoge dosis bestraling die hij eerder vanwege zijn testiscarcinoom "
-                       "heeft gehad . collega hirdes vervolgt het prostaatcarcinoom hetgeen op dit moment onbehandeld "
-                       "is . allergie : jodium . medicatie : simvastatine acetylsalicylzuur nitrofurantoefne . anamnese"
-                       " : patiebnt bemerkt bloedverlies via het stoma . lichamelijk onderzoek : status na diverse , "
-                       "mediane laparotomieebn . het colostoma zit nu rechts . sufficiebnte buikwand . lengte : 1.90 "
-                       "m , gewicht : 90 kg , bmi : 24,9. aanvullende diagnostiek : coloscopie : in het coecum bevindt"
-                       " zich een schotelvormige , ulceratieve laesie welke gebiopteerd is . hieruit komt "
-                       "adenocarcinoom . ct-thorax/abdomen : geen aanwijzingen voor long- of levermetastasen . "
-                       "bespreking : coecumcarcinoom . hiervoor is een hemicolectomie rechts geefndiceerd . ik "
-                       "verwacht een zeer moeilijke operatie aangezien de buik eerder niet toegankelijk is geweest "
-                       "vanwege adhesies en de eerdere chirurgie en bestraling op de buik . peroperatief zal worden "
-                       "gekeken of een hemicolectomie en een ileotransversostomie mogelijk is , zodat hij zijn"
-                       " colostoma kan behouden hetgeen een betere kwaliteit van leven zal geven en hetgeen ook beter "
-                       "is voor de buikwand . indien om technische redenen dit niet haalbaar is , zal misschien een "
-                       "restcolectomie moeten plaatsvinden en zal hij een eindstandig ileostoma krijgen . patiebnt en"
-                       " zijn echtgenote zijn uitvoerig ingelicht over de ingreep inclusief de verhoogde kans op"
-                       " complicaties , zoals naadlekkage , infectieuze complicaties , bloedingen en darmletsels . "
-                       "patiebnt gaat akkoord met het behandelvoorstel . gezien zijn cardiale voorgeschiedenis zal "
-                       "hij eerst zijn cardioloog bezoeken . hij gaf anamnestisch ook aan de laatste tijd toch wel "
-                       "weer wat pijn op de borst te hebben . ik wacht de analyse van de cardioloog af en zal eind "
-                       "mei a.s. de operatie proberen in te plannen . van de operatie en het postoperatieve beloop "
-                       "zult u separaat bericht ontvangen . met vriendelijke groet , dr. v.b . nieuwenhuijs , chirurg"]
 
-    # print "score ", check_highlight_relevance(txt, patient_reports, val)
-    txt = "86 jarige patient werd poliklinisch gezien in verband met een veranderd <em>defaecatie</em> patroon en een" \
-          " ijzergebreksanemie, differantiaal diagnostisch werd gedacht"
-    print patient_related(sentence_containing_value(txt, "Veranderde defaecatie"))
+    txt = [
+        u'MRI rectum: T2N2 locally advance distaal rectum carcinoom.',
+        u'<DIS> synchroon hepatogeen gemetastaseerd locally advanced distaal rectumcarcinoom.',
+        u'Januari: <DIS> rectumcarcinoom.',
+        u'geclassificeerd als een <DIS> rectumcarcinoom.',
+        u'vanwege pT3N2 rectumcarcinoom',
+        u'MRI-rectum: <DIS> rectumcarcinoom'
+        u'distaal rectumcarcinoom op 7 cm (<DIS>).',
+        u'beperkt rectumcarcinoom, cT2 N0.',
+        u'resectie ivm T3N2 rectumca.',
+        u'Conclusie: <DIS> rectumcarcinoom.',
+        u'in verband met een pT3N1Mx rectumcarcinoom.',
+        u'<DIS>: Goed / matig, gedifferentieerd adenocarcinoom.',
+        u'PA: pT3N1M1, adenocarcinoom met metastasen"'
+    ]
+    X, result = predict.predict_prob(clf, txt)
+    print result
+
+    txt = [
+        u'MRI rectum: T2N2 locally advance distaal rectum carcinoom.',
+        u'<DIS> synchroon hepatogeen gemetastaseerd locally advanced distaal rectumcarcinoom.',
+        u'Januari: <DIS> rectumcarcinoom.',
+        u'geclassificeerd als een <DIS> rectumcarcinoom.',
+        u'vanwege pT3N2 rectumcarcinoom MRI-rectum: <DIS> rectumcarcinoom distaal rectumcarcinoom op 7 cm (<DIS>).',
+        u'beperkt rectumcarcinoom, cT2 N0.',
+        u'resectie ivm T3N2 rectumca.',
+        u'Conclusie: <DIS> rectumcarcinoom.',
+        u'in verband met een pT3N1Mx rectumcarcinoom.',
+        u'<DIS>: Goed / matig, gedifferentieerd adenocarcinoom.',
+        u'PA: pT3N1M1, adenocarcinoom met metastasen'
+    ]
+    X, result = predict.predict_prob(clf, txt)
+    print result
+
+    txt = [
+        "MRI rectum: T2N2 locally advance distaal rectum carcinoom.",
+        "<DIS> synchroon hepatogeen gemetastaseerd locally advanced distaal rectumcarcinoom.",
+        "Januari: <DIS> rectumcarcinoom.",
+        "geclassificeerd als een <DIS> rectumcarcinoom.",
+        "vanwege pT3N2 rectumcarcinoom MRI-rectum: <DIS> rectumcarcinoom distaal rectumcarcinoom op 7 cm (<DIS>).",
+        "beperkt rectumcarcinoom, cT2 N0.",
+        "resectie ivm T3N2 rectumca.",
+        "Conclusie: <DIS> rectumcarcinoom.",
+        "in verband met een pT3N1Mx rectumcarcinoom.",
+        "<DIS>: Goed / matig, gedifferentieerd adenocarcinoom.",
+        "PA: pT3N1M1, adenocarcinoom met metastasen"
+    ]
+    X, result = predict.predict_prob(clf, txt)
+    print result
+
+    print "\n"
+
+    highlights = [
+        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Met vriendelijke groet, mede namens E. van Westreenen",
+        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Conclusie: akkoord voorstel. Met vriendelijke",
+        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
+        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
+        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : op 9-1-2014 besproken: Licht stijgend CEA in follow"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+
+    print "\n"
+
+    highlights = [
+        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Met vriendelijke groet, mede namens E. van Westreenen"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+    highlights = [
+        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Conclusie: akkoord voorstel. Met vriendelijke"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+    highlights = [
+        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+
+    # To make a prediction replace all mentions of a concept (using synonyms if wanted) with <DIS>
+    # A text is provided as a list of sentences.
+
+    print "\n"
+
+    highlights = [
+        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Met vriendelijke groet, mede namens E. van Westreenen"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+    highlights = [
+        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Conclusie: akkoord voorstel.", "Met vriendelijke"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+    highlights = [
+        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : Licht stijgend CEA in follow up.", "Pre-operatief 15"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+
+    print "\n"
+
+    highlights = [
+        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Met vriendelijke groet, mede namens E. van Westreenen",
+        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Conclusie: akkoord voorstel.", "Met vriendelijke",
+        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : Licht stijgend CEA in follow up.", "Pre-operatief 15",
+        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : Licht stijgend CEA in follow up.", "Pre-operatief 15",
+        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : op 9-1-2014 besproken: Licht stijgend CEA in follow"
+    ]
+    X, result = predict.predict_prob(clf, highlights)
+    print result
+
+    # for the moment I will use this last way. if all highlights (sentences) appear to be patient relevant is fine.
+    # or if one of the highlights (split in sentences) appear to be patient relevant.
+
+    print "test:"
+    highlights = [
+        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <em>chemoradiatie</em> capecitabine + RT gehad. Met vriendelijke groet, mede namens E. van Westreenen",
+        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <em>chemoradiatie</em> capecitabine + RT gehad. Conclusie: akkoord voorstel. Met vriendelijke",
+        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <em>chemoradiatie</em> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
+        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <em>chemoradiatie</em> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
+        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <em>chemoradiatie</em> ypT3N0Mx. Anamnese : op 9-1-2014 besproken: Licht stijgend CEA in follow"
+    ]
+    print check_highlights_relevance(highlights)
