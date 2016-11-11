@@ -16,7 +16,7 @@ run_algo: True
 forms: ["colorectaal"]  #,"mamma"]
 eval_algo: True
 eval_file: ""  #"Results_path\\conf1_results.json" # if run_algo is false give which file to eval
-patients_pct: 1  # percentage of patients to work with
+patients_pct: 0.01  # percentage of patients to work with
 
 patient_relevant: True
 #tf_fields: ["report.description.dutch_tf_description", "report.description.tf_description"]

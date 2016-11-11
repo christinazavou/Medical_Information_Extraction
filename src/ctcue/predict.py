@@ -60,6 +60,9 @@ if __name__ == "__main__":
         u'<DIS> waarvoor\nmeermaals stentplaatsing.', u'1995: mogelijk stil <DIS>\n\n2000: <DIS>, onderwand, waarvoor primaire PTCA RCA + stent bij\ndrietakslijden, ejectiefractie 46%\n\n2008: myocardscintigrafie: persisterend dun\naspect inferior.'
     ]
 
+    X, result = predict_prob(clf, text)
+    print result
+
     text = ["19 oktober 2009 Mevr. , geboren  , Geachte collega, Uw bovengenoemde patiënte was van 22-08-2011 tot " \
            "25-08-2011 opgenomen op de afdeling van de Isala, locatie blaat. Reden van opname: Stoornis en " \
            "duizeligheid. Voorgeschiedenis: bypass en een meniscuslesie. Medicatie bij opname: Geen. Anamnese: " \

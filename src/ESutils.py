@@ -184,6 +184,7 @@ class EsConnection:
 
     def refresh(self, index_name):
         self.es.indices.refresh(index_name)
+        # time.sleep(1)
 
     def documents(self, type_doc, ids):
         current = 0

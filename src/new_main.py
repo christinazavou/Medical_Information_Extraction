@@ -147,11 +147,11 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 4:
-        configFilePath = "aux_config\\conf23.yml"
+        configFilePath = "aux_config\\conf17.yml"
         # dataPath = "..\\Data"
         dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         # resultsPath = "..\\results"
-        resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov"
+        resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov"
     else:
         configFilePath = sys.argv[1]
         dataPath = sys.argv[2]

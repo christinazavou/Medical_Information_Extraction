@@ -9,7 +9,7 @@ import time
 
 from ESutils import EsConnection, start_es
 import settings
-from utils import check_highlight_relevance
+from utils import check_highlights_relevance
 from utils import condition_satisfied
 from queries import date_query, match_query_with_operator, match_phrase_query, term_query, search_body, highlight_query
 """
@@ -98,35 +98,18 @@ class Algorithm:
     def assign_one_of_k(self, patient_id, values, description):
         pass
 
-    # def is_accepted(self, query_text, highlights):
-    #     """
-    #     Check all highlights to see if there is an accepted evidence of assigning the value
-    #     """
-    #   if self.patient_relevant is False:  # the check if evidences(highlights) are relevant to patient is switched off
-    #         return 1, None
-    #     if not highlights:
-    #         return 0, None
-    #     scores = [0 for highlight in highlights]
-    #     for i, highlight in enumerate(highlights):
-    #         scores[i] = check_highlight_relevance(highlight, self.current_patient_reports, query_text)
-    #     score, idx = self.pick_score_and_index(scores)
-    #     return score, idx
     def is_accepted(self, query_text, highlights):
         """
         Check all highlights to see if there is an accepted evidence of assigning the value
         """
         global comment_relevance
         if self.patient_relevant is False:  # the check if evidences(highlights) are relevant to patient is switched off
-            return True, None
+            comment_relevance = ""
+            return True, -1  # to print the highlights and see what it finds
         if not highlights:
             return False, None
-        scores = [False for highlight in highlights]
-        for i, highlight in enumerate(highlights):
-            scores[i], comment_relevance = check_highlight_relevance(highlight, self.current_patient_reports,
-                                                                     query_text)
-            if scores[i]:
-                return True, i
-        return False, None
+        relevant, comment_relevance = check_highlights_relevance(highlights)
+        return relevant, comment_relevance
 
     # todo: find what min_score I should use in queries ... maybe put the number of must queries ?
 
@@ -168,9 +151,8 @@ class Algorithm:
             if not highlights:
                 print "no highlights: ", the_current_body
                 return None, None
-            score_relevance, h_idx = self.is_accepted(query_text, highlights[highlight_field])
-            # if score_relevance > 0:
-            if score_relevance:
+            relevant, comment = self.is_accepted(query_text, highlights[highlight_field])
+            if relevant:
                 # results is accepted and we take the query's score (but evidence may be not tested)
                 if '_score' in search_results['hits']['hits'][0].keys():
                     # print "score with 1st way"
@@ -178,11 +160,9 @@ class Algorithm:
                 else:
                     score_search = search_results['hits']['hits'][0]['_source']['_score']
                     print "score with 2nd way"
-                if h_idx:
-                    # evidence is accepted too (from patient relevance model)
-                    evidence_search = highlights[highlight_field][h_idx]
-                    return score_search, evidence_search
-                return score_search, None
+                if comment == -1:  # no relevance test applied. print all highlights
+                    return score_search, highlights
+                return score_search, comment
             else:
                 return None, None
         else:
@@ -268,8 +248,6 @@ class BaseAlgorithm(Algorithm):
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
             if score_search:
-                if evidence_search:
-                    return combine_assignment(value, evidence_search, score_search, comment=comment_relevance)
                 return combine_assignment(value, evidence_search, score_search)
             else:
                 return combine_assignment(value="", comment="No evidence found on description")
@@ -300,8 +278,6 @@ class BaseAlgorithm(Algorithm):
             if score_search > 2:
                 print "the current body : ", the_current_body
             value = 'Yes' if 'Yes' in values else 'Ja'
-            if evidence_search:
-                return combine_assignment(value, evidence_search, score_search, comment=comment_relevance)
             return combine_assignment(value, evidence_search, score_search)
         elif 'Onbekend' in values:
             should_body = list()
@@ -315,11 +291,8 @@ class BaseAlgorithm(Algorithm):
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(description, search_results, self.default_field)
             if score_search:
-                if evidence_search:
-                    return combine_assignment('Onbekend', evidence_search, score_search,
-                                              'onbekend available, relaxed query' + comment_relevance)
-                return combine_assignment('Onbekend', evidence_search, score_search, 'onbekend available, '
-                                                                                     'relaxed query')
+                return combine_assignment('Onbekend', evidence_search, score_search, 'onbekend available,'
+                                                                                     ' relaxed query')
         value = 'No' if 'No' in values else 'Nee'
         return combine_assignment(value, comment='no description match or no onbekend available')
 
@@ -463,7 +436,7 @@ class RandomAlgorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("aux_config\\conf17.yml",
+    settings.init("aux_config\\conf22.yml",
                   "C:\Users\\Christina Zavou\\Documents\Data",
                   "..\\results")
 
