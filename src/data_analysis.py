@@ -280,6 +280,10 @@ def run_heat_maps(true_counts, results_counts):
 
 if __name__ == "__main__":
 
+    true_counts = pickle.load(open('C:\Users\Christina Zavou\Documents\\results4Nov\\true_counts.p', 'rb'))
+    print json.dumps(true_counts)
+    exit()
+
     settings.init("aux_config\\conf23.yml",
                   "C:\\Users\\Christina Zavou\\Documents\\Data",
                   "C:\\Users\\Christina Zavou\\Documents\\results4Nov")

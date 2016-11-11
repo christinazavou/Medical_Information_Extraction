@@ -112,8 +112,8 @@ class Evaluation:
 
 if __name__ == '__main__':
     # start_es()
-    settings.init("Configurations\\configurations.yml",
-                  "..\\Data",
+    settings.init("aux_config\\conf17.yml",
+                  "C:\Users\\Christina Zavou\\Documents\Data",
                   "..\\results")
 
     host = settings.global_settings['host']
@@ -124,7 +124,7 @@ if __name__ == '__main__':
     # type_name_pp = settings.global_settings['type_name_pp']
     connection = EsConnection(host)
 
-    eval_file = "..\\results\\conf_results.json"
+    eval_file = "..\\results\\conf17_results.json"
     evaluationsFilePath = os.path.join(settings.global_settings['results_path'], "evaluations.json")
 
     ev = Evaluation(connection, index, type_name_p, type_name_f, eval_file, settings.labels_possible_values)

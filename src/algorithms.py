@@ -221,7 +221,9 @@ class BaseAlgorithm(Algorithm):
     def assign_patient_form(self, patient_id, form_id, doc_form):
         patient_form_assign = {}  # dictionary of assignments
         for label in self.labels_possible_values[form_id]:  # for each field in form
+            print "for patient {} and field {} check condition.".format(patient_id, label)
             if condition_satisfied(doc_form, self.labels_possible_values, form_id, label):
+                print "satisfied"
                 values = self.labels_possible_values[form_id][label]['values']
                 description = self.labels_possible_values[form_id][label]['description']
                 if values == "unknown":
@@ -231,6 +233,7 @@ class BaseAlgorithm(Algorithm):
                 if label_assignment:
                     patient_form_assign[label] = label_assignment
             else:  # in case condition is unsatisfied fill it with ""
+                print "un-satisfied"
                 patient_form_assign[label] = combine_assignment('', comment="condition unsatisfied.")
         return patient_form_assign
 
@@ -463,8 +466,8 @@ class RandomAlgorithm(Algorithm):
 if __name__ == '__main__':
     # start_ES()
 
-    settings.init("Configurations\\configurations.yml",
-                  "..\\Data",
+    settings.init("aux_config\\conf17.yml",
+                  "C:\Users\\Christina Zavou\\Documents\Data",
                   "..\\results")
 
     used_forms = settings.global_settings['forms']

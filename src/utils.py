@@ -16,6 +16,7 @@ def condition_satisfied(golden_truth, labels_possible_values, current_form, fiel
     from pre_process import MyPreprocessor
     # for a given patient(the golden truth) check whether the field to be field satisfies its condition(if exist) or not
     condition = labels_possible_values[current_form][field_to_be_filled]['condition']
+    print "golden truth:\n{}\ncondition: {}".format(golden_truth, condition)
     if condition == "":
         return True
     conditioned_field, condition_expression = re.split(' !?= ', condition)
@@ -24,7 +25,7 @@ def condition_satisfied(golden_truth, labels_possible_values, current_form, fiel
     if "!=" in condition:
         if golden_truth[conditioned_field] != condition_expression:
             return True
-    elif "==" in condition:
+    elif "=" in condition:
         if golden_truth[conditioned_field] == condition_expression:
             return True
     else:
