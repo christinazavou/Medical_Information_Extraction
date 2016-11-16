@@ -208,12 +208,13 @@ def heat_maps_truth_vs_predictions(truth_counts_dict, predicted_counts_dict, out
         y = x
         accuracies = np.zeros((len(x), len(y)))
         for i, value_i in enumerate(predicted_counts_dict[field].keys()):
-            for j, value_j in enumerate(predicted_counts_dict[field].keys()):
-                if truth_counts_dict[field][value_i]:
-                    accuracies[i][j] = predicted_counts_dict[field][value_j] / truth_counts_dict[field][value_i]
-                else:
-                    accuracies[i][j] = 0
-                # accuracies[i][j] = float(predicted_counts_dict[field][value_j])/100  # temporary.to test
+            if truth_counts_dict[field][value_i]:
+                # todo: what is the correct method?
+                accuracies[i][i] = predicted_counts_dict[field][value_i] / truth_counts_dict[field][value_i]
+                accuracies[i][i] *= (truth_counts_dict[field][value_i] / 1418.0)
+            # for j, value_j in enumerate(predicted_counts_dict[field].keys()):
+            #     if truth_counts_dict[field][value_i]:
+            #         accuracies[i][j] = predicted_counts_dict[field][value_j] / truth_counts_dict[field][value_i]
 
         df = DataFrame(accuracies, index=x, columns=y)
 
@@ -229,16 +230,16 @@ def heat_maps_truth_vs_predictions(truth_counts_dict, predicted_counts_dict, out
         plt.close()
 
 
-def store_majority_scores(true_counts):
+def store_majority_scores(true_counts_d):
 
     mj_file = os.path.join(results_folder, 'majority_scores.json')
     true_counts_1of_k = {}
     true_counts_open_q = {}
     for field_ in decease_dict:
         if decease_dict[field_]['values'] == "unknown":
-            true_counts_open_q[field_] = true_counts[field_]
+            true_counts_open_q[field_] = true_counts_d[field_]
         else:
-            true_counts_1of_k[field_] = true_counts[field_]
+            true_counts_1of_k[field_] = true_counts_d[field_]
     maj_dict_1ofk, maj_score_1ofk = get_majority_assignment_score(true_counts_1of_k, len(decease_ids))
     maj_dict_open_q, maj_score_open_q = get_majority_assignment_score(true_counts_open_q, len(decease_ids))
     maj_results = {'1_of_k': [maj_dict_1ofk, maj_score_1ofk], 'open_q': [maj_dict_open_q, maj_score_open_q]}
@@ -250,16 +251,16 @@ def store_majority_scores(true_counts):
 def run_golden_truth(plot=False):
     true_counts_file = os.path.join(results_folder, "true_counts.p")
     if os.path.isfile(true_counts_file):
-        true_counts = pickle.load(open(true_counts_file, "rb"))
+        true_counts_d = pickle.load(open(true_counts_file, "rb"))
     else:
         decease_file = (settings.global_settings['csv_form_path']).replace('decease', decease)
         golden_folder = os.path.join(results_folder, "distributions_t")
         if not os.path.exists(golden_folder):
             os.makedirs(golden_folder)
-        true_counts = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, golden_folder,
-                                           plot)
+        true_counts_d = analyze_golden_truth(decease_file, decease_dict, decease_ids, decease_names_dict, golden_folder,
+                                             plot)
         pickle.dump(true_counts, open(true_counts_file, "wb"))
-    return true_counts
+    return true_counts_d
 
 
 def run_predictions(plot=False):
@@ -275,21 +276,27 @@ def run_predictions(plot=False):
     return results_counts
 
 
-def run_heat_maps(true_counts, results_counts):
+def run_heat_maps(true_counts_d, results_counts):
     heat_maps_folder = os.path.join(results_folder, "heatmapssnum".replace('num', filter(str.isdigit, prediction_file)))
     if not os.path.exists(heat_maps_folder):
         os.makedirs(heat_maps_folder)
-    heat_maps_truth_vs_predictions(true_counts, results_counts, heat_maps_folder)
+    heat_maps_truth_vs_predictions(true_counts_d, results_counts, heat_maps_folder)
 
 if __name__ == "__main__":
 
-    true_counts = pickle.load(open('C:\Users\Christina Zavou\Documents\\results4Nov\\true_counts.p', 'rb'))
+    # true_counts = pickle.load(open('C:\Users\Christina Zavou\Documents\\results4Nov\\true_counts.p', 'rb'))
+    true_counts = pickle.load(open('..\\results\\true_counts.p', 'rb'))
+    all_assignments = true_counts['klachten_klacht2']['Yes'] + true_counts['klachten_klacht2']['NaN']
     print "true counts:\n{}".format(json.dumps(true_counts))
+    print "total: {}".format(all_assignments)
     # exit()
 
+    # settings.init("aux_config\\conf17.yml",
+    #               "C:\\Users\\Christina Zavou\\Documents\\Data",
+    #               "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov")
     settings.init("aux_config\\conf17.yml",
-                  "C:\\Users\\Christina Zavou\\Documents\\Data",
-                  "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov")
+                  "..\\Data",
+                  "..\\results")
 
     index = settings.global_settings['index_name']
     decease = 'colorectaal'
@@ -307,7 +314,7 @@ if __name__ == "__main__":
     # store_majority_scores(true_counts_)
 
     """---------------------------------------predictions visual analysis--------------------------------------------"""
-    results_counts_ = run_predictions(True)
-    print "results counts:\n{}".format(json.dumps(results_counts_))
+    results_counts_ = run_predictions(False)
+    # print "results counts:\n{}".format(json.dumps(results_counts_))
     """--------------------------------------heat maps visual analysis-----------------------------------------------"""
     run_heat_maps(true_counts_, results_counts_)
