@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import types
 import json
 import yaml
 import os
@@ -135,13 +136,16 @@ def find_chosen_labels_possible_values():
     global global_settings
     global chosen_labels_possible_values
     global labels_possible_values
+    with_unknowns = global_settings['unknowns'] == "include"
     chosen_labels_possible_values = labels_possible_values
     for form in labels_possible_values.keys():
         if form not in global_settings['forms']:
             del chosen_labels_possible_values[form]
         else:
             for field in labels_possible_values[form].keys():
-                if field not in global_settings[form]:
+                if field not in global_settings[form] or \
+                        (not with_unknowns and (not isinstance(chosen_labels_possible_values[form][field]['values'],
+                                                               types.ListType))):
                     del chosen_labels_possible_values[form][field]
 
     f = global_settings['fields_config_file'].replace('fields', "chosen_fields")
@@ -201,14 +205,13 @@ def get_run_description():
 
 if __name__ == "__main__":
 
-    init("Configurations\\configurations.yml",
+    init("aux_config\\conf17.yml",
          "..\\Data",
          "..\\results")
 
     find_chosen_labels_possible_values()
-    get_w2v_name()
-    get_preprocessor_file_name()
-    find_chosen_labels_possible_values()
+    # get_w2v_name()
+    # get_preprocessor_file_name()
     get_results_filename()
 
     print get_run_description()
