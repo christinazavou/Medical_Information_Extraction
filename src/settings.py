@@ -12,6 +12,9 @@ global chosen_labels_possible_values
 global global_settings
 
 
+random.seed(40)
+
+
 def get_data_path_root():
     if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
         return "C:\\Users\\Christina Zavou\\Documents\\Data"
@@ -75,7 +78,7 @@ def init(config_file, data_path, results_path):
             global_settings[key] = global_settings[key].replace("Data_path", data_path)
             global_settings[key] = global_settings[key].replace("Results_path", results_path)
 
-    global_settings['evaluation_file'] = os.path.join(global_settings['results_path'], "evaluations.json")
+    global_settings['evaluations_file'] = os.path.join(global_settings['results_path'], "evaluations.json")
 
     # --------------------------------------------fix some configurations----------------------------------------------#
 
@@ -84,11 +87,10 @@ def init(config_file, data_path, results_path):
         global_settings['type_name_s_preprocessed'] = (doc['type_name_s'] + global_settings['type_name_pp']).\
             replace("patient", "")
 
-    if global_settings['map_index_file'].__contains__('new_indexed_body'):
-        if os.path.isdir("C:\\Users\\Christina Zavou"):
-            global_settings['map_index_file'] = global_settings['map_index_file'].replace('5', '2')
-        else:
-            global_settings['map_index_file'] = global_settings['map_index_file'].replace('2', '5')
+    if 'Zavou' in global_settings['data_path']:
+        global_settings['map_index_file'] = global_settings['map_index_file'].replace('v5', 'v2')
+    else:
+        global_settings['map_index_file'] = global_settings['map_index_file'].replace('v2', 'v5')
 
     if 'default_field' not in global_settings.keys():
         global_settings['default_field'] = 'report.description'
