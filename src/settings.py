@@ -75,6 +75,8 @@ def init(config_file, data_path, results_path):
             global_settings[key] = global_settings[key].replace("Data_path", data_path)
             global_settings[key] = global_settings[key].replace("Results_path", results_path)
 
+    global_settings['evaluation_file'] = os.path.join(global_settings['results_path'], "evaluations.json")
+
     # --------------------------------------------fix some configurations----------------------------------------------#
 
     if 'pre_process' in global_settings.keys() and len(global_settings['pre_process']) > 0:
