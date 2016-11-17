@@ -6,7 +6,7 @@ def date_query():
     pass
 
 
-def match_query_with_operator(query_field, query_text, operator='OR', boost=1):
+def match_query_with_operator(query_field, query_text, operator='OR', boost=1, min_pct='0%'):
     """
     default boost in a clause (for should/must..) is 1.
     for increasing clause weight put boost>1, for decreasing put [0,1)
@@ -17,7 +17,8 @@ def match_query_with_operator(query_field, query_text, operator='OR', boost=1):
             query_field: {
                 "query": query_text,
                 "operator": operator,
-                "boost": boost
+                "boost": boost,
+                "minimum_should_match": min_pct
             }
         }
     }

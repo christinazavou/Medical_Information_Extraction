@@ -5,41 +5,56 @@ i.e. compares outputs with what is on forms
 """
 
 import os
-import re
+# import re
 import string
 import json
 import time
-import random
+# import random
 
-import algorithms
-import final_baseline
+# import algorithms
 from ESutils import start_es, EsConnection
 import settings
 from utils import condition_satisfied, make_ordered_dict_representation
 
 
+# todo: make it as a possibility to check or not conditions
+
+
 labels_correct_values = {}  # for one patient!!
+
+
+def bleu_evaluation(prediction, target):
+    predicted_tokens = prediction.split(" ")
+    trgt_tokens = target.split(" ")
+    tmp_score = 0
+    for token in trgt_tokens:
+        tmp_score += 1 if (token in predicted_tokens) and not (token in string.punctuation) else 0
+    tmp_score /= len(predicted_tokens)
+    return tmp_score
 
 
 class Evaluation:
     def __init__(self, con, index_name, type_patient, type_form, ev_file, chosen_labels_possible_values):
-        self.con = con
-        self.index_name = index_name
-        self.type_name_p = type_patient
-        self.type_name_f = type_form
+        self.con = con  # the connection to ElasticSearch
+        self.index_name = index_name  # the index name
+        self.type_name_p = type_patient  # the type of doc to look for patient
+        self.type_name_f = type_form  # the type of doc to look for form
         self.accuracy_1ofk = 0.0  # average of fields accuracy (fields with no assignments ignored)
-        self.accuracy_open_q = 0.0
-        self.file = ev_file
-        self.chosen_labels_possible_values = chosen_labels_possible_values
-        self.chosen_labels_accuracy = {}
-        self.chosen_labels_num = {}  # how many patients were assign a value for each label
+        self.accuracy_open_q = 0.0  # same, but for open question fields
+        self.file = ev_file  # the file with predicitons to evaluate
+        self.chosen_labels_possible_values = chosen_labels_possible_values  # the fields to evaluate (with other things)
+        self.chosen_labels_accuracy = {}  # the per field accuracy (for patients used and fields with assignments)
+        self.chosen_labels_num = {}  # how many patients were assign a value for each label (per label)
         # (note: many patients are not assign labels due to unsatisfied conditions)
+        self.unconditioned_num = {}  # to help check if all is good.
         for form in self.chosen_labels_possible_values:
             self.chosen_labels_accuracy[form] = {}
             self.chosen_labels_num[form] = {}
+            self.unconditioned_num[form] = {}
             for label in self.chosen_labels_possible_values[form]:
                 self.chosen_labels_accuracy[form][label] = 0.0
                 self.chosen_labels_num[form][label] = 0
+                self.unconditioned_num[form][label] = 0
 
     def eval(self, patients_ids, eval_forms):
         """
@@ -65,6 +80,12 @@ class Evaluation:
         num_open_q = 0
         for form_id in eval_forms:
             for field in self.chosen_labels_accuracy[form_id]:
+
+                if not (self.chosen_labels_num[form_id][field] + self.unconditioned_num[form_id][field] ==
+                            len(patients_ids)):
+                    print "oops in field ", field
+                    exit(-1)
+
                 if not self.chosen_labels_num[form_id][field] == 0:
                     self.chosen_labels_accuracy[form_id][field] /= self.chosen_labels_num[form_id][field]
                     if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
@@ -81,6 +102,7 @@ class Evaluation:
         return self.accuracy_1ofk, self.accuracy_open_q, self.chosen_labels_accuracy, self.chosen_labels_num
 
     def get_score(self, predictions, targets, form_id):
+        """Input: predictions and targets in the form of fields,values dictionary and the form fields come from"""
         # note: in prediction some fields may not appear, whilst in targets all fields appear
         chosen_labels = [label for label in self.chosen_labels_possible_values[form_id]]
         if len(predictions) == 0:
@@ -88,10 +110,12 @@ class Evaluation:
             return
         for field in predictions:
             if field in chosen_labels:
-                # todo: make it as a possibility to check or not conditions
                 if condition_satisfied(targets, self.chosen_labels_possible_values, form_id, field):
 
                     predicted = predictions[field]['value']
+                    if not isinstance(predicted, basestring):
+                        print "Ops. not correct."
+                        exit(-1)
                     self.chosen_labels_num[form_id][field] += 1
 
                     if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
@@ -101,58 +125,50 @@ class Evaluation:
                     else:
                         pass
                         # score for : open-question (BLEU)
-                        predicted_tokens = predicted.split(" ")
-                        trgt_tokens = targets[field].split(" ")
-                        tmp_score = 0
-                        for token in trgt_tokens:
-                            tmp_score += 1 if (token in predicted_tokens) and not(token in string.punctuation) else 0
-                        tmp_score /= len(predicted_tokens)
-                        self.chosen_labels_accuracy[form_id][field] += tmp_score
+                        self.chosen_labels_accuracy[form_id][field] += bleu_evaluation(predicted, targets[field])
+                else:
+                    self.unconditioned_num[form_id][field] += 1
 
-
-if __name__ == '__main__':
-    # start_es()
-    settings.init("aux_config\\conf17.yml",
-                  "C:\Users\\Christina Zavou\\Documents\Data",
-                  "..\\results")
-
-    host = settings.global_settings['host']
-    index = settings.global_settings['index_name']
-    type_name_p = settings.global_settings['type_name_p']
-    type_name_f = settings.global_settings['type_name_f']
-    type_name_s = settings.global_settings['type_name_s']
-    # type_name_pp = settings.global_settings['type_name_pp']
-    connection = EsConnection(host)
-
-    eval_file = "..\\results\\conf17_results.json"
-    evaluationsFilePath = os.path.join(settings.global_settings['results_path'], "evaluations.json")
-
-    ev = Evaluation(connection, index, type_name_p, type_name_f, eval_file, settings.labels_possible_values)
-    score1, score2, fields_score, fields_num = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
-    print score1, score2, fields_score, fields_num
-    evaluations_dict = dict()
-    evaluations_dict['description'] = settings.get_run_description()
-    evaluations_dict['file'] = eval_file
-    evaluations_dict['score_1of_k'] = score1
-    evaluations_dict['score_open_q'] = score2
-    evaluations_dict['fields_score'] = fields_score
-    evaluations_dict['dte-time'] = time.strftime("%c")
-    evaluations_dict['nums'] = fields_num
-
-    with open(evaluationsFilePath, 'w') as jfile:
-        json.dump(evaluations_dict, jfile, indent=4)
-    print "Finish evaluating."
-
-    ordered_fields = ["LOCPRIM", "LOCPRIM2", "klachten_klacht2", "klachten_klacht3", "klachten_klacht1",
-                      "klachten_klacht4",
-                      "klachten_klacht88", "klachten_klacht99", "SCORECT", "SCORECT2", "RESTAG_SCORECT_1",
-                      "RESTAG_SCORECT2_1", "RESTAG_CT", "SCORECN", "SCORECN2", "RESTAG_SCORECN_1", "RESTAG_SCORECN2_1",
-                      "SCORECM", "SCORECM2", "RESTAG_SCORECM_1", "RESTAG_SCORECM2_1", "PROCOK", "mdo_chir",
-                      "geenresectie_irres", "geenresectie_meta", "geenresec_palltherYN", "pall_NO_reden",
-                      "pallther_chemo",
-                      "pallther_chemoSTUDIE", "pallther_RT", "pallther_RTstudie", "pallther_chemoRT",
-                      "pallther_chemoRTstudie", "COMORB", "COMORBCAR", "COMORBVAS", "COMORBDIA", "COMORBPUL",
-                      "COMORBNEU",
-                      "COMORBMDA", "COMORBURO"]
-
-    print make_ordered_dict_representation(ordered_fields, fields_score['colorectaal'])
+# if __name__ == '__main__':
+#     # start_es()
+#     settings.init("aux_config\\conf17.yml",
+#                   "C:\Users\\Christina Zavou\\Documents\Data",
+#                   "..\\results")
+#
+#     host = settings.global_settings['host']
+#     index = settings.global_settings['index_name']
+#     type_name_p = settings.global_settings['type_name_p']
+#     type_name_f = settings.global_settings['type_name_f']
+#     type_name_s = settings.global_settings['type_name_s']
+#     # type_name_pp = settings.global_settings['type_name_pp']
+#     connection = EsConnection(host)
+#
+#     eval_file = "..\\results\\conf17_results.json"
+#     evaluationsFilePath = os.path.join(settings.global_settings['results_path'], "evaluations.json")
+#
+#     ev = Evaluation(connection, index, type_name_p, type_name_f, eval_file, settings.labels_possible_values)
+#     score1, score2, fields_score, fields_num = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
+#     print score1, score2, fields_score, fields_num
+#     evaluations_dict = dict()
+#     evaluations_dict['description'] = settings.get_run_description()
+#     evaluations_dict['file'] = eval_file
+#     evaluations_dict['score_1of_k'] = score1
+#     evaluations_dict['score_open_q'] = score2
+#     evaluations_dict['fields_score'] = fields_score
+#     evaluations_dict['dte-time'] = time.strftime("%c")
+#     evaluations_dict['nums'] = fields_num
+#
+#     with open(evaluationsFilePath, 'w') as jfile:
+#         json.dump(evaluations_dict, jfile, indent=4)
+#     print "Finish evaluating."
+#
+#     ordered_fields = ["LOCPRIM", "LOCPRIM2", "klachten_klacht2", "klachten_klacht3", "klachten_klacht1",
+#                       "klachten_klacht4", "klachten_klacht88", "klachten_klacht99", "SCORECT", "SCORECT2",
+#                       "RESTAG_SCORECT_1", "RESTAG_SCORECT2_1", "RESTAG_CT", "SCORECN", "SCORECN2", "RESTAG_SCORECN_1",
+#                       "RESTAG_SCORECN2_1", "SCORECM", "SCORECM2", "RESTAG_SCORECM_1", "RESTAG_SCORECM2_1", "PROCOK",
+#                       "mdo_chir", "geenresectie_irres", "geenresectie_meta", "geenresec_palltherYN", "pall_NO_reden",
+#                       "pallther_chemo", "pallther_chemoSTUDIE", "pallther_RT", "pallther_RTstudie",
+#                       "pallther_chemoRT", "pallther_chemoRTstudie", "COMORB", "COMORBCAR", "COMORBVAS", "COMORBDIA",
+#                       "COMORBPUL", "COMORBNEU", "COMORBMDA", "COMORBURO"]
+#
+#     print make_ordered_dict_representation(ordered_fields, fields_score['colorectaal'])

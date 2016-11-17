@@ -95,7 +95,8 @@ def predict_forms():
                                                 settings.global_settings['patient_relevant'],
                                                 settings.global_settings['default_field'],
                                                 settings.global_settings['boost_fields'],
-                                                settings.global_settings['min_score'])
+                                                settings.global_settings['min_score'],
+                                                settings.global_settings['use_description_1ofk'])
     my_algorithm.assign(patient_ids_used, settings.global_settings['forms'],
                         settings.global_settings['results_filename'])
     print "Finish assigning values."

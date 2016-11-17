@@ -12,7 +12,7 @@ global chosen_labels_possible_values
 global global_settings
 
 
-random.seed(40)
+random.seed(40)  # Always choose same patients
 
 
 def get_data_path_root():

@@ -188,6 +188,7 @@ def check_highlights_relevance(highlights):
     if score:
         return True, highlights
     if max_score > 0.5:
+        print "ONLY SOME SCORE"
         return True, max_highlight
     return False, None
 
