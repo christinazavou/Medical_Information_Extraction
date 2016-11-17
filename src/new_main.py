@@ -14,6 +14,9 @@ from utils import fix_ids_of_decease, combine_all_ids, update_form_values, make_
 import algorithms
 import evaluation
 
+# todo: check if all patients reports have date so that i'll save the date as date
+
+
 ordered_fields = ["LOCPRIM", "LOCPRIM2", "klachten_klacht2", "klachten_klacht3", "klachten_klacht1", "klachten_klacht4",
                   "klachten_klacht88", "klachten_klacht99", "SCORECT", "SCORECT2", "RESTAG_SCORECT_1",
                   "RESTAG_SCORECT2_1", "RESTAG_CT", "SCORECN", "SCORECN2", "RESTAG_SCORECN_1", "RESTAG_SCORECN2_1",
@@ -86,17 +89,15 @@ def predict_forms():
         labels_possible_values = settings.chosen_labels_possible_values
 
     if settings.global_settings['algo'] == 'random':
-        my_algorithm = algorithms.RandomAlgorithm(con, index_name, type_patient,
-                                                  settings.global_settings['results_filename'], labels_possible_values,
-                                                  with_unknowns)
+        my_algorithm = algorithms.RandomAlgorithm(con, index_name, type_patient, labels_possible_values)
     else:
-        my_algorithm = algorithms.BaseAlgorithm(con, index_name, type_patient,
-                                                settings.global_settings['results_filename'], labels_possible_values,
-                                                with_unknowns, settings.global_settings['patient_relevant'],
+        my_algorithm = algorithms.BaseAlgorithm(con, index_name, type_patient, labels_possible_values,
+                                                settings.global_settings['patient_relevant'],
                                                 settings.global_settings['default_field'],
                                                 settings.global_settings['boost_fields'],
                                                 settings.global_settings['min_score'])
-    my_algorithm.assign(patient_ids_used, settings.global_settings['forms'])
+    my_algorithm.assign(patient_ids_used, settings.global_settings['forms'],
+                        settings.global_settings['results_filename'])
     print "Finish assigning values."
 
 
@@ -106,8 +107,8 @@ def evaluate_predictions():
     (if assign_all evaluate only for specified fields)
     """
 
-    if os.path.isfile(evaluations_file_name):
-        with open(evaluations_file_name, 'r') as f:
+    if os.path.isfile(settings.global_settings['evaluations_file']):
+        with open(settings.global_settings['evaluations_file'], 'r') as f:
             evaluations_dict = json.load(f)
     else:
         evaluations_dict = {'evaluation': []}
@@ -124,9 +125,9 @@ def evaluate_predictions():
                                         'fields_score': make_ordered_dict_representation(ordered_fields,
                                                                                          fields_score['colorectaal']),
                                         'dte-time': time.strftime("%c"),
-                                        'nums': fields_num}]
+                                        'nums': make_ordered_dict_representation(ordered_fields, fields_num)}]
 
-    with open(evaluations_file_name, 'w') as f:
+    with open(settings.global_settings['evaluations_file'], 'w') as f:
         json.dump(evaluations_dict, f, indent=4)
     print "Finish evaluating."
 
@@ -147,11 +148,11 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 4:
-        configFilePath = "aux_config\\conf17.yml"
-        # dataPath = "..\\Data"
-        dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
-        # resultsPath = "..\\results"
-        resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov"
+        configFilePath = "aux_config\\conf24.yml"
+        dataPath = "..\\Data"
+        # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
+        resultsPath = "..\\results"
+        # resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov"
     else:
         configFilePath = sys.argv[1]
         dataPath = sys.argv[2]
@@ -167,12 +168,10 @@ if __name__ == '__main__':
 
     """-----------------------------------------read_dossiers--------------------------------------------------------"""
 
-    # todo: check if all patients reports have date so that i'll save the date as date
-
-    # if settings.global_settings['read_dossiers']:
-        # read()
-    # if settings.global_settings['store_dossiers']:
-        # store()
+    if settings.global_settings['read_dossiers']:
+        read()
+    if settings.global_settings['store_dossiers']:
+        store()
 
     """-------------------------------------------set params--------------------------------------------------------"""
     # to ensure we got values with conditions
@@ -182,7 +181,6 @@ if __name__ == '__main__':
     settings.find_chosen_labels_possible_values()
     settings.get_results_filename()
 
-    # we need to find them once, since it uses random (or use seed(x))
     patient_ids_used = settings.find_used_ids()
     print "total used patients: {}".format(len(patient_ids_used))
 
@@ -192,12 +190,6 @@ if __name__ == '__main__':
         predict_forms()
 
     """---------------------------------------------Evaluate---------------------------------------------------------"""
-    evaluations_file_name = os.path.join(settings.global_settings['results_path'], "evaluations.json")
 
     if settings.global_settings['eval_algo']:
         evaluate_predictions()
-
-    # """---------------------------------------Word Embeddings------------------------------------------------------"""
-    #
-    # if settings.global_settings['run_W2V']:
-    #     make_embeddings()
