@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import copy
 import types
 import json
 import yaml
@@ -10,7 +11,6 @@ global labels_possible_values
 global ids
 global chosen_labels_possible_values
 global global_settings
-global labels_multi_values
 
 
 random.seed(40)  # Always choose same patients
@@ -53,7 +53,6 @@ def init(config_file, data_path, results_path):
     global ids
     global chosen_labels_possible_values
     global global_settings
-    global labels_multi_values
 
     global_settings = {}
 
@@ -121,10 +120,6 @@ def init(config_file, data_path, results_path):
     else:
         ids = {}
     global_settings['ids_config_file'] = ids_config_file
-
-    fields_multi_config_file = "..\\Configurations\\important_fields\\important_fields_multi_colorectaal.json"
-    with open(fields_multi_config_file, 'r') as json_file:
-        labels_multi_values = json.load(json_file, encoding='utf-8')
 
 
 def update_values():

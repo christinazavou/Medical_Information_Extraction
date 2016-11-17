@@ -4,7 +4,7 @@ Gives Output: Evaluation measure
 i.e. compares outputs with what is on forms
 """
 
-import os
+# import os
 # import re
 import string
 import json
@@ -12,8 +12,8 @@ import time
 # import random
 
 # import algorithms
-from ESutils import start_es, EsConnection
-import settings
+# from ESutils import start_es, EsConnection
+# import settings
 from utils import condition_satisfied, make_ordered_dict_representation
 
 
@@ -128,6 +128,7 @@ class Evaluation:
                         self.chosen_labels_accuracy[form_id][field] += bleu_evaluation(predicted, targets[field])
                 else:
                     self.unconditioned_num[form_id][field] += 1
+
 
 # if __name__ == '__main__':
 #     # start_es()

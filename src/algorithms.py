@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
 
+import operator
+import numpy as np
 import types
 import json
 import random
@@ -24,7 +27,6 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 # note: sometimes score is returned, but no highlight (WEIRD)
 
 # todo: search also with synonyms .. but should ignore NormQuery factor
-# todo: find what min_score I should use in queries ... maybe put the number of must queries ?
 # todo: use thorax/adb search : thorax oor abd
 # todo: for open questions : either highlight description assignment or index sentences ...
 # todo: instead of list ... do one query with all boost_fields (??)
@@ -44,6 +46,25 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 #     "report.description.dutch_tf_description": {}
 # }}
 # }
+# or equally:
+# {
+#  "query": {
+#      "bool": {
+#          "filter": {"term": {"_id": "55558"}},
+#          "minimum_should_match": 0,
+#          "should": {
+#               "query_string" : {
+#                 "query" : "Comorbiditeit aanwezig",
+#                 "fields" : [ "report.description", "report.description.dutch_description",
+#                              "report.description.dutch_tf_description", "report.description.tf_description"],
+#                 "use_dis_max" : "true"
+#               }
+#          }}},
+# "min_score": 0,
+# "highlight": {"fields": {
+#  "report.description.dutch_tf_description": {}
+# }}
+#  }
 # todo: can also use conditions in queries: e.g. if equals in a must,if not equals, in a must_not
 # {
 #     "query": {
@@ -470,49 +491,61 @@ class BaseAlgorithm(Algorithm):
         return None
 
 
-class RandomAlgorithm(Algorithm):
+class MajorityAlgorithm:
 
-    def specific_assign(self, assign_patients, assign_forms):
+    def __init__(self, con, index_name, search_type, algo_labels_possible_values):
+        self.con = con
+        self.index_name = index_name
+        self.search_type = search_type
+        self.labels_possible_values = algo_labels_possible_values
+        self.counts = {}
+        self.majority_scores = {}
+
+    def run(self, assign_patients, assign_forms, mj_file):
+        self.get_conditioned_counts(assign_patients, assign_forms)
+        print "avg_score: ", self.get_conditioned_counts()
+        with open(mj_file, 'w') as f:
+            json.dump(self.majority_scores, f, indent=4)
+
+    def get_conditioned_counts(self, assign_patients, assign_forms):
+        # initialize counts
+        for form_id in assign_forms:
+            self.counts[form_id] = {}
+            for field in self.labels_possible_values[form_id].keys():
+                if self.labels_possible_values[form_id][field]['values'] == "unknown":
+                    continue  # don't consider open-questions
+                self.counts[form_id][field] = {}
+                for value in self.labels_possible_values[form_id][field]['values']:
+                    self.counts[form_id][field][value] = 0
+                self.counts[form_id][field][""] = 0
+        print "initial counts:\n{}".format(self.counts)
+        # count based on given patients and forms, and Considering conditions.
         for patient_id in assign_patients:
-            patient_forms = {}
             doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
             for form_id in assign_forms:
                 if form_id in doc.keys():
-                    form_values = self.assign_random_patient_form(form_id, doc)
-                    patient_forms[form_id] = form_values
-            self.assignments[patient_id] = patient_forms
-            if int(patient_id) % 100 == 0:
-                print "assign: ", self.assignments[patient_id], " to patient: ", patient_id
-        return self.assignments
+                    for field in self.counts[form_id].keys():
+                        if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, field):
+                            value = doc[form_id][field]
+                            self.counts[form_id][field][value] += 1
+        print "conditioned counts:\n{}".format(self.counts)
+        return self.counts
 
-    def assign_random_patient_form(self, form_id, doc):
-        patient_form_assign = {}  # dictionary of assignments
-        for label in self.labels_possible_values[form_id]:
-            possibilities = len(self.labels_possible_values[form_id][label]['values'])
-            if self.labels_possible_values[form_id][label]['values'] != "unknown":
-                chosen = random.randint(0, possibilities - 1)
-                assignment = self.labels_possible_values[form_id][label]['values'][chosen]
-            else:
-                assignment = ""
-                # reports = doc['report']
-                # if type(reports) == list:
-                #     chosen_description = reports[random.randint(0, len(reports)-1)]['description']
-                # else:
-                #     chosen_description = reports['description']
-                # if chosen_description:
-                #     tokens = nltk.word_tokenize(chosen_description.lower())
-                #     assignment = tokens[random.randint(0, len(tokens)-1)]
-                # else:
-                #     assignment = ""
-            patient_form_assign[label] = assignment
-        return patient_form_assign
+    def majority_assignment(self):
+        avg_score = 0.0
+        for form in self.counts.keys():
+            self.majority_scores[form] = {}
+            for field in self.counts[form].keys():
+                field_counts = self.counts[field].values()
+                max_idx, max_val = max(enumerate(field_counts), key=operator.itemgetter(1))
+                self.majority_scores[field] = max_val / np.sum(np.asarray(field_counts))
+                avg_score += self.majority_scores[field]
+        return avg_score
 
-"""
+
 if __name__ == '__main__':
-    # start_ES()
-
     settings.init("aux_config\\conf17.yml",
-                  "C:\Users\\Christina Zavou\\Documents\Data",
+                  "..\\Data",
                   "..\\results")
 
     used_forms = settings.global_settings['forms']
@@ -521,17 +554,11 @@ if __name__ == '__main__':
     type_name_s = settings.global_settings['type_name_s']
     possible_values = settings.find_chosen_labels_possible_values()
     used_patients = settings.find_used_ids()
-
     connection = EsConnection(settings.global_settings['host'])
-    unknowns = settings.global_settings['unknowns'] == "include"
 
-    if settings.global_settings['algo'] == 'random':
-        my_algorithm = RandomAlgorithm(connection, index, type_name_p, possible_values)
-    else:
-        my_algorithm = BaseAlgorithm(connection, index, type_name_p, possible_values,
-                                     settings.global_settings['patient_relevant'],
-                                     settings.global_settings['default_field'],
-                                     settings.global_settings['boost_fields'],
-                                     settings.global_settings['min_score'])
-    my_algorithm.assign(used_patients, used_forms, settings.get_results_filename())
-"""
+    from utils import remove_ids_with_wrong_values
+    r_ids = remove_ids_with_wrong_values(used_patients, connection, type_name_p, index, settings.labels_possible_values)
+    ids = [i for i in used_patients if i not in r_ids]
+    print ids
+    # algo = MajorityAlgorithm(connection, index, type_name_p, settings.chosen_labels_possible_values)
+    # algo.run(settings.find_used_ids(), settings.global_settings['forms'], "..\\results\\majority.json")

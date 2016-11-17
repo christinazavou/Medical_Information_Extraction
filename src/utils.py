@@ -2,7 +2,6 @@
 
 import settings
 import json
-import ESutils
 import re
 import os
 import pickle
@@ -10,6 +9,8 @@ import types
 from nltk import tokenize
 import numpy as np
 
+import ESutils
+from ESutils import EsConnection
 from ctcue import predict
 
 
@@ -213,151 +214,28 @@ def reports_as_list(reports):
         return to_return
 
 
-if __name__ == '__main__':
-    """
-    update_form_values("colorectaal", settings.global_settings['fields_config_file'])
-    fix_ids('mie', 'patient')
+def remove_ids_with_wrong_values(ids, con, search_type, index, labels_possible_values):
+    to_remove = set()
+    for patient in ids:
+        doc = con.get_doc_source(index, search_type, patient)
+        for form in labels_possible_values.keys():
+            if form in doc.keys():
+                for field in labels_possible_values[form].keys():
+                    if labels_possible_values[form][field]['values'] != "unknown":
+                        value = doc[form][field]
+                        if value not in labels_possible_values[form][field]['values']:
+                            to_remove.add(patient)
+    return to_remove
 
-    with open("C:\\Users\\Christina Zavou\\Desktop\\results\\ids.json") as ids_file:
-        current_ids = json.load(ids_file, encoding='utf-8')
-    index_name = settings.global_settings['index_name']
 
-    current_ids = fix_ids_of_decease(current_ids, 'colorectaal')
-    current_ids = fix_ids_of_decease(current_ids, 'mamma')
-    dict_key = index_name + " patient ids"
-    dict_key1 = index_name + " patients' ids in colorectaal"
-    dict_key2 = index_name + " patients' ids in mamma"
-    accepted_ids = combine_all_ids(current_ids, dict_key, dict_key1, dict_key2)
-    # don't forget sentences ids !
-    """
-    """
-    txt = "voor start van zesde behandelingsweek. Wordt steeds zwaarder. Vooral bij <em>defaecatie</em> pijnlijk. " \
-          "Niet bij zitten. Vermoeid. Geen rectaal bloedverliers. Geen"
-    print tokens_in_sentence_refers_to_patient(txt)
-    """
-
-    txt = [
-        u'MRI rectum: T2N2 locally advance distaal rectum carcinoom.',
-        u'<DIS> synchroon hepatogeen gemetastaseerd locally advanced distaal rectumcarcinoom.',
-        u'Januari: <DIS> rectumcarcinoom.',
-        u'geclassificeerd als een <DIS> rectumcarcinoom.',
-        u'vanwege pT3N2 rectumcarcinoom',
-        u'MRI-rectum: <DIS> rectumcarcinoom'
-        u'distaal rectumcarcinoom op 7 cm (<DIS>).',
-        u'beperkt rectumcarcinoom, cT2 N0.',
-        u'resectie ivm T3N2 rectumca.',
-        u'Conclusie: <DIS> rectumcarcinoom.',
-        u'in verband met een pT3N1Mx rectumcarcinoom.',
-        u'<DIS>: Goed / matig, gedifferentieerd adenocarcinoom.',
-        u'PA: pT3N1M1, adenocarcinoom met metastasen"'
-    ]
-    X, result = predict.predict_prob(clf, txt)
-    print result
-
-    txt = [
-        u'MRI rectum: T2N2 locally advance distaal rectum carcinoom.',
-        u'<DIS> synchroon hepatogeen gemetastaseerd locally advanced distaal rectumcarcinoom.',
-        u'Januari: <DIS> rectumcarcinoom.',
-        u'geclassificeerd als een <DIS> rectumcarcinoom.',
-        u'vanwege pT3N2 rectumcarcinoom MRI-rectum: <DIS> rectumcarcinoom distaal rectumcarcinoom op 7 cm (<DIS>).',
-        u'beperkt rectumcarcinoom, cT2 N0.',
-        u'resectie ivm T3N2 rectumca.',
-        u'Conclusie: <DIS> rectumcarcinoom.',
-        u'in verband met een pT3N1Mx rectumcarcinoom.',
-        u'<DIS>: Goed / matig, gedifferentieerd adenocarcinoom.',
-        u'PA: pT3N1M1, adenocarcinoom met metastasen'
-    ]
-    X, result = predict.predict_prob(clf, txt)
-    print result
-
-    txt = [
-        "MRI rectum: T2N2 locally advance distaal rectum carcinoom.",
-        "<DIS> synchroon hepatogeen gemetastaseerd locally advanced distaal rectumcarcinoom.",
-        "Januari: <DIS> rectumcarcinoom.",
-        "geclassificeerd als een <DIS> rectumcarcinoom.",
-        "vanwege pT3N2 rectumcarcinoom MRI-rectum: <DIS> rectumcarcinoom distaal rectumcarcinoom op 7 cm (<DIS>).",
-        "beperkt rectumcarcinoom, cT2 N0.",
-        "resectie ivm T3N2 rectumca.",
-        "Conclusie: <DIS> rectumcarcinoom.",
-        "in verband met een pT3N1Mx rectumcarcinoom.",
-        "<DIS>: Goed / matig, gedifferentieerd adenocarcinoom.",
-        "PA: pT3N1M1, adenocarcinoom met metastasen"
-    ]
-    X, result = predict.predict_prob(clf, txt)
-    print result
-
-    print "\n"
-
-    highlights = [
-        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Met vriendelijke groet, mede namens E. van Westreenen",
-        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Conclusie: akkoord voorstel. Met vriendelijke",
-        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
-        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
-        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : op 9-1-2014 besproken: Licht stijgend CEA in follow"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-
-    print "\n"
-
-    highlights = [
-        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Met vriendelijke groet, mede namens E. van Westreenen"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-    highlights = [
-        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad. Conclusie: akkoord voorstel. Met vriendelijke"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-    highlights = [
-        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-
-    # To make a prediction replace all mentions of a concept (using synonyms if wanted) with <DIS>
-    # A text is provided as a list of sentences.
-
-    print "\n"
-
-    highlights = [
-        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Met vriendelijke groet, mede namens E. van Westreenen"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-    highlights = [
-        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Conclusie: akkoord voorstel.", "Met vriendelijke"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-    highlights = [
-        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : Licht stijgend CEA in follow up.", "Pre-operatief 15"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-
-    print "\n"
-
-    highlights = [
-        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Met vriendelijke groet, mede namens E. van Westreenen",
-        ": ypT3N0 Voorstel : Follow up.", "Eventuele opmerkingen : Neo-adjuvant <DIS> capecitabine + RT gehad.", "Conclusie: akkoord voorstel.", "Met vriendelijke",
-        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : Licht stijgend CEA in follow up.", "Pre-operatief 15",
-        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : Licht stijgend CEA in follow up.", "Pre-operatief 15",
-        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <DIS> ypT3N0Mx.", "Anamnese : op 9-1-2014 besproken: Licht stijgend CEA in follow"
-    ]
-    X, result = predict.predict_prob(clf, highlights)
-    print result
-
-    # for the moment I will use this last way. if all highlights (sentences) appear to be patient relevant is fine.
-    # or if one of the highlights (split in sentences) appear to be patient relevant.
-
-    print "test:"
-    highlights = [
-        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <em>chemoradiatie</em> capecitabine + RT gehad. Met vriendelijke groet, mede namens E. van Westreenen",
-        ": ypT3N0 Voorstel : Follow up. Eventuele opmerkingen : Neo-adjuvant <em>chemoradiatie</em> capecitabine + RT gehad. Conclusie: akkoord voorstel. Met vriendelijke",
-        "Relevante Voorgeschiedenis : 22-11-2013 laparascopische LAR na neoadjuvante <em>chemoradiatie</em> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
-        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <em>chemoradiatie</em> ypT3N0Mx. Anamnese : Licht stijgend CEA in follow up. Pre-operatief 15",
-        "Relevante Voorgeschiedenis : 22-11-2013 Laparascopische LAR na neoadjuvante <em>chemoradiatie</em> ypT3N0Mx. Anamnese : op 9-1-2014 besproken: Licht stijgend CEA in follow"
-    ]
-    print check_highlights_relevance(highlights)
+# def get_map_value(labels_values, labels_multivalues, label, value):
+#     possible_values = labels_values[label]
+#     for i, value_list in enumerate(labels_multivalues[label].values()):
+#         if value in value_list:
+#             return possible_values[i]
+#
+#
+# if __name__ == '__main__':
+#     settings.init("aux_config\\conf17.yml",
+#                   "..\\Data",
+#                   "..\\results")

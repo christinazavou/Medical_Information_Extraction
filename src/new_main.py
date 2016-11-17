@@ -88,8 +88,9 @@ def predict_forms():
     else:
         labels_possible_values = settings.chosen_labels_possible_values
 
-    if settings.global_settings['algo'] == 'random':
-        my_algorithm = algorithms.RandomAlgorithm(con, index_name, type_patient, labels_possible_values)
+    if settings.global_settings['algo'] == 'majority':
+        my_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, labels_possible_values)
+        my_algorithm.majority_assignment()
     else:
         my_algorithm = algorithms.BaseAlgorithm(con, index_name, type_patient, labels_possible_values,
                                                 settings.global_settings['patient_relevant'],
@@ -97,8 +98,8 @@ def predict_forms():
                                                 settings.global_settings['boost_fields'],
                                                 settings.global_settings['min_score'],
                                                 settings.global_settings['use_description_1ofk'])
-    my_algorithm.assign(patient_ids_used, settings.global_settings['forms'],
-                        settings.global_settings['results_filename'])
+        my_algorithm.assign(patient_ids_used, settings.global_settings['forms'],
+                            settings.global_settings['results_filename'])
     print "Finish assigning values."
 
 
