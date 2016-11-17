@@ -28,10 +28,53 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 # todo: use thorax/adb search : thorax oor abd
 # todo: for open questions : either highlight description assignment or index sentences ...
 # todo: instead of list ... do one query with all boost_fields (??)
+# {
+#     "query": {
+#         "bool": {
+#             "filter": {"term": {"_id": "55558"}},
+#             "minimum_should_match": 0,
+#             "should": {
+#                 "multi_match": {
+#                     "query":"Comorbiditeit aanwezig",
+#                     "fields":  [ "report.description", "report.description.dutch_description",
+#                                  "report.description.dutch_tf_description", "report.description.tf_description"]}
+#             }}},
+# "min_score": 0,
+# "highlight": {"fields": {
+#     "report.description.dutch_tf_description": {}
+# }}
+# }
 # todo: can also use conditions in queries: e.g. if equals in a must,if not equals, in a must_not
-# todo: could do it with querying all values the same time and pick best, but i didn't find how.. with dis_max maybe
-# TODO: what about "Tx / onbekend" ?
-# TODO: when in zwolle test if sentences could use the m(ulti)termvectors
+# {
+#     "query": {
+#         "bool": {
+#             "filter": {"term": {"_id": "55558"}},
+#             "minimum_should_match": 0,
+#             "should":
+#                 {"multi_match": {
+#                     "query":"Comorbiditeit aanwezig",
+#                     "fields":  [ "report.description", "report.description.dutch_description",
+#                                  "report.description.dutch_tf_description", "report.description.tf_description"]}},
+#             "must": [
+#                {"match":{
+#                 "colorectaal.LOCPRIM":{
+#                     "query": "Rectum"
+#                 }
+#                }}
+#             ],
+#             "must_not": [
+#                {"match":{
+#                 "colorectaal.klachten_klacht2":{
+#                     "query": "No"
+#                 }
+#                }}
+#             ]
+#         }},
+# "min_score": 0,
+# "highlight": {"fields": {
+#     "report.description.dutch_tf_description": {}
+# }}
+# }
 
 global the_current_body
 global comment_relevance
@@ -180,9 +223,10 @@ class Algorithm:
 class BaseAlgorithm(Algorithm):
 
     def __init__(self, con, index_name, search_type, algo_labels_possible_values, patient_relevant,
-                 default_field=None, boost_fields=None, min_score=0):
+                 default_field=None, boost_fields=None, min_score=0, use_description_1ofk=False):
         super(BaseAlgorithm, self).__init__(con, index_name, search_type, algo_labels_possible_values,
                                             default_field, boost_fields, patient_relevant, min_score)
+        self.use_description_1ofk = use_description_1ofk
 
     def specific_assign(self, assign_patients, assign_forms):
         for patient_id in assign_patients:
@@ -347,11 +391,14 @@ class BaseAlgorithm(Algorithm):
         #     should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
         #     should_body.append(match_phrase_query(boost_field, description + " " + value, slop=100, boost=0.2))
 
-        must_body = match_phrase_query(self.default_field, value, slop=20)
+        must_body = list()
+        must_body.append(match_phrase_query(self.default_field, value, slop=20))
         should_body = list()
+        if self.use_description_1ofk:
+            must_body.append(match_query_with_operator(self.default_field, description, operator="OR", min_pct="40%"))
 
         filter_body = term_query("_id", patient_id)
-        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])  # WEIRDOOOOOOOOOOOOO
+        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
         body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
         the_current_body = body
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
