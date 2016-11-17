@@ -3,6 +3,9 @@
 #### usage
 call main.py aux_config\confxx.yml data_folder_path results_folder_path
 
+check aux_config\sample_configuration.yml to see how the setup is set
+and used.
+
 #### In read_data.py:
 read_patients() calls patient2json() where it checks whether the patient 
 folder contains a report csv that is not empty.
