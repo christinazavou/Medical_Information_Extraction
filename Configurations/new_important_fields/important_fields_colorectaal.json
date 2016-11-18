@@ -116,7 +116,7 @@
                   "condition":"PROCOK = Overig (nietresectieve procedure)",
                   "description": [],
                   "possible_values": [["Ileostoma"],["Colostoma"],["Bypass"],["TEM"],["Laparotomie"],["Laparoscopie","Laparoscopisch"]],
-                  "values": ["Ileostoma","Colostoma","Transversum resectie","Bypass","TEM", "Laparotomie","Laparoscopie","Anders"]
+                  "values": ["Ileostoma","Colostoma","Transversum resectie","Bypass","TEM", "Laparotomie ","Laparoscopie","Anders"]
                 }
              },
             "mdo_chir":{
