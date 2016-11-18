@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 4:
-        configFilePath = "aux_config\\conf24.yml"
+        configFilePath = "aux_config\\conf17.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         resultsPath = "..\\results"

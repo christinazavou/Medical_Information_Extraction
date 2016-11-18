@@ -315,6 +315,8 @@ class BaseAlgorithm(Algorithm):
             highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
             body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
             the_current_body = body
+            if int(patient_id) % 100 == 0:
+                print "the_current_body: {}".format(the_current_body)
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
             if score_search:
@@ -347,6 +349,8 @@ class BaseAlgorithm(Algorithm):
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
         body = search_body(must_body, {}, filter_body, highlight_body, min_score=self.min_score)
         the_current_body = body
+        if int(patient_id) % 100 == 0:
+            print "the_current_body: {}".format(the_current_body)
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
         if score_search:
@@ -368,6 +372,8 @@ class BaseAlgorithm(Algorithm):
 
             body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
             the_current_body = body
+            if int(patient_id) % 100 == 0:
+                print "the_current_body: {}".format(the_current_body)
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
             if score_search:
@@ -393,6 +399,8 @@ class BaseAlgorithm(Algorithm):
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
         body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
         the_current_body = body
+        if int(patient_id) % 100 == 0:
+            print "the_current_body: {}".format(the_current_body)
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(search_results, self.default_field)
 
@@ -422,6 +430,8 @@ class BaseAlgorithm(Algorithm):
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
         body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
         the_current_body = body
+        if int(patient_id) % 100 == 0:
+            print "the_current_body: {}".format(the_current_body)
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(search_results, self.default_field)
 
