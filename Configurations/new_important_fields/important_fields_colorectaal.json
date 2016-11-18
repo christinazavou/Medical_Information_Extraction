@@ -115,7 +115,7 @@
                 "properties": {
                   "condition":"PROCOK = Overig (niet-resectieve procedure)",
                   "description": [],
-                  "possible_values": [["Ileostoma"],["Colostoma"],["Bypass"],["TEM"],["Laparotomie"],["Laparoscopie","Laparoscopisch"]],
+                  "possible_values": [["Ileostoma"],["Colostoma"],["Transversum resectie"],["Bypass"],["TEM"],["Laparotomie"],["Laparoscopie","Laparoscopisch"]],
                   "values": ["Ileostoma","Colostoma","Transversum resectie","Bypass","TEM", "Laparotomie ","Laparoscopie","Anders"]
                 }
              },
