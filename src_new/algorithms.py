@@ -313,7 +313,6 @@ class BaseAlgorithm(Algorithm):
             highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
             body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
             the_current_body = body
-            print "search for:\n", the_current_body
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
             if score_search:
@@ -342,7 +341,6 @@ class BaseAlgorithm(Algorithm):
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
         body = search_body(must_body, {}, filter_body, highlight_body, min_score=self.min_score)
         the_current_body = body
-        print "search for:\n", the_current_body
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
         if score_search:
@@ -353,13 +351,13 @@ class BaseAlgorithm(Algorithm):
         elif 'Onbekend' in values:
 
             q = disjunction_of_conjunctions(description)
+
             must_body = query_string([self.default_field], q)
             should_body = list()
             # PREPEI NA ALLAXEI... ISOS ME MINIMUM_SHOULD_MATCH
 
             body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
             the_current_body = body
-            print "search for:\n", the_current_body
             search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
             if score_search:
@@ -381,7 +379,6 @@ class BaseAlgorithm(Algorithm):
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
         body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
         the_current_body = body
-        print "search for:\n", the_current_body
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(search_results, self.default_field)
 
@@ -391,7 +388,12 @@ class BaseAlgorithm(Algorithm):
         global comment_relevance
         comment_relevance = ""
 
-        q = disjunction_of_conjunctions(extend_value)
+        if isinstance(extend_value, types.ListType):
+            q = disjunction_of_conjunctions(extend_value)
+        else:
+            q = extend_value
+            if '/' in q:
+                q = q.replace('/',' or ')
         must_body = query_string([self.default_field], q)
         should_body = list()
 
@@ -399,7 +401,6 @@ class BaseAlgorithm(Algorithm):
         highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
         body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
         the_current_body = body
-        print "search-for \n", the_current_body
         search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
         return self.score_and_evidence(search_results, self.default_field)
     # afterwards check
@@ -419,17 +420,19 @@ class BaseAlgorithm(Algorithm):
         evidences = [None for value in values]
 
         for i, value in enumerate(values):
-            if value != 'Anders':  # NOTE: ANDERS APPEARS LAST SO INDEXING EXTEND_VALUES WITH I IS OK
+            if value != 'Anders' and value != "Overig (nietresectieve procedure)":
+                # NOTE: ANDERS AND OVERIG APPEARS LAST SO INDEXING EXTEND_VALUES WITH I IS OK
                 scores[i], evidences[i] = self.get_value_score(patient_id, value, extend_values[i], description)
 
         score, idx = pick_score_and_index(scores)
         if score > 0:
             return combine_assignment(values[idx], evidences[idx], scores[idx])
-        if score == 0 and 'Anders' in values:
-            idx_anders = values.index('Anders')
+        if score == 0 and ('Anders' in values or 'Overig (nietresectieve procedure)' in values):
+            idx_anders = len(values) - 1
             scores[idx_anders], evidences[idx_anders] = self.assign_anders(patient_id, description)
             if scores[idx_anders]:
-                return combine_assignment('Anders', evidences[idx_anders], scores[idx_anders])
+                v = 'Anders' if 'Anders' in values else 'Overig (nietresectieve procedure)'
+                return combine_assignment(v, evidences[idx_anders], scores[idx_anders])
         return combine_assignment("", comment='no value matched.')
 
     def assign_one_of_k(self, patient_id, values, extend_values, description):
