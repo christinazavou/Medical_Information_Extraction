@@ -86,11 +86,13 @@ def predict_forms():
     else:
         labels_possible_values = settings.chosen_labels_possible_values
 
+    import algorithms_alt
+
     if settings.global_settings['algo'] == 'majority':
-        my_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, labels_possible_values)
+        my_algorithm = algorithms_alt.MajorityAlgorithm(con, index_name, type_patient, labels_possible_values)
         my_algorithm.majority_assignment()
     else:
-        my_algorithm = algorithms.BaseAlgorithm(con, index_name, type_patient, labels_possible_values,
+        my_algorithm = algorithms_alt.BaseAlgorithm(con, index_name, type_patient, labels_possible_values,
                                                 settings.global_settings['patient_relevant'],
                                                 settings.global_settings['default_field'],
                                                 settings.global_settings['boost_fields'],
@@ -148,10 +150,10 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 4:
-        configFilePath = "aux_config\\conf17.yml"
+        configFilePath = "aux_config\\conf18.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
-        resultsPath = "..\\results_new"
+        resultsPath = "..\\results_alt"
         # resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov"
     else:
         configFilePath = sys.argv[1]
@@ -195,17 +197,17 @@ if __name__ == '__main__':
     """---------------------------------------------Evaluate---------------------------------------------------------"""
 
     if settings.global_settings['eval_algo']:
-        # evaluate_predictions()
+        evaluate_predictions()
+
         with open("..\\results_new\\majority.json", "r") as f:
             true_cond_counts = json.load(f, encoding='utf-8')['cond_counts']
+
         from evaluation_with_heatmaps import Evaluation
-
-
         my_evaluation = Evaluation(con, index_name, type_patient, type_form,
-                                   "..\\results_new\\conf17_results.json",
+                                   settings.global_settings['eval_file'],
                                    settings.chosen_labels_possible_values)
         my_evaluation.eval(patient_ids_used, settings.global_settings['forms'])
         my_evaluation.calculate_heat_maps(true_cond_counts)
-        my_evaluation.print_heat_maps("..\\results_new\\heat")
+        my_evaluation.print_heat_maps("..\\results_alt\\heat")
 
 

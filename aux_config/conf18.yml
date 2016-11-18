@@ -3,7 +3,7 @@
 # ---------------------------------------------------------------------------------------------------------------------#
 # --------------------------------------------------paths--------------------------------------------------------------#
 host: {"host": "localhost", "port": 9200}
-json_forms_directory: "Configurations_path\\important_fields\\"  # can remove last '\\'
+json_forms_directory: "Configurations_path\\new_important_fields\\"  # can remove last '\\'
 csv_form_path: "Data_path\\decease\\selection_decease.csv"
 in_dossiers_path: "Data_path\\decease\\patients_selection_decease\\"
 out_dossiers_path: "Data_path\\decease\\patients_selection_decease_json\\"
@@ -11,19 +11,19 @@ out_dossiers_path: "Data_path\\decease\\patients_selection_decease_json\\"
 # ----------------------------------------------excecution config------------------------------------------------------#
 read_dossiers: False  # if True -> makes jsons and index them in ES
 store_dossiers: False
-algo: "tf_tf-idf"  # "random" or baseline("tf" or "tf-idf")
+algo: "baseline"  # "random" or baseline("tf" or "tf-idf")
 run_algo: True
 forms: ["colorectaal"]  #,"mamma"]
 eval_algo: True
 eval_file: ""  #"Results_path\\conf1_results.json" # if run_algo is false give which file to eval
 patients_pct: 1  # percentage of patients to work with
 
-patient_relevant: False
+patient_relevant: True
 #tf_fields: ["report.description.dutch_tf_description", "report.description.tf_description"]
 #tfidf_fields: ["report.description", "report.description.dutch_description"]
 default_field: "report.description.dutch_tf_description"
-boost_fields: ["report.description.tf_description", "report.description", "report.description.dutch_description"]
-min_score: 1
+boost_fields: []
+min_score: 0
 
 #pre_process: []  # any of : ['remove_codes','extrastop','remove_stopwords','add_synonyms','stem']
 # if empty preprocess then take type_name_pp as is
@@ -31,12 +31,13 @@ min_score: 1
 #type_name_pp: "patient_0_1_1_0"  # "patient_stem_stop_extrastop_synonyms" or ~ patient_1_1_1_1
 
 unknowns: "exclude"  # "include" or "exclude" -> to use or not the fields that are open-questions
+use_description_1ofk: true
 #when_no_preference: "random" # "random" or "empty" -> to assign when no preference between the k possible values
 #fuzziness: 2
 #with_description: False # if True -> search for {the field label + possible value + field description}
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------fields config ---------------------------------------------------------#
-assign_all: True  # if True -> assigns all fields of given forms during algorithm assignment
+assign_all: False  # if True -> assigns all fields of given forms during algorithm assignment
 # colorectaal: ['LOCPRIM','LOCPRIM2','SCOPDIST','SCOPDIST2','klachten_klacht1','klachten_klacht2',
 #               'klachten_klacht3','klachten_klacht4','klachten_klacht88','klachten_klacht99']
 #mamma: []

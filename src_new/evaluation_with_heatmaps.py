@@ -183,7 +183,6 @@ class Evaluation:
                         names_dict[field][v] = 'v' + str(i)
                     else:
                         names_dict[field][v] = v
-                print names_dict
 
                 x = names_dict[field].values()
                 y = x
