@@ -90,13 +90,16 @@ def search_body(must_body=None, should_body=None, filter_body=None, highlight_bo
 
 def disjunction_of_conjunctions(phrases):
     if not phrases:
-        return None
+        return ""
     query = ""
     for i, phrase in enumerate(phrases):
+        if '/' in phrase:
+            txt = phrase.replace('/', ' or ')
+        else:
+            txt = " AND ".join([j for j in phrase.split()])
         if i > 0:
             query += " OR "
-        tmp = " AND ".join([i for i in phrase.split()])
-        query += " (" + tmp + ") "
+        query += " (" + txt + ") "
     return query
 
 

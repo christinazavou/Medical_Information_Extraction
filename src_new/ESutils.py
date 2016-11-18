@@ -173,11 +173,14 @@ class EsConnection:
         print(" map: %s" % mapping)
 
     def search(self, index, body, doc_type=None):
-        if doc_type:
-            res = self.es.search(index=index, doc_type=doc_type, body=body)
-        else:
-            res = self.es.search(index=index, body=body)
-        return res
+        try:
+            if doc_type:
+                res = self.es.search(index=index, doc_type=doc_type, body=body)
+            else:
+                res = self.es.search(index=index, body=body)
+            return res
+        except:
+            raise("except when search for:\n{}".format(body))
 
     def exists(self, index, type_name, id_doc):
         return self.es.exists(index, type_name, id_doc)
