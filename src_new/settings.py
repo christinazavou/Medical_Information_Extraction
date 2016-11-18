@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from os.path import basename
 import copy
 import types
 import json
@@ -57,7 +58,7 @@ def init(config_file, data_path, results_path):
     global_settings = {}
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
-    config_file = os.path.join(this_dir.replace("src_new", ""), config_file)
+    config_file = os.path.join(this_dir.replace(basename(__file__), ""), config_file)
     global_settings['configFile'] = config_file
 
     if not os.path.isdir(data_path):
@@ -71,7 +72,7 @@ def init(config_file, data_path, results_path):
     with open(config_file, 'r') as f:
         doc = yaml.load(f)
 
-    config_path = os.path.dirname(os.path.realpath(__file__)).replace('src_new', 'Configurations')
+    config_path = os.path.dirname(os.path.realpath(__file__)).replace(basename(__file__), 'Configurations')
 
     for key, value in doc.items():
         global_settings[key] = value
@@ -207,3 +208,4 @@ def get_results_filename():
 def get_run_description():
     global global_settings
     return global_settings
+
