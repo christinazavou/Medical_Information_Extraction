@@ -214,3 +214,16 @@ def make_ordered_dict_representation(ordered_fields, unordered_dict):
 #     return to_remove
 #
 #
+
+def check(patient_ids, con, fields_values, index, p_type):
+    for p_id in patient_ids:
+        doc = con.get_doc_source(index, p_type, p_id)
+        for form in fields_values.keys():
+            if form in doc.keys():
+                golden_truth = doc[form]
+                for field in fields_values[form].keys():
+                    if fields_values[form][field]['values'] == "unknown":
+                        print "unknown"
+                    else:
+                        if golden_truth[field] not in fields_values[form][field]['values'] and golden_truth[field] != "":
+                            print "golden truth for {} {} is {}".format(p_id, field, golden_truth[field])
