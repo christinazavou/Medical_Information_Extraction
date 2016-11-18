@@ -9,13 +9,13 @@ in_dossiers_path: "Data_path\\decease\\patients_selection_decease\\"
 out_dossiers_path: "Data_path\\decease\\patients_selection_decease_json\\"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
-read_dossiers: True  # if True -> makes jsons and index them in ES
-store_dossiers: True
+read_dossiers: False  # if True -> makes jsons and index them in ES
+store_dossiers: False
 algo: "baseline"  # "random" or baseline("tf" or "tf-idf")
 run_algo: False
 forms: ["colorectaal"]  #,"mamma"]
-eval_algo: False
-eval_file: ""  #"Results_path\\conf1_results.json" # if run_algo is false give which file to eval
+eval_algo: True
+eval_file: "Results_path"  #"Results_path\\conf1_results.json" # if run_algo is false give which file to eval
 patients_pct: 1  # percentage of patients to work with
 
 patient_relevant: False

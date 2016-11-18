@@ -155,7 +155,7 @@ def pick_score_and_index(scores):
     max_idx = len(sorted_scores) - 1
     max_val = sorted_scores[max_idx]
     if scores.count(max_val) > 1:
-        print "MORE THAN ONCE"
+        # print "MORE THAN ONCE"
         if scores.count(max_val) == len(scores):
             print "TIES"
         indices = [i for i, x in enumerate(scores) if x==max_val]
@@ -420,18 +420,20 @@ class BaseAlgorithm(Algorithm):
         evidences = [None for value in values]
 
         for i, value in enumerate(values):
-            if value != 'Anders' and value != "Overig (nietresectieve procedure)":
+            if value != 'Anders' and value != "Overig (niet-resectieve procedure)":
                 # NOTE: ANDERS AND OVERIG APPEARS LAST SO INDEXING EXTEND_VALUES WITH I IS OK
-                scores[i], evidences[i] = self.get_value_score(patient_id, value, extend_values[i], description)
-
+                try:
+                    scores[i], evidences[i] = self.get_value_score(patient_id, value, extend_values[i], description)
+                except:
+                    print extend_values,"  ",i
         score, idx = pick_score_and_index(scores)
         if score > 0:
             return combine_assignment(values[idx], evidences[idx], scores[idx])
-        if score == 0 and ('Anders' in values or 'Overig (nietresectieve procedure)' in values):
+        if score == 0 and ('Anders' in values or 'Overig (niet-resectieve procedure)' in values):
             idx_anders = len(values) - 1
             scores[idx_anders], evidences[idx_anders] = self.assign_anders(patient_id, description)
             if scores[idx_anders]:
-                v = 'Anders' if 'Anders' in values else 'Overig (nietresectieve procedure)'
+                v = 'Anders' if 'Anders' in values else 'Overig (niet-resectieve procedure)'
                 return combine_assignment(v, evidences[idx_anders], scores[idx_anders])
         return combine_assignment("", comment='no value matched.')
 
@@ -459,9 +461,10 @@ class MajorityAlgorithm:
 
     def run(self, assign_patients, assign_forms, mj_file):
         self.get_conditioned_counts(assign_patients, assign_forms)
-        print "avg_score: ", self.get_conditioned_counts()
+        self.majority_assignment()
+        d = {'mj_scores': self.majority_scores, 'cond_counts':self.counts}
         with open(mj_file, 'w') as f:
-            json.dump(self.majority_scores, f, indent=4)
+            json.dump(d, f, indent=4)
 
     def get_conditioned_counts(self, assign_patients, assign_forms):
         # initialize counts
@@ -483,26 +486,30 @@ class MajorityAlgorithm:
                     for field in self.counts[form_id].keys():
                         if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, field):
                             value = doc[form_id][field]
+                            # print "doc[{}][{}]={}".format(form_id, field, value)
                             self.counts[form_id][field][value] += 1
         print "conditioned counts:\n{}".format(self.counts)
         return self.counts
 
     def majority_assignment(self):
-        avg_score = 0.0
         for form in self.counts.keys():
+            avg_score = 0.0
+            num_fields = 0
             self.majority_scores[form] = {}
             for field in self.counts[form].keys():
-                field_counts = self.counts[field].values()
+                num_fields += 1
+                field_counts = self.counts[form][field].values()
                 max_idx, max_val = max(enumerate(field_counts), key=operator.itemgetter(1))
-                self.majority_scores[field] = max_val / np.sum(np.asarray(field_counts))
-                avg_score += self.majority_scores[field]
-        return avg_score
+                self.majority_scores[form][field] = max_val / np.sum(np.asarray(field_counts))
+                avg_score += self.majority_scores[form][field]
+            avg_score /= num_fields
+            print "acg_score for {} is {}".format(form, avg_score)
 
 
 if __name__ == '__main__':
-    settings.init("aux_config\\conf25.yml",
+    settings.init("aux_config\\conf17.yml",
                   "..\\Data",
-                  "..\\results")
+                  "..\\results_new")
 
     used_forms = settings.global_settings['forms']
     index = settings.global_settings['index_name']
@@ -512,19 +519,14 @@ if __name__ == '__main__':
     used_patients = settings.find_used_ids()
     connection = EsConnection(settings.global_settings['host'])
 
-    # from utils import remove_ids_with_wrong_values
-    # r_ids=remove_ids_with_wrong_values(used_patients, connection, type_name_p, index, settings.labels_possible_values)
-    # ids = [i for i in used_patients if i not in r_ids]
-    # print ids
+    my_algorithm = MajorityAlgorithm(connection, index, type_name_p, settings.chosen_labels_possible_values)
+    my_algorithm.run(settings.find_used_ids(), settings.global_settings['forms'], "..\\results_new\\majority.json")
 
-    # algo = MajorityAlgorithm(connection, index, type_name_p, settings.chosen_labels_possible_values)
-    # algo.run(settings.find_used_ids(), settings.global_settings['forms'], "..\\results\\majority.json")
-
-    my_algorithm = BaseAlgorithm(connection, index, type_name_p, settings.chosen_labels_possible_values,
-                                 settings.global_settings['patient_relevant'],
-                                 settings.global_settings['default_field'],
-                                 settings.global_settings['boost_fields'],
-                                 settings.global_settings['min_score'],
-                                 settings.global_settings['use_description_1ofk'])
-    my_algorithm.assign(used_patients, settings.global_settings['forms'],
-                        settings.get_results_filename())
+    # my_algorithm = BaseAlgorithm(connection, index, type_name_p, settings.chosen_labels_possible_values,
+    #                              settings.global_settings['patient_relevant'],
+    #                              settings.global_settings['default_field'],
+    #                              settings.global_settings['boost_fields'],
+    #                              settings.global_settings['min_score'],
+    #                              settings.global_settings['use_description_1ofk'])
+    # my_algorithm.assign(used_patients, settings.global_settings['forms'],
+    #                     settings.get_results_filename())

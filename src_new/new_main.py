@@ -10,7 +10,7 @@ from ESutils import EsConnection, start_es
 from read_data import read_patients
 from store_data import store_deceases, index_sentences
 import settings
-from utils import fix_ids_of_decease, combine_all_ids, update_form_values, make_ordered_dict_representation
+from utils import fix_ids_of_decease, combine_all_ids, update_form_values, make_ordered_dict_representation, check
 import algorithms
 import evaluation
 
@@ -148,10 +148,10 @@ if __name__ == '__main__':
 
     random.seed(100)
     if len(sys.argv) < 4:
-        configFilePath = "aux_config\\conf25.yml"
+        configFilePath = "aux_config\\conf17.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
-        resultsPath = "..\\results"
+        resultsPath = "..\\results_new"
         # resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov"
     else:
         configFilePath = sys.argv[1]
@@ -174,6 +174,7 @@ if __name__ == '__main__':
         store()
 
     """-------------------------------------------set params--------------------------------------------------------"""
+
     # to ensure we got values with conditions
     for form in settings.global_settings['forms']:
         update_form_values(form, os.path.join(settings.global_settings['json_forms_directory'],
@@ -184,6 +185,8 @@ if __name__ == '__main__':
     patient_ids_used = settings.find_used_ids()
     print "total used patients: {}".format(len(patient_ids_used))
 
+    check(patient_ids_used, con, settings.chosen_labels_possible_values, index_name, type_patient)
+
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
     if settings.global_settings['run_algo']:
@@ -192,4 +195,17 @@ if __name__ == '__main__':
     """---------------------------------------------Evaluate---------------------------------------------------------"""
 
     if settings.global_settings['eval_algo']:
-        evaluate_predictions()
+        # evaluate_predictions()
+        with open("..\\results_new\\majority.json", "r") as f:
+            true_cond_counts = json.load(f, encoding='utf-8')['cond_counts']
+        from evaluation_with_heatmaps import Evaluation
+
+
+        my_evaluation = Evaluation(con, index_name, type_patient, type_form,
+                                   "..\\results_new\\conf17_results.json",
+                                   settings.chosen_labels_possible_values)
+        my_evaluation.eval(patient_ids_used, settings.global_settings['forms'])
+        my_evaluation.calculate_heat_maps(true_cond_counts)
+        my_evaluation.print_heat_maps("..\\results_new\\heat")
+
+
