@@ -228,14 +228,12 @@ def remove_ids_with_wrong_values(ids, con, search_type, index, labels_possible_v
     return to_remove
 
 
-# def get_map_value(labels_values, labels_multivalues, label, value):
-#     possible_values = labels_values[label]
-#     for i, value_list in enumerate(labels_multivalues[label].values()):
-#         if value in value_list:
-#             return possible_values[i]
-#
-#
-# if __name__ == '__main__':
-#     settings.init("aux_config\\conf17.yml",
-#                   "..\\Data",
-#                   "..\\results")
+def check(patient_ids, con, fields_values, index, p_type):
+    for p_id in patient_ids:
+        doc = con.get_doc_source(index, p_type, p_id)
+        for form in fields_values.keys():
+            if form in doc.keys():
+                golden_truth = doc[form]
+                for field in fields_values[form].keys():
+                    if golden_truth[field] not in fields_values[form][field]['values']:
+                        print "golden truth for {} {} is {}".format(p_id, field, golden_truth[form][field])
