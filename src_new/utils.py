@@ -200,21 +200,6 @@ def make_ordered_dict_representation(ordered_fields, unordered_dict):
     return ordered_dict
 
 
-# def remove_ids_with_wrong_values(ids, con, search_type, index, labels_possible_values):
-#     to_remove = set()
-#     for patient in ids:
-#         doc = con.get_doc_source(index, search_type, patient)
-#         for form in labels_possible_values.keys():
-#             if form in doc.keys():
-#                 for field in labels_possible_values[form].keys():
-#                     if labels_possible_values[form][field]['values'] != "unknown":
-#                         value = doc[form][field]
-#                         if value not in labels_possible_values[form][field]['values']:
-#                             to_remove.add(patient)
-#     return to_remove
-#
-#
-
 def check(patient_ids, con, fields_values, index, p_type):
     for p_id in patient_ids:
         doc = con.get_doc_source(index, p_type, p_id)

@@ -214,20 +214,6 @@ def reports_as_list(reports):
         return to_return
 
 
-def remove_ids_with_wrong_values(ids, con, search_type, index, labels_possible_values):
-    to_remove = set()
-    for patient in ids:
-        doc = con.get_doc_source(index, search_type, patient)
-        for form in labels_possible_values.keys():
-            if form in doc.keys():
-                for field in labels_possible_values[form].keys():
-                    if labels_possible_values[form][field]['values'] != "unknown":
-                        value = doc[form][field]
-                        if value not in labels_possible_values[form][field]['values']:
-                            to_remove.add(patient)
-    return to_remove
-
-
 def check(patient_ids, con, fields_values, index, p_type):
     for p_id in patient_ids:
         doc = con.get_doc_source(index, p_type, p_id)
@@ -235,5 +221,8 @@ def check(patient_ids, con, fields_values, index, p_type):
             if form in doc.keys():
                 golden_truth = doc[form]
                 for field in fields_values[form].keys():
-                    if golden_truth[field] not in fields_values[form][field]['values']:
-                        print "golden truth for {} {} is {}".format(p_id, field, golden_truth[form][field])
+                    if fields_values[form][field]['values'] == "unknown":
+                        print "unknown"
+                    else:
+                        if golden_truth[field] not in fields_values[form][field]['values'] and golden_truth[field] != "":
+                            print "golden truth for {} {} is {}".format(p_id, field, golden_truth[field])
