@@ -81,8 +81,6 @@ def predict_forms():
     (if assign_all predict for all fields)
     """
 
-    with_unknowns = settings.global_settings['unknowns'] == "include"
-
     if settings.global_settings['assign_all']:
         labels_possible_values = settings.labels_possible_values
     else:

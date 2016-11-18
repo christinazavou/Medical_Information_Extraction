@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# other POS for ducth : https://www.simpleweb.org/~infrieks/stt/stt.html, http://lands.let.ru.nl/cgn/doc_English/topics/version_1.0/annot/pos_tagging/info.htm
+# other POS for ducth : https://www.simpleweb.org/~infrieks/stt/stt.html,
+# http://lands.let.ru.nl/cgn/doc_English/topics/version_1.0/annot/pos_tagging/info.htm
 
 import json
 from rosette.api import API, DocumentParameters, MorphologyOutput
@@ -10,15 +11,15 @@ import re
 
 # to specify dutch -> use 'nld' ... but where ?
 
-class RosetteApi():
+class RosetteApi:
     def __init__(self):
         self.key = 'e615b6920672b704c69f2261cc7f4d69'
         self.altUrl = 'https://api.rosette.com/rest/v1/'
         self.api = API(user_key=self.key, service_url=self.altUrl)
 
-    def get_nouns(self, source_text):
+    def get_nouns(self, src_txt):
         params = DocumentParameters()
-        params["content"] = source_text
+        params["content"] = src_txt
         result = self.api.morphology(params, MorphologyOutput.PARTS_OF_SPEECH)
         pos_tags = result['posTags']
         tokens = result['tokens']
@@ -26,9 +27,9 @@ class RosetteApi():
         print "nouns=", nouns
         return result
 
-    def get_entitiesnlinks(self, source_text):
+    def get_entities_and_links(self, src_txt):
         params = DocumentParameters()
-        params["content"] = source_text
+        params["content"] = src_txt
         result = self.api.entities(params)
         print(json.dumps(result['entities'], indent=2, ensure_ascii=False, sort_keys=True).encode("utf8"))
         return result
@@ -87,7 +88,7 @@ if __name__ == '__main__':
                   " zusje borstkanker, moeder mammacarcinoom -Sociaal - niet getrouwd -Uitslagen onderzoeken -echo " \
                   "abdomen: De blaas is goed gevuld, Normale uterus. -Conclusie -Geen verdenking maligniteit. -Beleid" \
                   " -Beleid + Aanvraag -Colonoscopie"
-    result = myros.get_nouns(source_text)
-    print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True).encode("utf8"))
-    result = myros.get_entitiesnlinks(source_text)
-    print(json.dumps(result, indent=2, ensure_ascii=False, sort_keys=True).encode("utf8"))
+    res = myros.get_nouns(source_text)
+    print(json.dumps(res, indent=2, ensure_ascii=False, sort_keys=True).encode("utf8"))
+    res = myros.get_entities_and_links(source_text)
+    print(json.dumps(res, indent=2, ensure_ascii=False, sort_keys=True).encode("utf8"))
