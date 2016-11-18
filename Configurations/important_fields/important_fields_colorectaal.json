@@ -111,7 +111,7 @@
                 "properties": {
                   "condition":"",
                   "description": "CT THORAX/ABDOMEN",
-                  "possible_values": ["Ja","Nee"]
+                  "possible_values": ["Yes","No"]
                 }
              },
             "SCORECN":{
@@ -174,9 +174,9 @@
                 "properties": {
                   "condition":"",
                   "description": "",
-                  "possible_values": ["Ileocoecaal (+appendectomie)","(Extended) Hemicolectomie rechts","Transversum resectie","(Extended) Hemicolectomie links","(Low) anteriorresectie/sigmoidresectie",
-                    "Subtotale colectomie (coecum totrectum)","Abdomino-perianaleresectie","Panproctocolectomie","Transanaal endoscopische procedure","Transanaal endoscopische procedure gevolgd door anterior resectie",
-                  "Transanaal endoscopische procedure gevolgd door abdomino-perinealeresectie","Overig (nietresectieve procedure)"]
+                  "possible_values": ["Ileocoecaal (+appendectomie)","(Extended) Hemicolectomie rechts","Transversum resectie","(Extended) Hemicolectomie links","(Low) anterior-resectie/sigmoidresectie",
+                    "Subtotale colectomie (coecum tot rectum)","Abdomino-perianale resectie","Panproctocolectomie","Transanaal endoscopische procedure","Transanaal endoscopische procedure gevolgd door anterior resectie",
+                  "Transanaal endoscopische procedure gevolgd door abdomino-perineale resectie","Overig (niet-resectieve procedure)"]
                 }
              },
             "TYPPROCOK":{
