@@ -58,7 +58,7 @@ def init(config_file, data_path, results_path):
     global_settings = {}
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
-    config_file = os.path.join(this_dir.replace(basename(__file__), ""), config_file)
+    config_file = os.path.join(this_dir.replace("src_new", ""), config_file)
     global_settings['configFile'] = config_file
 
     if not os.path.isdir(data_path):
@@ -72,7 +72,7 @@ def init(config_file, data_path, results_path):
     with open(config_file, 'r') as f:
         doc = yaml.load(f)
 
-    config_path = os.path.dirname(os.path.realpath(__file__)).replace(basename(__file__), 'Configurations')
+    config_path = os.path.dirname(os.path.realpath(__file__)).replace("src_new", 'Configurations')
 
     for key, value in doc.items():
         global_settings[key] = value
@@ -200,7 +200,6 @@ def get_results_filename():
             global_settings['eval_file'] = results_filename
         else:
             print "no given evaluation file"
-            exit(-1)
     global_settings['results_filename'] = results_filename
     return results_filename
 
