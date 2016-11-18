@@ -1301,7 +1301,7 @@
             ]
         },
         "TYPPROCOK":{
-            "condition":"PROCOK = Overig (nietresectieve procedure)",
+            "condition":"PROCOK = Overig (niet-resectieve procedure)",
             "description":[],
             "possible_values":[
                 [
