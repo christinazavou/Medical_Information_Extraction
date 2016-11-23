@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from os.path import basename
 import copy
 import types
 import json
 import yaml
 import os
 import random
+from utils import key_in_values
 
 global labels_possible_values
 global ids
@@ -57,7 +59,8 @@ def init(config_file, data_path, results_path):
     global_settings = {}
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
-    config_file = os.path.join(this_dir.replace("src", ""), config_file)
+    dir_name = os.path.basename(os.path.dirname(__file__))
+    config_file = os.path.join(this_dir.replace(dir_name, ""), config_file)
     global_settings['configFile'] = config_file
 
     if not os.path.isdir(data_path):
@@ -71,7 +74,7 @@ def init(config_file, data_path, results_path):
     with open(config_file, 'r') as f:
         doc = yaml.load(f)
 
-    config_path = os.path.dirname(os.path.realpath(__file__)).replace('src', 'Configurations')
+    config_path = os.path.dirname(os.path.realpath(__file__)).replace(dir_name, 'Configurations')
 
     for key, value in doc.items():
         global_settings[key] = value
@@ -143,15 +146,15 @@ def find_chosen_labels_possible_values():
     global chosen_labels_possible_values
     global labels_possible_values
     with_unknowns = global_settings['unknowns'] == "include"
-    chosen_labels_possible_values = labels_possible_values
+    chosen_labels_possible_values = copy.deepcopy(labels_possible_values)
     for form in labels_possible_values.keys():
         if form not in global_settings['forms']:
             del chosen_labels_possible_values[form]
         else:
             for field in labels_possible_values[form].keys():
                 if field not in global_settings[form] or \
-                        (not with_unknowns and (not isinstance(chosen_labels_possible_values[form][field]['values'],
-                                                               types.ListType))):
+                        (not with_unknowns and
+                            (key_in_values(labels_possible_values[form][field]['values'], 'unknown'))):
                     del chosen_labels_possible_values[form][field]
 
     f = global_settings['fields_config_file'].replace('fields', "chosen_fields")
@@ -192,32 +195,22 @@ def get_preprocessor_file_name():
 
 def get_results_filename():
     global global_settings
-    num = filter(str.isdigit, global_settings['configFile'])
-    results_filename = os.path.join(global_settings['results_path'], "confnum_results.json".replace("num", num))
+    num_res = filter(str.isdigit, global_settings['configFile'])
+    results_filename = os.path.join(global_settings['results_path'], "confnum_results.json".replace("num", num_res))
     if global_settings['eval_file'] == "":
         if global_settings['run_algo']:
             global_settings['eval_file'] = results_filename
         else:
             print "no given evaluation file"
-            exit(-1)
     global_settings['results_filename'] = results_filename
+    num_eval = filter(str.isdigit, global_settings['eval_file'])
+    if 'distributions_folder' in global_settings.keys():
+        global_settings['distributions_folder'] = global_settings['distributions_folder'].replace("num", num_eval)
+    if 'heat_maps_folder' in global_settings.keys():
+        global_settings['heat_maps_folder'] = global_settings['heat_maps_folder'].replace("num", num_eval)
     return results_filename
 
 
 def get_run_description():
     global global_settings
     return global_settings
-
-
-if __name__ == "__main__":
-
-    init("aux_config\\conf17.yml",
-         "..\\Data",
-         "..\\results")
-
-    find_chosen_labels_possible_values()
-    # get_w2v_name()
-    # get_preprocessor_file_name()
-    get_results_filename()
-
-    print get_run_description()

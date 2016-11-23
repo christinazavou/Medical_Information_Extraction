@@ -100,18 +100,18 @@ class Decease:
         form_name = self.name
         with open(self.json_form) as field_file:
             f = json.load(field_file)
-        assert form_name == f['properties'].keys()[0], "form name is not valid"
-        fields_dict = f['properties'][form_name]['properties']
+        assert form_name in f.keys(), "form name is not valid"
+        fields_dict = f[form_name]
         body_data = {"name": form_name, "fields": fields_dict}
         if self.patients:
             body_data['patients'] = self.patients
         # also store the attributes of fields
         fields = [i for i in fields_dict]
         for field in fields:
-            values = fields_dict[field]['properties']['possible_values']
-            description = fields_dict[field]['properties']['description']
-            condition = fields_dict[field]['properties']['condition']
-            self.possible_values[field] = {'values': values, 'description': description, 'condition': condition}
+            values = fields_dict[field]['values']
+            description = fields_dict[field]['description']
+            condition = fields_dict[field]['condition']
+            self.possible_values[field] = {'condition': condition, 'description': description, 'values': values}
         return body_data
 
     def store_possible_values(self):
@@ -188,47 +188,3 @@ def index_sentences(con, index, patient_type, sentence_type, patients_ids):
             print "sentences of patient {} has been indexed.".format(patient_id)
     settings.update_ids()
     print "Finished sentence indexing after {} minutes.".format((time.time() - start_time) / 60.0)
-
-
-if __name__ == '__main__':
-    # start_es()
-
-    settings.init("Configurations\\configurations.yml",
-                  "..\\Data",
-                  "..\\results")
-
-    map_file = settings.global_settings['map_index_file']
-    host = settings.global_settings['host']
-    index_name = settings.global_settings['index_name']
-    # type_name_pp = settings.global_settings['type_name_pp']
-    type_name_p = settings.global_settings['type_name_p']
-    # type_name_s = settings.global_settings['type_name_s']
-    type_name_f = settings.global_settings['type_name_f']
-
-    connection = EsConnection(host)
-
-    if settings.global_settings['map_index_file'].__contains__('new_indexed_body'):
-        with open(settings.global_settings['map_index_file'], "r") as json_file:
-            index_body = json.load(json_file, encoding='utf-8')
-        connection.create_index(index_name=index_name, body=index_body)
-    else:
-        connection.create_index(index_name)
-        connection.put_map(settings.global_settings['map_index_file'], index_name, type_name_p)
-
-    data_path = settings.global_settings['data_path']
-
-    MyDeceases = store_deceases(connection, index_name, type_name_p, type_name_f,
-                                data_path, settings.global_settings['out_dossiers_path'],
-                                settings.global_settings['json_forms_directory'],
-                                settings.global_settings['csv_form_path'],
-                                settings.global_settings['forms'])
-
-    text = "(%o_postnummer%) NEWLINE (%o_instelling%) NEWLINE (%o_aanhef%) NEWLINE (%o_titel%) (%o_naam_1%), " \
-           "(%o_beroep%) NEWLINE (%o_adres%) NEWLINE (%o_postkode%)  (%o_plaats%) NEWLINE Zwolle, 27 oktober 2009 " \
-           "NEWLINE Ref.: MB NEWLINE Betreft: NEWLINE Dhr. [BIRTHDATE] ([PATIENTID] ) NEWLINE [LOCATION] Geachte " \
-           "collega, NEWLINE Reden van verwijzing: arthritis of reuma? NEWLINE Anamnese: patient heeft veel pijn aan" \
-           " de polsen en uitslag op meerdere plaatse. Deze uitslag is onlangs op komen zetten. Familie-anamnese: " \
-           "geen reuma in familie. Met vriendelijke groet, NEWLINE Dr. Zallenga, reumatoloog"
-    # print remove_tokens(remove_codes(text))
-
-    # index_sentences(connection, index_name, type_name_p, type_name_s, settings.ids[index_name+' patient ids'])

@@ -49,26 +49,10 @@ def read_patients(path_root_in, path_root_out):
     """
     Read all files-patients and converts them to json files.
     """
-    print path_root_out
     if not os.path.isdir(path_root_out):
-        print "nnn"
+        print "Creating {} ...".format(path_root_out)
         os.makedirs(path_root_out)
     for root, dirs, files in os.walk(path_root_in):
         for dir in dirs:
             patient_id = dir
             patient2json_doc(path_root_in, path_root_out, dir, patient_id)
-
-
-if __name__ == '__main__':
-
-    settings.init("Configurations\\configurations.yml",
-                  "..\\Data",
-                  "..\\results")
-
-    in_dossiers_path = settings.global_settings['in_dossiers_path']
-    out_dossiers_path = settings.global_settings['out_dossiers_path']
-
-    for decease in settings.global_settings['forms']:
-        path_in_dossiers = in_dossiers_path.replace('decease', decease)
-        path_out_dossiers = out_dossiers_path.replace('decease', decease)
-        read_patients(path_in_dossiers, path_out_dossiers)

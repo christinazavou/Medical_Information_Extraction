@@ -4,17 +4,18 @@ Gives Output: Evaluation measure
 i.e. compares outputs with what is on forms
 """
 
-# import os
-# import re
+import os
 import string
 import json
 import time
-# import random
+import numpy as np
+import copy
+from pandas import DataFrame
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# import algorithms
-# from ESutils import start_es, EsConnection
-# import settings
-from utils import condition_satisfied, make_ordered_dict_representation
+from utils import condition_satisfied, key_in_values
+from data_analysis import values_names_dict
 
 
 # todo: make it as a possibility to check or not conditions
@@ -55,6 +56,19 @@ class Evaluation:
                 self.chosen_labels_accuracy[form][label] = 0.0
                 self.chosen_labels_num[form][label] = 0
                 self.unconditioned_num[form][label] = 0
+        self.heat_maps = {}
+        self.init_heat_maps()
+
+    def init_heat_maps(self):
+        for form in self.chosen_labels_possible_values.keys():
+            self.heat_maps[form] = {}
+            for field, field_dict in self.chosen_labels_possible_values[form].items():
+                values = copy.deepcopy(field_dict['values'].keys())
+                if "unknown" not in values:
+                    values.insert(len(values), "")
+                else:
+                    values = ["unknown", ""]
+                self.heat_maps[form][field] = (values, np.zeros((len(values), len(values))))
 
     def eval(self, patients_ids, eval_forms):
         """
@@ -82,13 +96,13 @@ class Evaluation:
             for field in self.chosen_labels_accuracy[form_id]:
 
                 if not (self.chosen_labels_num[form_id][field] + self.unconditioned_num[form_id][field] ==
-                            len(patients_ids)):
+                        len(patients_ids)):
                     print "oops in field ", field
                     exit(-1)
 
                 if not self.chosen_labels_num[form_id][field] == 0:
                     self.chosen_labels_accuracy[form_id][field] /= self.chosen_labels_num[form_id][field]
-                    if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
+                    if not key_in_values(self.chosen_labels_possible_values[form_id][field]['values'], "unknown"):
                         self.accuracy_1ofk += self.chosen_labels_accuracy[form_id][field]
                         num_1ofk += 1
                     else:
@@ -102,7 +116,8 @@ class Evaluation:
         return self.accuracy_1ofk, self.accuracy_open_q, self.chosen_labels_accuracy, self.chosen_labels_num
 
     def get_score(self, predictions, targets, form_id):
-        """Input: predictions and targets in the form of fields,values dictionary and the form fields come from"""
+        """Also updates heat maps
+        Input: predictions and targets in the form of fields,values dictionary and the form fields come from"""
         # note: in prediction some fields may not appear, whilst in targets all fields appear
         chosen_labels = [label for label in self.chosen_labels_possible_values[form_id]]
         if len(predictions) == 0:
@@ -111,65 +126,48 @@ class Evaluation:
         for field in predictions:
             if field in chosen_labels:
                 if condition_satisfied(targets, self.chosen_labels_possible_values, form_id, field):
-
                     predicted = predictions[field]['value']
                     if not isinstance(predicted, basestring):
                         print "Ops. not correct."
                         exit(-1)
                     self.chosen_labels_num[form_id][field] += 1
-
-                    if self.chosen_labels_possible_values[form_id][field]['values'] != "unknown":
+                    if not key_in_values(self.chosen_labels_possible_values[form_id][field]['values'], "unknown"):
                         # score for : one out of k
                         if predicted == targets[field]:
                             self.chosen_labels_accuracy[form_id][field] += 1.0
+                        idx_predicted = self.heat_maps[form_id][field][0].index(predicted)
+                        idx_target = self.heat_maps[form_id][field][0].index(targets[field])
+                        self.heat_maps[form_id][field][1][idx_predicted][idx_target] += 1
                     else:
                         pass
+                        p = "unknown" if predicted != "" else ""
+                        t = "unknown" if targets[field] != "" else ""
+                        idx_predicted = self.heat_maps[form_id][field][0].index(p)
+                        idx_target = self.heat_maps[form_id][field][0].index(t)
+                        self.heat_maps[form_id][field][1][idx_predicted][idx_target] += 1  # not ecactly correct...
+                        # ... just captures if nan or not
                         # score for : open-question (BLEU)
                         self.chosen_labels_accuracy[form_id][field] += bleu_evaluation(predicted, targets[field])
                 else:
                     self.unconditioned_num[form_id][field] += 1
 
-
-# if __name__ == '__main__':
-#     # start_es()
-#     settings.init("aux_config\\conf17.yml",
-#                   "C:\Users\\Christina Zavou\\Documents\Data",
-#                   "..\\results")
-#
-#     host = settings.global_settings['host']
-#     index = settings.global_settings['index_name']
-#     type_name_p = settings.global_settings['type_name_p']
-#     type_name_f = settings.global_settings['type_name_f']
-#     type_name_s = settings.global_settings['type_name_s']
-#     # type_name_pp = settings.global_settings['type_name_pp']
-#     connection = EsConnection(host)
-#
-#     eval_file = "..\\results\\conf17_results.json"
-#     evaluationsFilePath = os.path.join(settings.global_settings['results_path'], "evaluations.json")
-#
-#     ev = Evaluation(connection, index, type_name_p, type_name_f, eval_file, settings.labels_possible_values)
-#     score1, score2, fields_score, fields_num = ev.eval(settings.find_used_ids(), settings.global_settings['forms'])
-#     print score1, score2, fields_score, fields_num
-#     evaluations_dict = dict()
-#     evaluations_dict['description'] = settings.get_run_description()
-#     evaluations_dict['file'] = eval_file
-#     evaluations_dict['score_1of_k'] = score1
-#     evaluations_dict['score_open_q'] = score2
-#     evaluations_dict['fields_score'] = fields_score
-#     evaluations_dict['dte-time'] = time.strftime("%c")
-#     evaluations_dict['nums'] = fields_num
-#
-#     with open(evaluationsFilePath, 'w') as jfile:
-#         json.dump(evaluations_dict, jfile, indent=4)
-#     print "Finish evaluating."
-#
-#     ordered_fields = ["LOCPRIM", "LOCPRIM2", "klachten_klacht2", "klachten_klacht3", "klachten_klacht1",
-#                       "klachten_klacht4", "klachten_klacht88", "klachten_klacht99", "SCORECT", "SCORECT2",
-#                       "RESTAG_SCORECT_1", "RESTAG_SCORECT2_1", "RESTAG_CT", "SCORECN", "SCORECN2", "RESTAG_SCORECN_1",
-#                       "RESTAG_SCORECN2_1", "SCORECM", "SCORECM2", "RESTAG_SCORECM_1", "RESTAG_SCORECM2_1", "PROCOK",
-#                       "mdo_chir", "geenresectie_irres", "geenresectie_meta", "geenresec_palltherYN", "pall_NO_reden",
-#                       "pallther_chemo", "pallther_chemoSTUDIE", "pallther_RT", "pallther_RTstudie",
-#                       "pallther_chemoRT", "pallther_chemoRTstudie", "COMORB", "COMORBCAR", "COMORBVAS", "COMORBDIA",
-#                       "COMORBPUL", "COMORBNEU", "COMORBMDA", "COMORBURO"]
-#
-#     print make_ordered_dict_representation(ordered_fields, fields_score['colorectaal'])
+    def print_heat_maps(self, maps, out_folder):
+        if not os.path.isdir(out_folder):
+            os.mkdir(out_folder)
+        for form in self.heat_maps.keys():
+            for field in self.heat_maps[form].keys():
+                names_dict = values_names_dict(self.heat_maps[form][field][0])
+                # print "dict for heat maps names in {} : {}".format(field, names_dict)
+                x = names_dict.values()
+                y = x
+                df = DataFrame(maps[form][field][1], index=x, columns=y)
+                plt.figure()
+                plt.pcolor(df)
+                plt.colorbar()
+                plt.yticks(np.arange(0.5, len(df.index), 1), df.index)
+                plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns)
+                plt.title(field)
+                plt.xlabel('Targets')
+                plt.ylabel('Predictions')
+                plt.savefig(os.path.join(out_folder, field + '.png'))
+                plt.close()

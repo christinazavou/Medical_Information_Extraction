@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 
 def date_query():
@@ -50,7 +51,7 @@ def term_query(query_field, query_text):
     return body
 
 
-def highlight_query(query_field, pre_tags, post_tags):
+def highlight_query(query_field, pre_tags, post_tags, frgm_size=150, frgm_num=5):
     if not pre_tags:
         pre_tags = ["<em>"]
     if not post_tags:
@@ -61,43 +62,101 @@ def highlight_query(query_field, pre_tags, post_tags):
         "order": "score",
         "fields": {query_field: {}},
         "type": "fvh",
-        "fragment_size": 150,
-        "number_of_fragments": 5
+        "fragment_size": frgm_size,
+        "number_of_fragments": frgm_num
     }
     return body
 
 
-def search_body(must_body=None, should_body=None, filter_body=None, highlight_body=None, min_should_match=0,
-                min_score=0):
+def bool_body(must_body=None, should_body=None, must_not_body=None, filter_body=None, min_should_match=0):
+    body = {
+        "bool": {
+            "minimum_should_match": min_should_match
+        }
+    }
+    if must_body:
+        body['bool']["must"] = must_body
+    if should_body:
+        body['bool']["should"] = should_body
+    if filter_body:
+        body['bool']["filter"] = filter_body
+    return body
+
+
+def search_body(query_body, highlight_body=None, min_score=0):
 
     # note: minimum_should_match can be ignored...so only if the should_body (in this case is a phrase-proximity
     # appears it only boosts the score of that!)
 
     body = {
         "min_score": min_score,
-        "query": {
-            "bool": {
-                "must": must_body,
-                "should": should_body,
-                "filter": filter_body,
-                "minimum_should_match": min_should_match
-            }
-        },
-        "highlight": highlight_body
+        "query": query_body
+    }
+    if highlight_body:
+        body["highlight"] = highlight_body
+    return body
+
+
+def disjunction_of_conjunctions(phrases, skip_length=5):
+    if not phrases:
+        return ""
+    query = ""
+    new_phrases = list()
+    for i, phrase in enumerate(phrases):
+        if ' / ' in phrase:
+            phrase = phrase.replace(' / ', '/')
+        if '/' in phrase:
+            words = phrase.split(' ')
+            for word in words:
+                if '/' in word:
+                    x1, x2 = word.split('/')
+                    new_phrases.append(phrase.replace(word, x1))
+                    new_phrases.append(phrase.replace(word, x2))
+            continue
+        new_phrases.append(phrase)
+    for i, phrase in enumerate(new_phrases):
+        txt = " AND ".join([j for j in phrase.split()])
+        if i > 0:
+            query += " OR "
+        query += " (" + txt + ") "
+    return query
+
+
+def query_string(fields, query):
+    body = {
+        "query_string": {
+            "fields": fields,
+            "query": query,
+            "use_dis_max": "true"
+        }
     }
     return body
 
 
+def big_phrases_small_phrases(phrases, max_words=5):
+    big_set = set()
+    small_set = set()
+    for phrase in phrases:
+        if len(phrase.split()) > max_words:
+            big_set.add(phrase)
+        else:
+            small_set.add(phrase)
+    return list(big_set), list(small_set)
+
+
 if __name__ == "__main__":
-    field = 'report.description'
-    value, description = 'Anamnese', "komen zetten"
-    _id = '1504'
-    pre_tag, post_tag = ["<em>"], ["</em>"]
-    must = match_query_with_operator(field, value, operator='AND')
-    should = list()
-    should.append(match_phrase_query(field, value, slop=15))
-    should.append(match_phrase_query(field, description+" "+value, slop=100))
-    filter_ = term_query("_id", _id)
-    highlight = highlight_query(field, pre_tag, post_tag)
     import json
-    print json.dumps(search_body(must, should, filter_, highlight), indent=4)
+
+    with open("..\\results\\fields_mie_tfidf.json", 'r') as json_file:
+        labels_possible_values = json.load(json_file, encoding='utf-8')
+        values = labels_possible_values['colorectaal']['RESTAG_SCORECT2_1']['values']
+        description = labels_possible_values['colorectaal']['PROCOK']['description']
+
+    field = "report.description.dutch_tf_description"
+    for value in values.keys():
+        possible_values = values[value]
+
+    # q = disjunction_of_conjunctions(possible_values)
+    # a = bool_body(must_body=query_string([field], q), should_body=description_query(description), min_should_match=1)
+    # print json.dumps(search_body(query_body=a))
+        print json.dumps(value_query(possible_values))

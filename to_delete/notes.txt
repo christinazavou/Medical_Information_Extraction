@@ -1,0 +1,306 @@
+to make a cluster...with client,server,master nodes...need virtual machine...
+You'll need each machine to have it's own copy of ElasticSearch (simply copy the one you have now) -- the reason is
+that each machine / node whatever is going to keep it's own files that are sharded accross the cluster.
+The only thing you really need to do is edit the config file to include the name of the cluster.
+If all machines have the same cluster name elasticsearch will do the rest automatically (as long as the machines
+are all on the same network)
+http://techieroop.com/add-new-node-in-elasticsearch-cluster/
+http://devopscube.com/how-to-setup-an-elasticsearch-cluster/
+or
+http://stackoverflow.com/questions/13477303/multiple-nodes-in-elasticsearch
+
+
+partial search and analysis:
+http://stackoverflow.com/questions/17940026/partial-search-using-analyzer-in-elasticsearch
+
+to see analysis:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-analyze.html
+
+
+for amount of shards:
+"Elasticsearch provides the ability to subdivide your index into multiple pieces called shards. When you create an
+index, you can simply define the number of shards that you want. Each shard is in itself a fully-functional and
+independent “index” that can be hosted on any node in the cluster.
+The challenge is to figure out the right number of shards, because you only get to make the decision once per index.
+And it impacts both performance, storage and scale, since queries are sent to all shards.
+To decide how many shards to start with, you need to consider how big the index might grow — by size, by query volume,
+and by write load.
+The Elastic team recommends starting with one shard, sending “realistic” traffic, and seeing where it breaks. Then add
+more shards and retest until you find the right number.
+note: if you will need to reshard...then you need to copy all docs of old index to a new index...to be sure you are
+having evereything you need, keep track of a version (on which reshard) each document was created/saved."
+
+
+add in an array using script:
+https://www.elastic.co/guide/en/elasticsearch/guide/current/partial-updates.html
+
+
+search with wildcards:
+Ma?s — Will match Mars, Mass, and Maps
+Ma*s — Will match Mars, Matches, and Massachusetts
+
+
+to run it as a windows service and shut it down:
+http://www.howtogeek.com/50786/using-srvstart-to-run-any-application-as-a-windows-service/
+https://www.elastic.co/guide/en/elasticsearch/reference/2.1/setup.html#setup-installation-pid
+
+
+how to query with many parameters!!:only some fields and so on!:
+https://www.elastic.co/guide/en/elasticsearch/reference/0.90/query-dsl-query-string-query.html
+(also field query)
+how to search in ES:
+https://compose.com/articles/elasticsearch-query-time-strategies-and-techniques-for-relevance-part-i/
+the scroll api( to get huge amount of results...reindex..):
+https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html
+
+
+analysis:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis.html
+tokenizers:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-tokenizers.html?__hstc=62641971.f3a72a737870c5077542439680586ddb.1470872193294.1470872193294.1470872193294.1&__hssc=62641971.1.1470872193296&__hsfp=2977536404?__hstc=62641971.f3a72a737870c5077542439680586ddb.1470872193294.1470872193294.1470872193294.1&__hssc=62641971.1.1470872193296&__hsfp=2977536404
+explanation:
+http://blog.tryolabs.com/2015/02/25/elasticsearch-analyzers-or-how-i-learned-to-stop-worrying-and-love-custom-filters/
+
+PUT /neoindex
+{
+    "settings": {
+        "analysis": {
+            "char_filter":{
+                "&_to_and": {
+                    "type":"mapping",
+                    "mappings": [ "&=> and "]
+                }
+            },
+            "filter": {
+                "my_stopwords": {
+                    "type":"stop",
+                    "stopwords": [ "the", "a" ]
+                }
+            },
+            "analyzer": {
+                "my_analyzer": {
+                    "type": "custom",
+                    "char_filter":  [ "html_strip", "&_to_and" ],
+                    "tokenizer":"standard",
+                    "filter":  [ "lowercase", "my_stopwords" ]
+                }
+            }
+        }
+    }
+}
+GET /neoindex/_analyze?analyzer=my_analyzer&text='The quick & brown fox'
+
+
+for dutch:
+{
+  "settings": {
+    "analysis": {
+      "filter": {
+        "dutch_stop": {
+          "type":       "stop",
+          "stopwords":  "_dutch_"
+        },
+        "dutch_keywords": {
+          "type":       "keyword_marker",
+          "keywords":   []
+        },
+        "dutch_stemmer": {
+          "type":       "stemmer",
+          "language":   "dutch"
+        },
+        "dutch_override": {
+          "type":       "stemmer_override",
+          "rules": [
+            "fiets=>fiets",
+            "bromfiets=>bromfiets",
+            "ei=>eier",
+            "kind=>kinder"
+          ]
+        }
+      },
+      "analyzer": {
+        "dutch": {
+          "tokenizer":  "standard",
+          "filter": [
+            "lowercase",
+            "dutch_stop",
+            "dutch_keywords",
+            "dutch_override",
+            "dutch_stemmer"
+          ]
+        }
+      }
+    }
+  }
+}
+
+
+https://www.compose.com/articles/how-scoring-works-in-elasticsearch/
+(deixnei pos ipologizetai to score sto ES)
+
+
+to find tf-idf from es:
+http://dharmicdata.com/the-tf-idf-score-in-elastic-search/
+or
+https://gist.github.com/konradkonrad/2f66dc46e324feec706b
+
+
+filters:
+curl -XGET 'http://localhost:9200/festivals/music/_search?&pretty=true&size=3' -d '{
+"query": {
+   "filtered": {
+     "filter": {
+       "script": {
+         "script": "doc[\"entryCharge\"].value <cutoff",
+         "params" : {
+           "cutoff" : 1500
+         }
+       }
+     },
+     "query": {
+       "match_all": {}
+     }
+   }
+}'
+opou entrycharge ine leaf field,kato apo allo .. "k":{"entrycharge":"","kk":"ll"}
+"query": {
+    "filtered": {
+      "filter": {
+        "script": {
+          "script": "doc[\"startDate\"].value == doc[\"endDate\"].value"
+        }
+      }
+    }
+  }
+  excellent ocures more than twice
+  "script": {
+          "script": "_index['reviews']['excellent'].tf() > 2"
+  }
+
+
+https://qbox.io/blog/elasticsearch-scripting-filtering
+
+term vectors:
+https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-termvectors.html
+
+to use filters ( the above is depricated so use: )
+
+GET /medical_info_extraction/patient/_search
+{
+    "query":{
+        "bool" : {
+            "should" : {
+                "term" : { "forms" : "mamma" }
+            },
+            "filter": {
+                "term" : { "patient_nr" : "1504" }
+            }
+        }
+    }
+}
+
+
+has_dis = re.search(r"<DIS>", sentence, re.IGNORECASE) is not None
+
+"""
+    res=es.indices.create(index="neoindex", body=
+    {
+        "analysis": {
+            "filter": {
+                "search_synonym_filter": {
+                    "type": "synonym",
+                    "synonyms": [
+                        "sneakers,pumps"
+                    ]
+                }
+            },
+            "analyzer": {
+                "search_synonyms": {
+                    "filter": [
+                        "lowercase",
+                        "search_synonym_filter"
+                    ],
+                    "tokenizer": "standard"
+                }
+            }
+        },
+        "settings": {
+            "number_of_shards": 2,
+            "number_of_replicas": 1
+        }
+    })
+    print("res %s"%res)
+    res=es.indices.put_mapping("proto",body=
+    {
+        "properties": {
+            "kati": {
+                "type": "string",
+                "analyzer": "search_synonyms"
+            },
+            "katiallo": {
+                "type": "string",
+                "analyzer": "standard"
+            }
+        }
+    },index="neoindex")
+    es.bulk(body=[
+    {
+        "index": {
+            "_index": "neoindex",
+            "_type": "proto",
+            "_id": 1
+        }
+    },
+    {
+        "kati": "sneakers",
+        "katiallo": "kafes"
+    }],index="neoindex",doc_type="proto")
+    print("res %s"%res)
+    res=es.bulk(body=[
+        {
+            "index": {
+                "_index": "neoindex",
+                "_type": "proto",
+                "_id": 2
+            }
+        },
+        {
+            "kati": "pumps",
+            "katiallo": "dunno"
+        }], index="neoindex", doc_type="proto")
+    print("res %s"%res)
+"""
+
+
+"""
+put_form:
+
+#Or if I have a mapping already in ES for the form:
+map=es.indices.get_mapping(index=index_name);
+imp_fields=res['medical_info_extraction']['mappings']['patient']['properties'][form_name];
+important_fields=[i for i in imp_fields['properties']]
+"""
+
+"""
+#I can add Data to the index without first putting a mapping
+with open("..\configurations\important_fields_colon.json","r") as map_file:
+    map=json.load(map_file)
+print("putting a new (part) mapping...")
+res=es.indices.put_mapping(type_name,map,index_name)
+print(" response: '%s'" % (res))
+"""
+
+#    start_word = phrase if word_count == 0 else tmp[0]
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "folding": {
+          "tokenizer": "standard",
+          "filter":  [ "lowercase", "asciifolding" ]
+        }
+      }
+    }
+  }
+}

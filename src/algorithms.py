@@ -3,18 +3,18 @@ from __future__ import division
 
 import operator
 import numpy as np
-import types
 import json
 import random
-import nltk
 from abc import ABCMeta, abstractmethod
 import time
 
-from ESutils import EsConnection, start_es
-import settings
-from utils import check_highlights_relevance
-from utils import condition_satisfied
-from queries import date_query, match_query_with_operator, match_phrase_query, term_query, search_body, highlight_query
+from patient_relevant_utils import PatientRelevance
+from utils import condition_satisfied, value_in_description, key_in_values
+# from queries import date_query
+from data_analysis import plot_counts
+from queries import match_query_with_operator, term_query, search_body, highlight_query, \
+    query_string, big_phrases_small_phrases, bool_body, disjunction_of_conjunctions
+
 """
 Input:
 Output:
@@ -97,8 +97,9 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 # }}
 # }
 
-global the_current_body
-global comment_relevance
+
+print_freq = 0
+fragments = 10
 
 
 def combine_assignment(value, evidence=None, score=None, comment=None):
@@ -115,7 +116,7 @@ def combine_assignment(value, evidence=None, score=None, comment=None):
 
 def decision_is_unary(values):
     """return True if decision is Yes or NaN, else False"""
-    if isinstance(values, types.ListType) and len(values) == 1:
+    if len(values) == 1 and "unknown" not in values.keys():
         return True
     return False
 
@@ -123,14 +124,20 @@ def decision_is_unary(values):
 def decision_is_binary_and_ternary(values):
     """Return bool1,bool2, where bool1 is True if decision is Yes/No(Ja/NEe)
     and bool2 is True if decision can also be Onbekend"""
-    if isinstance(values, types.ListType):
-        if (values.__contains__('Ja') and values.__contains__('Nee')) or \
-                (values.__contains__('Yes') and values.__contains__('No')):
-            if values.__contains__('Onbekend'):
+    if len(values) == 3 or len(values) == 2:
+        values_keys = values.keys()
+        if ('Ja' in values_keys and 'Nee' in values_keys) or ('Yes' in values_keys and 'No' in values_keys):
+            if 'Onbekend' in values_keys:
                 return True, True
             else:
                 return True, False
     return False, None
+
+
+def decision_is_open(values):
+    if "unknown" in values.keys():
+        return True
+    return False
 
 
 def get_from_dict(dict_to_search, key, path):
@@ -155,7 +162,7 @@ def pick_score_and_index(scores):
         print "MORE THAN ONCE"
         if scores.count(max_val) == len(scores):
             print "TIES"
-        indices = [i for i, x in enumerate(scores) if x==max_val]
+        indices = [i for i, x in enumerate(scores) if x == max_val]
         idx = random.choice(indices)
     else:
         idx = scores.index(max_val)
@@ -163,6 +170,9 @@ def pick_score_and_index(scores):
 
 
 """-----------------------------------------------------------------------------------------------------------------"""
+
+global the_current_body
+global comment_relevance
 
 
 class Algorithm:
@@ -177,6 +187,9 @@ class Algorithm:
         self.assignments = {}  # the assignments of form values (to patients to be assigned)
         self.patient_relevant = patient_relevant  # if we want to test the relevance of evidence to patient
         self.min_score = min_score
+
+        if self.patient_relevant:
+            self.pr = PatientRelevance()
 
         if not default_field:
             default_field = 'report.description'
@@ -218,7 +231,7 @@ class Algorithm:
             return True, -1  # to print the highlights and see what it finds
         if not highlights:
             return False, None
-        relevant, highlight_relevant = check_highlights_relevance(highlights[highlight_field])
+        relevant, highlight_relevant = self.pr.check_highlights_relevance(highlights[highlight_field])
         return relevant, highlight_relevant
 
     def score_and_evidence(self, search_results, highlight_field):
@@ -248,6 +261,7 @@ class BaseAlgorithm(Algorithm):
         super(BaseAlgorithm, self).__init__(con, index_name, search_type, algo_labels_possible_values,
                                             default_field, boost_fields, patient_relevant, min_score)
         self.use_description_1ofk = use_description_1ofk
+        self.search_fields = [self.default_field] + self.boost_fields
 
     def specific_assign(self, assign_patients, assign_forms):
         for patient_id in assign_patients:
@@ -258,247 +272,156 @@ class BaseAlgorithm(Algorithm):
                 if form_id in doc.keys():
                     patient_forms[form_id] = self.assign_patient_form(patient_id, form_id, doc[form_id])
             self.assignments[patient_id] = patient_forms
-            if int(patient_id) % 100 == 0:
-                print "patient {} was assigned. ".format(patient_id)
+        if self.patient_relevant:
+            self.pr.store_irrelevant_highlights('irrelevant.json')
         return self.assignments
 
     def assign_patient_form(self, patient_id, form_id, doc_form):
         """assign the form fields for the current patient with the given golden truth"""
         patient_form_assign = {}  # dictionary of assignments
-        for label in self.labels_possible_values[form_id]:  # for each field (to be assign) in form
+        for label in self.labels_possible_values[form_id].keys():  # for each field (to be assign) in form
             if condition_satisfied(doc_form, self.labels_possible_values, form_id, label):
                 values = self.labels_possible_values[form_id][label]['values']
                 description = self.labels_possible_values[form_id][label]['description']
-                if values == "unknown":
+                if decision_is_open(values):
                     label_assignment = self.assign_open_question()
                 else:
                     label_assignment = self.assign_one_of_k(patient_id, values, description)
                 if label_assignment:
                     patient_form_assign[label] = label_assignment
             else:
-                # in case condition is unsatisfied fill assignment with "" which means NaN
                 patient_form_assign[label] = combine_assignment('', comment="condition unsatisfied.")
         return patient_form_assign
 
+    def filter_and_highlight_body(self, patient_id):
+        filter_body = term_query("_id", patient_id)
+        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'], frgm_num=fragments)
+        return filter_body, highlight_body
+
+    def value_query(self, possible_values):
+        should_body = list()
+        big, small = big_phrases_small_phrases(possible_values)
+        should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
+        for d in big:
+            should_body.append(match_query_with_operator(self.default_field, d, min_pct='40%'))
+        body = bool_body(should_body=should_body, min_should_match=1)
+        return body
+
+    def description_query(self, description):
+        should_body = list()
+        big, small = big_phrases_small_phrases(description)
+        should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
+        for d in big:
+            should_body.append(match_query_with_operator(self.default_field, d, min_pct='40%'))
+        body = bool_body(should_body=should_body, min_should_match=1)
+        return body
+
     def make_unary_decision(self, patient_id, value, description):
         """
-        Search for the description and assign yes if description matches well, otherwise assign NaN.
-
-        note: these cases appear only for klachten and have only 1-2 words. Two cases have as words 'anders' and
-        'onbekend'. These should be tested differently. For the moment I don't consider them.
-
         @value is 'Yes' or 'Ja'
         """
-        global comment_relevance
+        global comment_relevance, the_current_body
         comment_relevance = "no description matched."
-        global the_current_body
-
-        if description == 'Anders':
+        if value_in_description(description, 'Anders'):
             return None
-        elif description == 'Onbekend':
+            # todo
+        elif value_in_description(description, 'Onbekend'):
             return None
+            # todo
         else:
-
-            # must_body = match_query_with_operator(self.default_field, description, operator='OR')
-            # should_body = list()
-            # should_body.append(match_query_with_operator(self.default_field, description, operator='AND'))
-            # should_body.append(match_phrase_query(self.default_field, description, slop=100))
-            # for boost_field in self.boost_fields:
-            #     should_body.append(match_query_with_operator(boost_field, description, operator='OR', boost=0.2))
-            #     should_body.append(match_query_with_operator(boost_field, description, operator='AND', boost=0.2))
-            #     should_body.append(match_phrase_query(boost_field, description, slop=100, boost=0.2))
-
-            must_body = match_phrase_query(self.default_field, description, slop=20)  # by default all terms must exist
-            should_body = list()
-
-            filter_body = term_query("_id", patient_id)
-            highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
-            body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
-            the_current_body = body
-            if int(patient_id) % 100 == 0:
-                print "the_current_body: {}".format(the_current_body)
-            search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
+            db = self.description_query(description)
+            fb, hb = self.filter_and_highlight_body(patient_id)
+            qb = bool_body(must_body=db, filter_body=fb)
+            the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+            if random.uniform(0, 1) < print_freq:
+                print "the_current_body: {}".format(json.dumps(the_current_body))
+            search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
             score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
             if score_search:
                 return combine_assignment(value, evidence_search, score_search)
             else:
                 return combine_assignment(value="", comment=comment_relevance)
 
-    def make_binary_and_ternary_decision(self, patient_id, values, description):
+    def make_binary_and_ternary_decision(self, patient_id, values, description, isternary=False):
         """
-        Search for the description and assign yes if description matches exactly
-        Assign no if exact description cannot be found
-        Assign Onbekend if it's a possible value and a relaxed match is found
-
-        note: in these cases we have descriptions of 1-2 words (except mdo_chir has 5-6 words)
-
         @values to know if 'Yes' or 'Ja' and if 'onbekend'
         """
-        global the_current_body
-        global comment_relevance
+        global the_current_body, comment_relevance
         comment_relevance = "no description matched."
-
-        # must_body = list()
-        # must_body.append(match_phrase_query(self.default_field, description, slop=15))
-        # for boost_field in self.boost_fields:
-        #     must_body.append(match_phrase_query(boost_field, description, slop=15, boost=0.2))
-
-        must_body = match_phrase_query(self.default_field, description, slop=15)
-
-        filter_body = term_query("_id", patient_id)
-        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
-        body = search_body(must_body, {}, filter_body, highlight_body, min_score=self.min_score)
-        the_current_body = body
-        if int(patient_id) % 100 == 0:
-            print "the_current_body: {}".format(the_current_body)
-        search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
+        db = self.description_query(description)
+        fb, hb = self.filter_and_highlight_body(patient_id)
+        qb = bool_body(must_body=db, filter_body=fb)
+        the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+        if random.uniform(0, 1) < print_freq:
+            print "the_current_body: {}".format(json.dumps(the_current_body))
+        search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
         score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
         if score_search:
-            # if score_search > 2:
-            #     print "the current body : ", the_current_body
-            value = 'Yes' if 'Yes' in values else 'Ja'
+            value = 'Yes' if key_in_values(values, 'Yes') else 'Ja'
             return combine_assignment(value, evidence_search, score_search)
-        elif 'Onbekend' in values:
-
-            # should_body = list()
-            # should_body.append(match_query_with_operator(self.default_field, description, operator='AND'))
-            # should_body.append(match_phrase_query(self.default_field, description, slop=15))
-            # for boost_field in self.boost_fields:
-            #     should_body.append(match_query_with_operator(boost_field, description, operator='AND', boost=0.2))
-            #     should_body.append(match_phrase_query(boost_field, description, slop=15, boost=0.2))
-
-            must_body = match_query_with_operator(self.default_field, description, operator='OR')
-            should_body = list()
-
-            body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
-            the_current_body = body
-            if int(patient_id) % 100 == 0:
-                print "the_current_body: {}".format(the_current_body)
-            search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
-            score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
-            if score_search:
-                return combine_assignment('Onbekend', evidence_search, score_search, 'onbekend available,relaxed query')
-        value = 'No' if 'No' in values else 'Nee'
+        elif isternary:
+            pass
+            # todo
+        value = 'No' if key_in_values(values, 'No') else 'Nee'
         return combine_assignment(value, comment=comment_relevance)
 
     def assign_anders(self, patient_id, description):
         """To assign anders check if description can be found and return the score and evidence of such a query"""
         global the_current_body
-
-        # must_body = match_query_with_operator(self.default_field, description, operator='OR')
-        # should_body = list()
-        # should_body.append(match_phrase_query(self.default_field, description, slop=20))
-        # for boost_field in self.boost_fields:
-        #     should_body.append(match_query_with_operator(boost_field, description, operator='OR', boost=0.2))
-        #     should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
-
-        must_body = match_phrase_query(self.default_field, description, slop=20)
-        should_body = list()
-
-        filter_body = term_query("_id", patient_id)
-        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
-        body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
-        the_current_body = body
-        if int(patient_id) % 100 == 0:
-            print "the_current_body: {}".format(the_current_body)
-        search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
+        db = self.description_query(description)
+        fb, hb = self.filter_and_highlight_body(patient_id)
+        qb = bool_body(must_body=db, filter_body=fb)
+        the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+        if random.uniform(0, 1) < print_freq:
+            print "the_current_body: {}".format(json.dumps(the_current_body))
+        search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
         return self.score_and_evidence(search_results, self.default_field)
 
-    def get_value_score(self, patient_id, value, description):
+    def get_value_score(self, patient_id, possible_values, description):
         """Check if value can be found and return its score and evidence"""
         global the_current_body
-
-        # must_body = match_query_with_operator(self.default_field, value, operator='AND')
-        # should_body = list()
-        # should_body.append(match_phrase_query(self.default_field, value, slop=20))
-        # # description search will only make sense if used as phrase match search with the value.
-        # # otherwise it will add the same score to all value searches
-        # should_body.append(match_phrase_query(self.default_field, description + " " + value, slop=100))
-        # for boost_field in self.boost_fields:
-        #     should_body.append(match_query_with_operator(boost_field, description, operator='AND', boost=0.2))
-        #     should_body.append(match_query_with_operator(boost_field, description, operator='OR', boost=0.2))
-        #     should_body.append(match_phrase_query(boost_field, description, slop=20, boost=0.2))
-        #     should_body.append(match_phrase_query(boost_field, description + " " + value, slop=100, boost=0.2))
-
-        must_body = list()
-        must_body.append(match_phrase_query(self.default_field, value, slop=20))
-        should_body = list()
+        vb = self.value_query(possible_values)
+        fb, hb = self.filter_and_highlight_body(patient_id)
+        qb = bool_body(must_body=vb, filter_body=fb)
         if self.use_description_1ofk:
-            must_body.append(match_query_with_operator(self.default_field, description, operator="OR", min_pct="40%"))
-
-        filter_body = term_query("_id", patient_id)
-        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'])
-        body = search_body(must_body, should_body, filter_body, highlight_body, min_score=self.min_score)
-        the_current_body = body
-        if int(patient_id) % 100 == 0:
-            print "the_current_body: {}".format(the_current_body)
-        search_results = self.con.search(index=self.index_name, body=body, doc_type=self.search_type)
+            db = self.description_query(description)
+            qb = bool_body(must_body=vb, should_body=db, filter_body=fb, min_should_match=1)
+        the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+        if random.uniform(0, 1) < print_freq:
+            print "the_current_body: {}".format(json.dumps(the_current_body))
+        search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
         return self.score_and_evidence(search_results, self.default_field)
-
-    # # after finding the phrase of value...check if half of the description words are there
-    # "must": [
-    #     {"match": {"report.description.dutch_tf_description": {
-    #         "query": "Locatie van de ‘belangrijkste’ tumor. De tumor welke het meest bepalend is voor de prognose
-    #                   of behandeling.",
-    #         "operator": "or",
-    #         "minimum_should_match": "50%"
-    #     }}}]
 
     def pick_value_decision(self, patient_id, values, description):
         """
-        Some fields allow 'Anders' value. The rest values are 1-2 words. The description is either a whole sentence or
-        2-4 words. Procok has longer values available
-
-        note: in case of Mx/Onbekend the important is to find Mx and maybe description also (cM score ('dubbel' tumor))
-
-        Search if all words of value exist...and then refine score
-        If no score (not all words exist) for all values -> assign NaN
         """
         scores = [None for value in values]
         evidences = [None for value in values]
-
         for i, value in enumerate(values):
             if value != 'Anders':
-                scores[i], evidences[i] = self.get_value_score(patient_id, value, description)
-
-        # sorted_scores = sorted(scores)
-        # if sorted_scores[-1]:
-        #     the_scores = [score for score in scores if score]
-        #     if len(set(the_scores)) == 1:
-        #         # ties
-        #         winner = random.randint(0, len(the_scores) - 1)
-        #         idx = scores.index(the_scores[winner])
-        #         return combine_assignment(values[idx], evidences[idx], scores[idx], 'random from ties of length {}'.
-        #                                   format(len(the_scores)))
-        #     idx = scores.index(sorted_scores[-1])
-        #     return combine_assignment(values[idx], evidences[idx], scores[idx])
-        # else:
-        #     if 'Anders' in values:
-        #         idx_anders = values.index('Anders')
-        #         scores[idx_anders], evidences[idx_anders] = self.assign_anders(patient_id, description)
-        #         if scores[idx_anders]:
-        #             return combine_assignment('Anders', evidences[idx_anders], scores[idx_anders])
-
+                scores[i], evidences[i] = self.get_value_score(patient_id, values[value], description)
         score, idx = pick_score_and_index(scores)
-        if score > 0:
-            return combine_assignment(values[idx], evidences[idx], scores[idx])
-        if score == 0 and 'Anders' in values:
-            idx_anders = values.index('Anders')
+        if score > self.min_score:
+            return combine_assignment(values.keys()[idx], evidences[idx], scores[idx])
+        if key_in_values(values, 'Anders'):
+            idx_anders = values.keys().index('Anders')
             scores[idx_anders], evidences[idx_anders] = self.assign_anders(patient_id, description)
             if scores[idx_anders]:
                 return combine_assignment('Anders', evidences[idx_anders], scores[idx_anders])
         return combine_assignment("", comment='no value matched.')
 
     def assign_one_of_k(self, patient_id, values, description):
-        if decision_is_unary(values):
-            return self.make_unary_decision(patient_id, values[0], description)
-        elif decision_is_binary_and_ternary(values)[0]:
-            return self.make_binary_and_ternary_decision(patient_id, values, description)
+        binary, ternary = decision_is_binary_and_ternary(values)
+        if binary:
+            return self.make_binary_and_ternary_decision(patient_id, values, description, ternary)
+        elif decision_is_unary(values):
+            return self.make_unary_decision(patient_id, values.keys()[0], description)
         else:
             return self.pick_value_decision(patient_id, values, description)
 
     def assign_open_question(self):
-        return None
+        return {}
+        # todo
 
 
 class MajorityAlgorithm:
@@ -511,24 +434,15 @@ class MajorityAlgorithm:
         self.counts = {}
         self.majority_scores = {}
 
-    def run(self, assign_patients, assign_forms, mj_file):
-        self.get_conditioned_counts(assign_patients, assign_forms)
-        print "avg_score: ", self.get_conditioned_counts()
-        with open(mj_file, 'w') as f:
-            json.dump(self.majority_scores, f, indent=4)
-
     def get_conditioned_counts(self, assign_patients, assign_forms):
         # initialize counts
         for form_id in assign_forms:
             self.counts[form_id] = {}
             for field in self.labels_possible_values[form_id].keys():
-                if self.labels_possible_values[form_id][field]['values'] == "unknown":
-                    continue  # don't consider open-questions
                 self.counts[form_id][field] = {}
-                for value in self.labels_possible_values[form_id][field]['values']:
+                for value in self.labels_possible_values[form_id][field]['values'].keys():
                     self.counts[form_id][field][value] = 0
                 self.counts[form_id][field][""] = 0
-        print "initial counts:\n{}".format(self.counts)
         # count based on given patients and forms, and Considering conditions.
         for patient_id in assign_patients:
             doc = self.con.get_doc_source(self.index_name, self.search_type, patient_id)
@@ -537,38 +451,23 @@ class MajorityAlgorithm:
                     for field in self.counts[form_id].keys():
                         if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, field):
                             value = doc[form_id][field]
+                            if decision_is_open(self.labels_possible_values[form_id][field]['values']):
+                                if value != "":
+                                    self.counts[form_id][field]["unknown"] += 1
+                                    continue
                             self.counts[form_id][field][value] += 1
-        print "conditioned counts:\n{}".format(self.counts)
-        return self.counts
 
     def majority_assignment(self):
         avg_score = 0.0
         for form in self.counts.keys():
             self.majority_scores[form] = {}
             for field in self.counts[form].keys():
-                field_counts = self.counts[field].values()
+                field_counts = self.counts[form][field].values()
                 max_idx, max_val = max(enumerate(field_counts), key=operator.itemgetter(1))
-                self.majority_scores[field] = max_val / np.sum(np.asarray(field_counts))
-                avg_score += self.majority_scores[field]
+                self.majority_scores[form][field] = max_val / np.sum(np.asarray(field_counts))
+                avg_score += self.majority_scores[form][field]
         return avg_score
 
-
-if __name__ == '__main__':
-    settings.init("aux_config\\conf17.yml",
-                  "..\\Data",
-                  "..\\results")
-
-    used_forms = settings.global_settings['forms']
-    index = settings.global_settings['index_name']
-    type_name_p = settings.global_settings['type_name_p']
-    type_name_s = settings.global_settings['type_name_s']
-    possible_values = settings.find_chosen_labels_possible_values()
-    used_patients = settings.find_used_ids()
-    connection = EsConnection(settings.global_settings['host'])
-
-    from utils import remove_ids_with_wrong_values
-    r_ids = remove_ids_with_wrong_values(used_patients, connection, type_name_p, index, settings.labels_possible_values)
-    ids = [i for i in used_patients if i not in r_ids]
-    print ids
-    # algo = MajorityAlgorithm(connection, index, type_name_p, settings.chosen_labels_possible_values)
-    # algo.run(settings.find_used_ids(), settings.global_settings['forms'], "..\\results\\majority.json")
+    def show(self, out_folder):
+        for form in self.counts.keys():
+            plot_counts(self.counts[form], out_folder)

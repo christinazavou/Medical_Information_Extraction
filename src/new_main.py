@@ -10,21 +10,12 @@ from ESutils import EsConnection, start_es
 from read_data import read_patients
 from store_data import store_deceases, index_sentences
 import settings
-from utils import fix_ids_of_decease, combine_all_ids, update_form_values, make_ordered_dict_representation
+from check_utils import fix_ids_of_decease, combine_all_ids, update_form_values, check
+from utils import make_ordered_dict_representation
 import algorithms
 import evaluation
 
 # todo: check if all patients reports have date so that i'll save the date as date
-
-
-ordered_fields = ["LOCPRIM", "LOCPRIM2", "klachten_klacht2", "klachten_klacht3", "klachten_klacht1", "klachten_klacht4",
-                  "klachten_klacht88", "klachten_klacht99", "SCORECT", "SCORECT2", "RESTAG_SCORECT_1",
-                  "RESTAG_SCORECT2_1", "RESTAG_CT", "SCORECN", "SCORECN2", "RESTAG_SCORECN_1", "RESTAG_SCORECN2_1",
-                  "SCORECM", "SCORECM2", "RESTAG_SCORECM_1", "RESTAG_SCORECM2_1", "PROCOK", "mdo_chir",
-                  "geenresectie_irres", "geenresectie_meta", "geenresec_palltherYN", "pall_NO_reden",
-                  "pallther_chemo", "pallther_chemoSTUDIE", "pallther_RT", "pallther_RTstudie", "pallther_chemoRT",
-                  "pallther_chemoRTstudie", "COMORB", "COMORBCAR", "COMORBVAS", "COMORBDIA", "COMORBPUL",
-                  "COMORBNEU", "COMORBMDA", "COMORBURO"]
 
 
 def read():
@@ -46,7 +37,7 @@ def store():
     if not settings.global_settings['map_index_file'].__contains__('mapping'):
         with open(settings.global_settings['map_index_file'], "r") as json_file:
             index_body = json.load(json_file, encoding='utf-8')
-        con.create_index(index_name=index_name, body=index_body)
+        con.create_index(index_name, body=index_body)
     else:
         con.create_index(index_name)
         con.put_map(settings.global_settings['map_index_file'], index_name, type_patient)
@@ -75,6 +66,22 @@ def store():
     print "Finished importing Data."
 
 
+def calculate_conditioned_majority():
+    mj_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, settings.labels_possible_values)
+    mj_algorithm.get_conditioned_counts(patient_ids_used, settings.global_settings['forms'])
+    print "avg maj score: ", mj_algorithm.majority_assignment()
+    counts = mj_algorithm.counts
+    maj_scores = mj_algorithm.majority_scores
+    d = {}
+    for form in settings.global_settings['forms']:
+        ordered_fields = settings.global_settings[form]
+        d['counts_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, counts[form])
+        d['mj_score_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, maj_scores[form])
+    with open(settings.global_settings['majority_file'], 'w') as f:
+        json.dump(d, f, indent=4)
+    mj_algorithm.show('..\\results\\maj')
+
+
 def predict_forms():
     """
     Make predictions for fields specified in configuration file
@@ -86,10 +93,7 @@ def predict_forms():
     else:
         labels_possible_values = settings.chosen_labels_possible_values
 
-    if settings.global_settings['algo'] == 'majority':
-        my_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, labels_possible_values)
-        my_algorithm.majority_assignment()
-    else:
+    if settings.global_settings['algo'] == 'baseline':
         my_algorithm = algorithms.BaseAlgorithm(con, index_name, type_patient, labels_possible_values,
                                                 settings.global_settings['patient_relevant'],
                                                 settings.global_settings['default_field'],
@@ -114,39 +118,47 @@ def evaluate_predictions():
         evaluations_dict = {'evaluation': []}
 
     my_evaluation = evaluation.Evaluation(con, index_name, type_patient, type_form,
-                                          settings.global_settings['eval_file'],
-                                          settings.chosen_labels_possible_values)
-    score1, score2, fields_score, fields_num = my_evaluation.eval(patient_ids_used, settings.global_settings['forms'])
+                                          settings.global_settings['eval_file'], settings.chosen_labels_possible_values)
 
-    evaluations_dict['evaluation'] += [{'description': settings.get_run_description(),
-                                        'file': settings.global_settings['eval_file'],
-                                        'score_1_of_k': score1,
-                                        'score_open_q': score2,
-                                        'fields_score': make_ordered_dict_representation(ordered_fields,
-                                                                                         fields_score['colorectaal']),
-                                        'dte-time': time.strftime("%c"),
-                                        'nums': make_ordered_dict_representation(ordered_fields, fields_num)}]
+    score1, score2, fields_score, fields_num = my_evaluation.eval(patient_ids_used, settings.global_settings['forms'])
+    if 'heat_maps_folder' in settings.global_settings.keys():
+        # heat_maps = my_evaluation.calculate_heat_maps()
+        heat_maps = my_evaluation.heat_maps
+        my_evaluation.print_heat_maps(heat_maps, settings.global_settings['heat_maps_folder'])
+
+    current_evaluation = {'description': settings.get_run_description(),
+                          'file': settings.global_settings['eval_file'],
+                          'score_1_of_k': score1,
+                          'score_open_q': score2,
+                          'dte-time': time.strftime("%c"),
+                          }
+    for decease in settings.global_settings['forms']:
+        ordered_fields = settings.global_settings[decease]
+        current_evaluation['nums_{}'.format(decease)] = make_ordered_dict_representation(ordered_fields,
+                                                                                         fields_num[decease])
+        current_evaluation['fields_score_{}'.format(decease)] = make_ordered_dict_representation(ordered_fields,
+                                                                                                 fields_score[decease])
+    evaluations_dict['evaluation'] += [current_evaluation]
 
     with open(settings.global_settings['evaluations_file'], 'w') as f:
         json.dump(evaluations_dict, f, indent=4)
     print "Finish evaluating."
 
 
-def make_embeddings():
-    from pre_process import make_word_embeddings
-    w2v_name = settings.get_w2v_name()
-    if not os.path.isfile(w2v_name):
-        my_w2v = make_word_embeddings(con, settings.global_settings['patient_W2V'], patient_ids_used, w2v_name)
-    else:
-        from text_analysis import WordEmbeddings
-        my_w2v = WordEmbeddings()
-        my_w2v.load(w2v_name)
-    print my_w2v.get_vocab()
+# def make_embeddings():
+#     from pre_process import make_word_embeddings
+#     w2v_name = settings.get_w2v_name()
+#     if not os.path.isfile(w2v_name):
+#         my_w2v = make_word_embeddings(con, settings.global_settings['patient_W2V'], patient_ids_used, w2v_name)
+#     else:
+#         from text_analysis import WordEmbeddings
+#         my_w2v = WordEmbeddings()
+#         my_w2v.load(w2v_name)
+#     print my_w2v.get_vocab()
 
 
 if __name__ == '__main__':
 
-    random.seed(100)
     if len(sys.argv) < 4:
         configFilePath = "aux_config\\conf17.yml"
         dataPath = "..\\Data"
@@ -174,6 +186,7 @@ if __name__ == '__main__':
         store()
 
     """-------------------------------------------set params--------------------------------------------------------"""
+
     # to ensure we got values with conditions
     for form in settings.global_settings['forms']:
         update_form_values(form, os.path.join(settings.global_settings['json_forms_directory'],
@@ -184,6 +197,11 @@ if __name__ == '__main__':
     patient_ids_used = settings.find_used_ids()
     print "total used patients: {}".format(len(patient_ids_used))
 
+    check(patient_ids_used, con, settings.chosen_labels_possible_values, index_name, type_patient)
+
+    """-------------------------------------Find majority assignment on conditioned----------------------------------"""
+    if settings.global_settings['find_conditioned_majority']:
+        calculate_conditioned_majority()
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
     if settings.global_settings['run_algo']:
