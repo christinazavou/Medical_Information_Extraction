@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from os.path import basename
 import copy
-import types
 import json
 import yaml
 import os
 import random
 from utils import key_in_values
+from form_details import Form
 
 global labels_possible_values
 global ids
-global chosen_labels_possible_values
+# global chosen_labels_possible_values
 global global_settings
 
 
@@ -141,27 +140,33 @@ def update_ids():
         json_file.write(data)
 
 
-def find_chosen_labels_possible_values():
-    global global_settings
-    global chosen_labels_possible_values
-    global labels_possible_values
-    with_unknowns = global_settings['unknowns'] == "include"
-    chosen_labels_possible_values = copy.deepcopy(labels_possible_values)
-    for form in labels_possible_values.keys():
-        if form not in global_settings['forms']:
-            del chosen_labels_possible_values[form]
-        else:
-            for field in labels_possible_values[form].keys():
-                if field not in global_settings[form] or \
-                        (not with_unknowns and
-                            (key_in_values(labels_possible_values[form][field]['values'], 'unknown'))):
-                    del chosen_labels_possible_values[form][field]
+def get_ids_key(index, type_, form_name=None, id_=None):
+    if form_name:
+        return "{} {} {}".format(index, type_, form_name)
+    elif id_:
+        return "{} {} {}".format(index, type_, id_)
+    else:
+        return "{} {}".format(index, type_)
 
-    f = global_settings['fields_config_file'].replace('fields', "chosen_fields")
-    with open(f, "w") as json_file:
-        data = json.dumps(chosen_labels_possible_values, separators=[',', ':'], indent=4, sort_keys=True)
-        json_file.write(data)
-    return chosen_labels_possible_values
+
+def get_labels_possible_values():
+    global global_settings
+    global labels_possible_values
+    if not labels_possible_values:
+        return None
+    # diaforetika exoun ginei indexed ta forms kai exoun apothikeutei ola opos sto important_fields in configurations..
+    current_forms_labels_dicts = {}
+    if global_settings['assign_all']:
+        for form in global_settings['forms']:
+            current_forms_labels_dicts[form] = Form(form, labels_possible_values)
+    else:
+        current_form_labels_dict = {}
+        for form in global_settings['forms']:
+            current_form_labels_dict[form] = {}
+            for field in global_settings[form]:
+                current_form_labels_dict[form][field] = labels_possible_values[form][field]
+            current_forms_labels_dicts[form] = Form(form, current_form_labels_dict)
+    return current_forms_labels_dicts
 
 
 def find_used_ids():
@@ -169,28 +174,11 @@ def find_used_ids():
     global ids
     used_patients = []
     for form in global_settings['forms']:
-        used_patients += ids[global_settings['index_name']+' patients\' ids in '+form]
-
+        name = get_ids_key(global_settings['index_name'], global_settings['type_name_p'], form_name=form)
+        used_patients += ids[name]
     used_patients = list(set(used_patients))
     used_patients = random.sample(used_patients, int(global_settings['patients_pct'] * len(used_patients)))
     return used_patients
-
-
-def get_w2v_name():
-    global global_settings
-    w2v_name = os.path.join(global_settings['results_path'],
-                            "w2v_patient.p".replace("patient", global_settings['patient_W2V']))
-    global_settings['patient_W2V'] = w2v_name
-    return w2v_name
-
-
-def get_preprocessor_file_name():
-    global global_settings
-    preprocessor_name = os.path.join(global_settings['results_path'],
-                                     "preprocessor_patient.p".replace("patient", global_settings['type_name_pp'])
-                                                             .replace("patient_", ""))
-    global_settings['preprocessor_name'] = preprocessor_name
-    return preprocessor_name
 
 
 def get_results_filename():
@@ -209,6 +197,32 @@ def get_results_filename():
     if 'heat_maps_folder' in global_settings.keys():
         global_settings['heat_maps_folder'] = global_settings['heat_maps_folder'].replace("num", num_eval)
     return results_filename
+
+
+def get_evaluations_dict():
+    if os.path.isfile(global_settings['evaluations_file']):
+        with open(global_settings['evaluations_file'], 'r') as f:
+            evaluations_dict = json.load(f)
+    else:
+        evaluations_dict = {'evaluation': []}
+    return evaluations_dict
+
+
+def get_w2v_name():
+    global global_settings
+    w2v_name = os.path.join(global_settings['results_path'],
+                            "w2v_patient.p".replace("patient", global_settings['patient_W2V']))
+    global_settings['patient_W2V'] = w2v_name
+    return w2v_name
+
+
+def get_preprocessor_file_name():
+    global global_settings
+    preprocessor_name = os.path.join(global_settings['results_path'],
+                                     "preprocessor_patient.p".replace("patient", global_settings['type_name_pp'])
+                                                             .replace("patient_", ""))
+    global_settings['preprocessor_name'] = preprocessor_name
+    return preprocessor_name
 
 
 def get_run_description():

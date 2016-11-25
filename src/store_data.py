@@ -78,7 +78,7 @@ class Decease:
                                params_dict=params)
 
     def store_patients_ids(self):
-        name = self.index + " patients' ids in " + self.name
+        name = settings.get_ids_key(self.index, self.patients_type, self.name)
         settings.ids[name] = self.patients
         settings.update_ids()
         # if the form is indexed update it to insert the patients ids
@@ -164,7 +164,8 @@ def index_sentences(con, index, patient_type, sentence_type, patients_ids):
     start_time = time.time()
     sentence_id = 0
     for patient_id in patients_ids:
-        settings.ids[patient_id] = []
+        name = settings.get_ids_key(index, patient_type, id_=patient_id)
+        settings.ids[name] = []
         patient_doc = con.get_doc_source(index, patient_type, patient_id)
         patient_reports = patient_doc['report'] if "report" in patient_doc.keys() else None
         if isinstance(patient_reports, types.ListType):
@@ -175,7 +176,7 @@ def index_sentences(con, index, patient_type, sentence_type, patients_ids):
                     sentence_id += 1
                     body_data = {"text": sentence, "patient": patient_id, "date": date, "position": i}
                     con.index_doc(index, sentence_type, sentence_id, body_data)
-                    settings.ids[patient_id] = settings.ids[patient_id].__add__([sentence_id])
+                    settings.ids[name] = settings.ids[name].__add__([sentence_id])
         elif isinstance(patient_reports, types.DictionaryType):
             report_sentences = split_into_sentences(patient_reports['description'])
             date = patient_reports['date']
@@ -183,7 +184,7 @@ def index_sentences(con, index, patient_type, sentence_type, patients_ids):
                 sentence_id += 1
                 body_data = {"text": sentence, "patient": patient_id, "date": date, "position": i}
                 con.index_doc(index, sentence_type, sentence_id, body_data)
-                settings.ids[patient_id] = settings.ids[patient_id].__add__([sentence_id])
+                settings.ids[name] = settings.ids[name].__add__([sentence_id])
         if int(patient_id) % 100 == 0:
             print "sentences of patient {} has been indexed.".format(patient_id)
     settings.update_ids()

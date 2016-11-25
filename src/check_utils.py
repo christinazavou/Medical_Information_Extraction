@@ -7,7 +7,7 @@ from utils import value_in_values
 
 def fix_ids_of_decease(ids, decease, index):
     not_accepted = not_accepted_patients_decease(decease)
-    dict_key = index+" patients' ids in "+decease
+    dict_key = settings.get_ids_key(index, 'patient', form_name=decease)
     for patient_id in not_accepted:
         if patient_id in ids[dict_key]:
             idx = ids[dict_key].index(patient_id)

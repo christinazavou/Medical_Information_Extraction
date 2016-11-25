@@ -9,14 +9,14 @@ in_dossiers_path: "Data_path\\decease\\patients_selection_decease\\"
 out_dossiers_path: "Data_path\\decease\\patients_selection_decease_json\\"
 # ---------------------------------------------------------------------------------------------------------------------#
 # ----------------------------------------------excecution config------------------------------------------------------#
-read_dossiers: False
-store_dossiers: False
+read_dossiers: false
+store_dossiers: false
 find_conditioned_majority: true
 algo: "baseline"
-run_algo: False
+run_algo: false
 forms: ["colorectaal"]
-eval_algo: False
-eval_file: ""
+eval_algo: true
+eval_file: "Results_path\\conf17_results.json"
 patients_pct: 1
 
 distributions_folder: "Results_path\\distributions_num\\"

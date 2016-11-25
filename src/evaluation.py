@@ -35,7 +35,7 @@ def bleu_evaluation(prediction, target):
 
 
 class Evaluation:
-    def __init__(self, con, index_name, type_patient, type_form, ev_file, chosen_labels_possible_values):
+    def __init__(self, con, index_name, type_patient, type_form, ev_file, forms_labels_dicts):
         self.con = con  # the connection to ElasticSearch
         self.index_name = index_name  # the index name
         self.type_name_p = type_patient  # the type of doc to look for patient
@@ -43,27 +43,27 @@ class Evaluation:
         self.accuracy_1ofk = 0.0  # average of fields accuracy (fields with no assignments ignored)
         self.accuracy_open_q = 0.0  # same, but for open question fields
         self.file = ev_file  # the file with predicitons to evaluate
-        self.chosen_labels_possible_values = chosen_labels_possible_values  # the fields to evaluate (with other things)
+        self.forms_labels_dicts = forms_labels_dicts  # the fields to evaluate (with other things)
         self.chosen_labels_accuracy = {}  # the per field accuracy (for patients used and fields with assignments)
         self.chosen_labels_num = {}  # how many patients were assign a value for each label (per label)
         # (note: many patients are not assign labels due to unsatisfied conditions)
         self.unconditioned_num = {}  # to help check if all is good.
-        for form in self.chosen_labels_possible_values:
+        for form in self.forms_labels_dicts.keys():
             self.chosen_labels_accuracy[form] = {}
             self.chosen_labels_num[form] = {}
             self.unconditioned_num[form] = {}
-            for label in self.chosen_labels_possible_values[form]:
-                self.chosen_labels_accuracy[form][label] = 0.0
-                self.chosen_labels_num[form][label] = 0
-                self.unconditioned_num[form][label] = 0
+            for field in self.forms_labels_dicts[form].get_fields():
+                self.chosen_labels_accuracy[form][field] = 0.0
+                self.chosen_labels_num[form][field] = 0
+                self.unconditioned_num[form][field] = 0
         self.heat_maps = {}
         self.init_heat_maps()
 
     def init_heat_maps(self):
-        for form in self.chosen_labels_possible_values.keys():
+        for form in self.forms_labels_dicts.keys():
             self.heat_maps[form] = {}
-            for field, field_dict in self.chosen_labels_possible_values[form].items():
-                values = copy.deepcopy(field_dict['values'].keys())
+            for field in self.forms_labels_dicts[form].get_fields():
+                values = copy.deepcopy(self.forms_labels_dicts[form].get_field_values(field))
                 if "unknown" not in values:
                     values.insert(len(values), "")
                 else:
@@ -102,7 +102,7 @@ class Evaluation:
 
                 if not self.chosen_labels_num[form_id][field] == 0:
                     self.chosen_labels_accuracy[form_id][field] /= self.chosen_labels_num[form_id][field]
-                    if not key_in_values(self.chosen_labels_possible_values[form_id][field]['values'], "unknown"):
+                    if not key_in_values(self.forms_labels_dicts[form_id].get_field_values_dict(field), "unknown"):
                         self.accuracy_1ofk += self.chosen_labels_accuracy[form_id][field]
                         num_1ofk += 1
                     else:
@@ -119,19 +119,19 @@ class Evaluation:
         """Also updates heat maps
         Input: predictions and targets in the form of fields,values dictionary and the form fields come from"""
         # note: in prediction some fields may not appear, whilst in targets all fields appear
-        chosen_labels = [label for label in self.chosen_labels_possible_values[form_id]]
         if len(predictions) == 0:
             print "no predictions"
             return
         for field in predictions:
-            if field in chosen_labels:
-                if condition_satisfied(targets, self.chosen_labels_possible_values, form_id, field):
+            if field in self.forms_labels_dicts[form_id].get_fields():
+                condition = self.forms_labels_dicts[form_id].get_field_condition(field)
+                if condition_satisfied(targets, condition):
                     predicted = predictions[field]['value']
                     if not isinstance(predicted, basestring):
                         print "Ops. not correct."
                         exit(-1)
                     self.chosen_labels_num[form_id][field] += 1
-                    if not key_in_values(self.chosen_labels_possible_values[form_id][field]['values'], "unknown"):
+                    if not key_in_values(self.forms_labels_dicts[form_id].get_field_values_dict(field), "unknown"):
                         # score for : one out of k
                         if predicted == targets[field]:
                             self.chosen_labels_accuracy[form_id][field] += 1.0

@@ -2,7 +2,6 @@
 
 import sys
 import json
-import random
 import os
 import time
 
@@ -14,6 +13,8 @@ from check_utils import fix_ids_of_decease, combine_all_ids, update_form_values,
 from utils import make_ordered_dict_representation
 import algorithms
 import evaluation
+from data_analysis import from_json_predictions_to_pandas, get_predictions_distribution, plot_counts
+
 
 # todo: check if all patients reports have date so that i'll save the date as date
 
@@ -52,12 +53,12 @@ def store():
     time.sleep(50)
     # to be sure for the ids in file:
     current_ids = fix_ids_of_decease(settings.ids, 'colorectaal', index_name)
-    dict_key = index_name + " patient ids"
-    dict_key1 = index_name + " patients' ids in colorectaal"
+    dict_key = settings.get_ids_key(index_name, type_patient)
+    dict_key1 = settings.get_ids_key(index_name, type_patient, form_name='colorectaal')
     dict_key2 = None
     if 'mamma' in settings.global_settings.keys():
         current_ids = fix_ids_of_decease(current_ids, 'mamma', index_name)
-        dict_key2 = index_name + " patients' ids in mamma"
+        dict_key2 = settings.get_ids_key(index_name, type_patient, form_name='mamma')
     accepted_ids = combine_all_ids(current_ids, dict_key, dict_key1, dict_key2)
     settings.ids = accepted_ids
     settings.update_ids()
@@ -67,13 +68,13 @@ def store():
 
 
 def calculate_conditioned_majority():
-    mj_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, settings.labels_possible_values)
-    mj_algorithm.get_conditioned_counts(patient_ids_used, settings.global_settings['forms'])
+    mj_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, current_forms_labels)
+    mj_algorithm.get_conditioned_counts(patient_ids_used, current_config_forms)
     print "avg maj score: ", mj_algorithm.majority_assignment()
     counts = mj_algorithm.counts
     maj_scores = mj_algorithm.majority_scores
     d = {}
-    for form in settings.global_settings['forms']:
+    for form in current_config_forms:
         ordered_fields = settings.global_settings[form]
         d['counts_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, counts[form])
         d['mj_score_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, maj_scores[form])
@@ -88,20 +89,14 @@ def predict_forms():
     (if assign_all predict for all fields)
     """
 
-    if settings.global_settings['assign_all']:
-        labels_possible_values = settings.labels_possible_values
-    else:
-        labels_possible_values = settings.chosen_labels_possible_values
-
     if settings.global_settings['algo'] == 'baseline':
-        my_algorithm = algorithms.BaseAlgorithm(con, index_name, type_patient, labels_possible_values,
+        my_algorithm = algorithms.BaseAlgorithm(con, index_name, type_patient, current_forms_labels,
                                                 settings.global_settings['patient_relevant'],
                                                 settings.global_settings['default_field'],
                                                 settings.global_settings['boost_fields'],
                                                 settings.global_settings['min_score'],
                                                 settings.global_settings['use_description_1ofk'])
-        my_algorithm.assign(patient_ids_used, settings.global_settings['forms'],
-                            settings.global_settings['results_filename'])
+        my_algorithm.assign(patient_ids_used, settings.global_settings['forms'], current_config_result)
     print "Finish assigning values."
 
 
@@ -110,39 +105,45 @@ def evaluate_predictions():
     Evaluate the file specified in configurations file or the just predicted file, for fields specified.
     (if assign_all evaluate only for specified fields)
     """
-
-    if os.path.isfile(settings.global_settings['evaluations_file']):
-        with open(settings.global_settings['evaluations_file'], 'r') as f:
-            evaluations_dict = json.load(f)
-    else:
-        evaluations_dict = {'evaluation': []}
-
+    evaluations_dict = settings.get_evaluations_dict()
     my_evaluation = evaluation.Evaluation(con, index_name, type_patient, type_form,
-                                          settings.global_settings['eval_file'], settings.chosen_labels_possible_values)
+                                          settings.global_settings['eval_file'], current_forms_labels)
 
-    score1, score2, fields_score, fields_num = my_evaluation.eval(patient_ids_used, settings.global_settings['forms'])
-    if 'heat_maps_folder' in settings.global_settings.keys():
-        # heat_maps = my_evaluation.calculate_heat_maps()
-        heat_maps = my_evaluation.heat_maps
-        my_evaluation.print_heat_maps(heat_maps, settings.global_settings['heat_maps_folder'])
-
+    score1, score2, fields_score, fields_num = my_evaluation.eval(patient_ids_used, current_config_forms)
+    make_heat_maps(my_evaluation)
     current_evaluation = {'description': settings.get_run_description(),
                           'file': settings.global_settings['eval_file'],
                           'score_1_of_k': score1,
                           'score_open_q': score2,
                           'dte-time': time.strftime("%c"),
                           }
+
     for decease in settings.global_settings['forms']:
         ordered_fields = settings.global_settings[decease]
         current_evaluation['nums_{}'.format(decease)] = make_ordered_dict_representation(ordered_fields,
                                                                                          fields_num[decease])
         current_evaluation['fields_score_{}'.format(decease)] = make_ordered_dict_representation(ordered_fields,
                                                                                                  fields_score[decease])
-    evaluations_dict['evaluation'] += [current_evaluation]
+        make_distributions(decease, ordered_fields)
 
+    evaluations_dict['evaluation'] += [current_evaluation]
     with open(settings.global_settings['evaluations_file'], 'w') as f:
         json.dump(evaluations_dict, f, indent=4)
     print "Finish evaluating."
+
+
+def make_distributions(decease, ordered_fields):
+    name = settings.global_settings['csv_form_path'].replace('decease', decease)
+    rdf = from_json_predictions_to_pandas(settings.global_settings['eval_file'], decease, ordered_fields,
+                                          current_forms_labels, name)
+    cd = get_predictions_distribution(rdf, current_forms_labels[decease].the_dict)
+    plot_counts(cd, settings.global_settings['distributions_folder'])
+
+
+def make_heat_maps(my_evaluation):
+    if 'heat_maps_folder' in settings.global_settings.keys():
+        heat_maps = my_evaluation.heat_maps
+        my_evaluation.print_heat_maps(heat_maps, settings.global_settings['heat_maps_folder'])
 
 
 # def make_embeddings():
@@ -188,16 +189,15 @@ if __name__ == '__main__':
     """-------------------------------------------set params--------------------------------------------------------"""
 
     # to ensure we got values with conditions
-    for form in settings.global_settings['forms']:
-        update_form_values(form, os.path.join(settings.global_settings['json_forms_directory'],
-                                              "important_fields_decease.json".replace("decease", 'form')))
-    settings.find_chosen_labels_possible_values()
-    settings.get_results_filename()
-
+    current_config_forms = settings.global_settings['forms']
+    for form_ in current_config_forms:
+        update_form_values(form_, os.path.join(settings.global_settings['json_forms_directory'],
+                                               "important_fields_decease.json".replace("decease", 'form')))
+    current_forms_labels = settings.get_labels_possible_values()
+    current_config_result = settings.get_results_filename()
     patient_ids_used = settings.find_used_ids()
     print "total used patients: {}".format(len(patient_ids_used))
-
-    check(patient_ids_used, con, settings.chosen_labels_possible_values, index_name, type_patient)
+    # check(patient_ids_used, con, settings.chosen_labels_possible_values, index_name, type_patient)
 
     """-------------------------------------Find majority assignment on conditioned----------------------------------"""
     if settings.global_settings['find_conditioned_majority']:
@@ -211,3 +211,4 @@ if __name__ == '__main__':
 
     if settings.global_settings['eval_algo']:
         evaluate_predictions()
+

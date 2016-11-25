@@ -30,6 +30,16 @@
                 "Onbekend":[]
             }
         },
+        "COMORBPUL":{
+            "condition":"",
+            "description": ["Pulmonaal"],
+            "values": {"Ja": ["Ja"],"Nee": ["Nee"], "Onbekend": ["Onbekend"]}
+        },
+        "COMORBNEU":{
+            "condition":"",
+            "description": ["Neurologisch"],
+            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
+        },
         "COMORBDIA":{
             "condition":"COMORB = Ja",
             "description":[
@@ -44,6 +54,11 @@
                 ],
                 "Onbekend":[]
             }
+        },
+        "COMORBMDA":{
+            "condition":"",
+            "description": ["Gastrointestinaal"],
+            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
         },
         "COMORBURO":{
             "condition":"COMORB = Ja",
@@ -60,6 +75,11 @@
                 "Onbekend":[]
             }
         },
+        "COMORBVAS":{
+            "condition":"",
+            "description": ["Vasculair"],
+            "values": {"Ja": ["Ja"], "Nee": ["Nee"], "Onbekend": []}
+           },
         "LOCPRIM":{
             "condition":"",
             "description":[
@@ -1629,6 +1649,11 @@
                     "Ja"
                 ]
             }
-        }
+        },
+        "pallther_RTstudie":{
+              "description": ["Radiotherapie in studieverband"],
+              "condition": "",
+              "values": {"Nee": ["Nee"], "Ja": ["Ja"]}
+         }
     }
 }

@@ -114,32 +114,6 @@ def combine_assignment(value, evidence=None, score=None, comment=None):
     return assignment
 
 
-def decision_is_unary(values):
-    """return True if decision is Yes or NaN, else False"""
-    if len(values) == 1 and "unknown" not in values.keys():
-        return True
-    return False
-
-
-def decision_is_binary_and_ternary(values):
-    """Return bool1,bool2, where bool1 is True if decision is Yes/No(Ja/NEe)
-    and bool2 is True if decision can also be Onbekend"""
-    if len(values) == 3 or len(values) == 2:
-        values_keys = values.keys()
-        if ('Ja' in values_keys and 'Nee' in values_keys) or ('Yes' in values_keys and 'No' in values_keys):
-            if 'Onbekend' in values_keys:
-                return True, True
-            else:
-                return True, False
-    return False, None
-
-
-def decision_is_open(values):
-    if "unknown" in values.keys():
-        return True
-    return False
-
-
 def get_from_dict(dict_to_search, key, path):
     """because ES results are sometimes inconsistent check both ways (of finding total, highlight and score)"""
     if key in dict_to_search.keys():
@@ -178,12 +152,12 @@ global comment_relevance
 class Algorithm:
     __metaclass__ = ABCMeta
 
-    def __init__(self, con, index_name, search_type, algo_labels_possible_values,
+    def __init__(self, con, index_name, search_type, forms_labels_dicts,
                  default_field=None, boost_fields=None, patient_relevant=False, min_score=0):
         self.con = con  # the ElasticSearch connection
         self.index_name = index_name  # the index name to search
         self.search_type = search_type  # the type of documents to search
-        self.labels_possible_values = algo_labels_possible_values  # the labels and values (of fields to be assigned)
+        self.forms_labels_dicts = forms_labels_dicts  # the labels and values (of fields to be assigned)
         self.assignments = {}  # the assignments of form values (to patients to be assigned)
         self.patient_relevant = patient_relevant  # if we want to test the relevance of evidence to patient
         self.min_score = min_score
@@ -217,7 +191,7 @@ class Algorithm:
         pass
 
     @abstractmethod
-    def assign_one_of_k(self, patient_id, values, description):
+    def assign_one_of_k(self, patient_id, form, field):
         """assign value for multi-value field"""
         pass
 
@@ -256,9 +230,9 @@ class Algorithm:
 
 class BaseAlgorithm(Algorithm):
 
-    def __init__(self, con, index_name, search_type, algo_labels_possible_values, patient_relevant,
+    def __init__(self, con, index_name, search_type, forms_labels_dicts, patient_relevant,
                  default_field=None, boost_fields=None, min_score=0, use_description_1ofk=False):
-        super(BaseAlgorithm, self).__init__(con, index_name, search_type, algo_labels_possible_values,
+        super(BaseAlgorithm, self).__init__(con, index_name, search_type, forms_labels_dicts,
                                             default_field, boost_fields, patient_relevant, min_score)
         self.use_description_1ofk = use_description_1ofk
         self.search_fields = [self.default_field] + self.boost_fields
@@ -279,18 +253,19 @@ class BaseAlgorithm(Algorithm):
     def assign_patient_form(self, patient_id, form_id, doc_form):
         """assign the form fields for the current patient with the given golden truth"""
         patient_form_assign = {}  # dictionary of assignments
-        for label in self.labels_possible_values[form_id].keys():  # for each field (to be assign) in form
-            if condition_satisfied(doc_form, self.labels_possible_values, form_id, label):
-                values = self.labels_possible_values[form_id][label]['values']
-                description = self.labels_possible_values[form_id][label]['description']
-                if decision_is_open(values):
+        for field in self.forms_labels_dicts[form_id].get_fields():  # for each field (to be assign) in form
+            condition = self.forms_labels_dicts[form_id].get_field_condition(field)
+            if condition_satisfied(doc_form, condition):
+                values = self.forms_labels_dicts[form_id].get_field_values(field)
+                description = self.forms_labels_dicts[form_id].get_field_description(field)
+                if self.forms_labels_dicts[form_id].field_decision_is_open_question(field):
                     label_assignment = self.assign_open_question()
                 else:
-                    label_assignment = self.assign_one_of_k(patient_id, values, description)
+                    label_assignment = self.assign_one_of_k(patient_id, form_id, field)
                 if label_assignment:
-                    patient_form_assign[label] = label_assignment
+                    patient_form_assign[field] = label_assignment
             else:
-                patient_form_assign[label] = combine_assignment('', comment="condition unsatisfied.")
+                patient_form_assign[field] = combine_assignment('', comment="condition unsatisfied.")
         return patient_form_assign
 
     def filter_and_highlight_body(self, patient_id):
@@ -342,7 +317,7 @@ class BaseAlgorithm(Algorithm):
             else:
                 return combine_assignment(value="", comment=comment_relevance)
 
-    def make_binary_and_ternary_decision(self, patient_id, values, description, isternary=False):
+    def make_binary_and_ternary_decision(self, patient_id, values, description, is_ternary=False):
         """
         @values to know if 'Yes' or 'Ja' and if 'onbekend'
         """
@@ -359,7 +334,7 @@ class BaseAlgorithm(Algorithm):
         if score_search:
             value = 'Yes' if key_in_values(values, 'Yes') else 'Ja'
             return combine_assignment(value, evidence_search, score_search)
-        elif isternary:
+        elif is_ternary:
             pass
             # todo
         value = 'No' if key_in_values(values, 'No') else 'Nee'
@@ -410,11 +385,13 @@ class BaseAlgorithm(Algorithm):
                 return combine_assignment('Anders', evidences[idx_anders], scores[idx_anders])
         return combine_assignment("", comment='no value matched.')
 
-    def assign_one_of_k(self, patient_id, values, description):
-        binary, ternary = decision_is_binary_and_ternary(values)
+    def assign_one_of_k(self, patient_id, form, field):
+        binary, ternary = self.forms_labels_dicts[form].field_decision_is_binary_and_ternary(field)
+        values = self.forms_labels_dicts[form].get_field_values_dict(field)
+        description = self.forms_labels_dicts[form].get_field_description(field)
         if binary:
             return self.make_binary_and_ternary_decision(patient_id, values, description, ternary)
-        elif decision_is_unary(values):
+        elif self.forms_labels_dicts[form].field_decision_is_unary(field):
             return self.make_unary_decision(patient_id, values.keys()[0], description)
         else:
             return self.pick_value_decision(patient_id, values, description)
@@ -426,11 +403,11 @@ class BaseAlgorithm(Algorithm):
 
 class MajorityAlgorithm:
 
-    def __init__(self, con, index_name, search_type, algo_labels_possible_values):
+    def __init__(self, con, index_name, search_type, forms_labels_dicts):
         self.con = con
         self.index_name = index_name
         self.search_type = search_type
-        self.labels_possible_values = algo_labels_possible_values
+        self.forms_labels_dicts = forms_labels_dicts
         self.counts = {}
         self.majority_scores = {}
 
@@ -438,9 +415,9 @@ class MajorityAlgorithm:
         # initialize counts
         for form_id in assign_forms:
             self.counts[form_id] = {}
-            for field in self.labels_possible_values[form_id].keys():
+            for field in self.forms_labels_dicts[form_id].fields:
                 self.counts[form_id][field] = {}
-                for value in self.labels_possible_values[form_id][field]['values'].keys():
+                for value in self.forms_labels_dicts[form_id].get_field_values(field):
                     self.counts[form_id][field][value] = 0
                 self.counts[form_id][field][""] = 0
         # count based on given patients and forms, and Considering conditions.
@@ -449,9 +426,10 @@ class MajorityAlgorithm:
             for form_id in assign_forms:
                 if form_id in doc.keys():
                     for field in self.counts[form_id].keys():
-                        if condition_satisfied(doc[form_id], self.labels_possible_values, form_id, field):
+                        condition = self.forms_labels_dicts[form_id].get_field_condition(field)
+                        if condition_satisfied(doc[form_id], condition):
                             value = doc[form_id][field]
-                            if decision_is_open(self.labels_possible_values[form_id][field]['values']):
+                            if self.forms_labels_dicts[form_id].field_decision_is_open_question(field):
                                 if value != "":
                                     self.counts[form_id][field]["unknown"] += 1
                                     continue
