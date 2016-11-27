@@ -4,6 +4,7 @@ import sys
 import json
 import os
 import time
+import pickle
 
 from ESutils import EsConnection, start_es
 from read_data import read_patients
@@ -68,19 +69,25 @@ def store():
 
 
 def calculate_conditioned_majority():
-    mj_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, current_forms_labels)
-    mj_algorithm.get_conditioned_counts(patient_ids_used, current_config_forms)
-    print "avg maj score: ", mj_algorithm.majority_assignment()
-    counts = mj_algorithm.counts
-    maj_scores = mj_algorithm.majority_scores
-    d = {}
-    for form in current_config_forms:
-        ordered_fields = settings.global_settings[form]
-        d['counts_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, counts[form])
-        d['mj_score_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, maj_scores[form])
-    with open(settings.global_settings['majority_file'], 'w') as f:
-        json.dump(d, f, indent=4)
-    mj_algorithm.show('..\\results\\maj')
+    if not os.path.isfile(settings.global_settings['majority_file']):
+        mj_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, current_forms_labels)
+        mj_algorithm.get_conditioned_counts(patient_ids_used, current_config_forms)
+        print "avg maj score: ", mj_algorithm.majority_assignment()
+        counts = mj_algorithm.counts
+        maj_scores = mj_algorithm.majority_scores
+        pickle.dump(counts, open(os.path.join(settings.global_settings['results_path'], 'counts.p'), "wb"))
+        pickle.dump(maj_scores, open(os.path.join(settings.global_settings['results_path'], 'maj_scores.p'), "wb"))
+        d = {}
+        for form in current_config_forms:
+            ordered_fields = settings.global_settings[form]
+            d['counts_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, counts[form])
+            d['mj_score_{}'.format(form)] = make_ordered_dict_representation(ordered_fields, maj_scores[form])
+        with open(settings.global_settings['majority_file'], 'w') as f:
+            json.dump(d, f, indent=4)
+        mj_algorithm.show(settings.global_settings['majority_folder'])
+    else:
+        counts = pickle.load(open(os.path.join(settings.global_settings['results_path'], 'counts.p'), "rb"))
+        maj_scores = pickle.load(open(os.path.join(settings.global_settings['results_path'], 'maj_scores.p'), "rb"))
 
 
 def predict_forms():
@@ -161,7 +168,7 @@ def make_heat_maps(my_evaluation):
 if __name__ == '__main__':
 
     if len(sys.argv) < 4:
-        configFilePath = "aux_config\\conf17.yml"
+        configFilePath = "aux_config\\conf18.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         resultsPath = "..\\results"
@@ -182,33 +189,49 @@ if __name__ == '__main__':
     """-----------------------------------------read_dossiers--------------------------------------------------------"""
 
     if settings.global_settings['read_dossiers']:
-        read()
+        try:
+            read()
+        except:
+            raise Exception("error in read")
     if settings.global_settings['store_dossiers']:
-        store()
+        try:
+            store()
+        except:
+            raise Exception("error in store")
 
     """-------------------------------------------set params--------------------------------------------------------"""
 
-    # to ensure we got values with conditions
-    current_config_forms = settings.global_settings['forms']
-    for form_ in current_config_forms:
-        update_form_values(form_, os.path.join(settings.global_settings['json_forms_directory'],
-                                               "important_fields_decease.json".replace("decease", 'form')))
-    current_forms_labels = settings.get_labels_possible_values()
-    current_config_result = settings.get_results_filename()
-    patient_ids_used = settings.find_used_ids()
-    print "total used patients: {}".format(len(patient_ids_used))
-    # check(patient_ids_used, con, settings.chosen_labels_possible_values, index_name, type_patient)
+    try:
+        # to ensure we got values with conditions
+        current_config_forms = settings.global_settings['forms']
+        for form_ in current_config_forms:
+            update_form_values(form_, os.path.join(settings.global_settings['json_forms_directory'],
+                                                   "important_fields_decease.json".replace("decease", 'form')))
+        current_forms_labels = settings.get_labels_possible_values()
+        current_config_result = settings.get_results_filename()
+        patient_ids_used = settings.find_used_ids()
+        print "total used patients: {}".format(len(patient_ids_used))
+        # check(patient_ids_used, con, settings.chosen_labels_possible_values, index_name, type_patient)
+    except:
+        raise Exception("error in set params")
 
     """-------------------------------------Find majority assignment on conditioned----------------------------------"""
     if settings.global_settings['find_conditioned_majority']:
-        calculate_conditioned_majority()
+        try:
+            calculate_conditioned_majority()
+        except:
+            raise Exception("error in calculate_conditioned_majority")
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
     if settings.global_settings['run_algo']:
-        predict_forms()
-
+        try:
+            predict_forms()
+        except:
+            raise Exception("error in predict_forms")
     """---------------------------------------------Evaluate---------------------------------------------------------"""
 
     if settings.global_settings['eval_algo']:
-        evaluate_predictions()
-
+        try:
+            evaluate_predictions()
+        except:
+            raise Exception("error in evaluate_predictions")

@@ -47,7 +47,7 @@ class PatientRelevance:
         if relevant:
             return True, highlights
         if max_score > 0.5:
-            print "ONLY SOME SCORE"
+            # print "ONLY SOME SCORE"
             return True, max_highlight
         self.irrelevant_highlights.append(highlights)
         return False, None

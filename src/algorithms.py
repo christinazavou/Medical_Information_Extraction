@@ -101,6 +101,9 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 print_freq = 0
 fragments = 10
 
+global the_current_body
+global comment_relevance
+
 
 def combine_assignment(value, evidence=None, score=None, comment=None):
     """create and return a dictionary: assignment = {value:value, evidence:evidence, score:score, comment:comment}"""
@@ -144,9 +147,6 @@ def pick_score_and_index(scores):
 
 
 """-----------------------------------------------------------------------------------------------------------------"""
-
-global the_current_body
-global comment_relevance
 
 
 class Algorithm:
@@ -353,6 +353,8 @@ class BaseAlgorithm(Algorithm):
         return self.score_and_evidence(search_results, self.default_field)
 
     def get_value_score(self, patient_id, possible_values, description):
+        global comment_relevance
+        comment_relevance = ""
         """Check if value can be found and return its score and evidence"""
         global the_current_body
         vb = self.value_query(possible_values)
