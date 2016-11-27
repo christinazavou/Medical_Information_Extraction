@@ -27,6 +27,8 @@ else:
 if not os.path.isdir(resultsPath):
     os.mkdir(resultsPath)
 
+this_dir = os.path.dirname(os.path.realpath(__file__))
+main_file = os.path.join(this_dir, "new_main.py")
 start_time = time.time()
 configFilePath = "aux_config\\conf17.yml"
 run_cmd = "python {} {} {} {}".format("new_main.py", configFilePath, dataPath, resultsPath)
