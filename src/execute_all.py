@@ -15,6 +15,10 @@ import time
 #             zf.write(absname, arcname)
 #     zf.close()
 
+import os
+cwd = os.getcwd()
+print "my environment folder: {}".format(cwd)
+
 if os.path.isdir("C:\\Users\\Christina Zavou\\Desktop\\"):
     resultsPath = "C:\\Users\\Christina Zavou\\Desktop\\results28_nov"
     # final_zip_root = "C:\\Users\\Christina Zavou\\Desktop\\results28_nov\\tosend"
