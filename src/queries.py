@@ -142,21 +142,3 @@ def big_phrases_small_phrases(phrases, max_words=5):
         else:
             small_set.add(phrase)
     return list(big_set), list(small_set)
-
-
-if __name__ == "__main__":
-    import json
-
-    with open("..\\results\\fields_mie_tfidf.json", 'r') as json_file:
-        labels_possible_values = json.load(json_file, encoding='utf-8')
-        values = labels_possible_values['colorectaal']['RESTAG_SCORECT2_1']['values']
-        description = labels_possible_values['colorectaal']['PROCOK']['description']
-
-    field = "report.description.dutch_tf_description"
-    for value in values.keys():
-        possible_values = values[value]
-
-    # q = disjunction_of_conjunctions(possible_values)
-    # a = bool_body(must_body=query_string([field], q), should_body=description_query(description), min_should_match=1)
-    # print json.dumps(search_body(query_body=a))
-        print json.dumps(value_query(possible_values))

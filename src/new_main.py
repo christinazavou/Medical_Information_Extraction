@@ -179,6 +179,8 @@ if __name__ == '__main__':
         resultsPath = sys.argv[3]
 
     settings.init(configFilePath, dataPath, resultsPath)
+    print "dataPath: {}\nresultsPath:{}".format(settings.global_settings['data_path'],
+                                                settings.global_settings['results_path'])
 
     index_name = settings.global_settings['index_name']
     type_patient = settings.global_settings['type_name_p']
@@ -211,7 +213,7 @@ if __name__ == '__main__':
         current_config_result = settings.get_results_filename()
         patient_ids_used = settings.find_used_ids()
         print "total used patients: {}".format(len(patient_ids_used))
-        # check(patient_ids_used, con, settings.chosen_labels_possible_values, index_name, type_patient)
+        check(patient_ids_used, con, current_forms_labels, index_name, type_patient)
     except:
         raise Exception("error in set params")
 

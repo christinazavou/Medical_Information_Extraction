@@ -178,6 +178,8 @@ class Algorithm:
         self.assignments = self.specific_assign(assign_patients, assign_forms)
         with open(results_file, 'wb') as f:
             json.dump(self.assignments, f, indent=4)
+        if self.patient_relevant:
+            self.pr.store_irrelevant_highlights(results_file)
         print("--- %s seconds for assign method---" % (time.time() - start_time))
 
     @abstractmethod
@@ -246,8 +248,6 @@ class BaseAlgorithm(Algorithm):
                 if form_id in doc.keys():
                     patient_forms[form_id] = self.assign_patient_form(patient_id, form_id, doc[form_id])
             self.assignments[patient_id] = patient_forms
-        if self.patient_relevant:
-            self.pr.store_irrelevant_highlights('irrelevant.json')
         return self.assignments
 
     def assign_patient_form(self, patient_id, form_id, doc_form):

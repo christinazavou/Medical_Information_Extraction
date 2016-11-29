@@ -24,7 +24,7 @@ class Form:
         return self.the_dict[field]['values'].keys()
 
     def get_field_value_possible_values(self, field, value):
-        return self.the_dict[field]['values'][value].keys()
+        return self.the_dict[field]['values'][value]
 
     def get_field_description(self, field):
         return self.the_dict[field]['description']
@@ -53,3 +53,10 @@ class Form:
                     return True, False
         return False, None
 
+    def value_is_possible(self, field, value):
+        values = self.get_field_values(field)
+        for val in values:
+            possible_values = self.get_field_value_possible_values(field, val)
+            if value in possible_values:
+                return True
+        return False

@@ -1,9 +1,8 @@
 
 import os
 import time
+import sys
 # import zipfile
-
-
 # def zip(src, dst):
 #     zf = zipfile.ZipFile("%s.zip" % (dst), "w", zipfile.ZIP_DEFLATED)
 #     abs_src = os.path.abspath(src)
@@ -15,21 +14,17 @@ import time
 #             zf.write(absname, arcname)
 #     zf.close()
 
-import os
-cwd = os.getcwd()
-print "my environment folder: {}".format(cwd)
-
-if os.path.isdir("C:\\Users\\Christina Zavou\\Desktop\\"):
-    resultsPath = "C:\\Users\\Christina Zavou\\Desktop\\results28_nov"
-    # final_zip_root = "C:\\Users\\Christina Zavou\\Desktop\\results28_nov\\tosend"
+RESULTS_IDX = 1
+environmentPath = os.getcwd()
+if 'Zavou' in environmentPath:
     dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
 else:
-    resultsPath = "C:\\Users\\Christina\\Desktop\\results28_nov"
-    # final_zip_root = "C:\\Users\\Christina\\Desktop\\results28_nov\\tosend"
     dataPath = "..\\Data"
-
-if not os.path.isdir(resultsPath):
-    os.mkdir(resultsPath)
+if len(sys.argv) < 2:
+    resultsPath = "..\\results"
+else:
+    resultsPath = sys.argv[RESULTS_IDX]
+    resultsPath = os.path.join(environmentPath, resultsPath)
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 main_file = os.path.join(this_dir, "new_main.py")

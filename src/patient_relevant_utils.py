@@ -53,5 +53,6 @@ class PatientRelevance:
         return False, None
 
     def store_irrelevant_highlights(self, file_path):
+        file_path = file_path.replace("results.json", "irrelevant.json")
         with open(file_path, 'w') as f:
             json.dump(self.irrelevant_highlights, f, encoding='utf-8', indent=4)

@@ -95,14 +95,6 @@ def key_in_values(values_field_dict, key):
         return False
 
 
-def value_in_values(values_field_dict, value):
-    field_values = list()
-    [[field_values.append(i) for i in value_dict] for vd, value_dict in values_field_dict.items()]
-    if value in field_values:
-        return True
-    return False
-
-
 def get_possible_values(labels_possible_values, field):
     return labels_possible_values[field]['values'].keys()
 

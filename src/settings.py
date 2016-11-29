@@ -1,42 +1,41 @@
 # -*- coding: utf-8 -*-
 
-import copy
+# import copy
 import json
 import yaml
 import os
 import random
-from utils import key_in_values
+# from utils import key_in_values
 from form_details import Form
 
 global labels_possible_values
 global ids
-# global chosen_labels_possible_values
 global global_settings
 
 
 random.seed(40)  # Always choose same patients
 
 
-def get_data_path_root():
+def get_data_path_root(data_path):
+    if os.path.isdir(data_path):
+        return data_path
     if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
         return "C:\\Users\\Christina Zavou\\Documents\\Data"
-    else:
-        if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\Data"):
-            return "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\Data"
-        else:
-            print "a correct data path root is unspecified."
-            exit(-1)
+    if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\Data"):
+        return "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\Data"
+    print "a correct data path root is unspecified."
+    exit(-1)
 
 
-def get_results_path():
-    if os.path.isdir("C:\\Users\\Christina Zavou\\Desktop\\results"):
-        return "C:\\Users\\Christina Zavou\\Desktop\\results\\"
-    else:
-        if os.path.isdir("C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results"):
-            return "C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results\\"
+def get_results_path(results_folder):
+    try:
+        if os.path.isdir(results_folder):
+            return results_folder
         else:
-            print "a correct results path root is unspecified."
-            exit(-1)
+            os.mkdir(results_folder)
+            return results_folder
+    except:
+        raise Exception("error in results folder")
 
 
 def get_preprocess_patient_name():
@@ -52,7 +51,6 @@ def get_preprocess_patient_name():
 def init(config_file, data_path, results_path):
     global labels_possible_values
     global ids
-    global chosen_labels_possible_values
     global global_settings
 
     global_settings = {}
@@ -61,26 +59,19 @@ def init(config_file, data_path, results_path):
     dir_name = os.path.basename(os.path.dirname(__file__))
     config_file = os.path.join(this_dir.replace(dir_name, ""), config_file)
     global_settings['configFile'] = config_file
-
-    if not os.path.isdir(data_path):
-        data_path = get_data_path_root()
-    global_settings['data_path'] = data_path
-
-    if not os.path.isdir(results_path):
-        results_path = get_results_path()
-    global_settings['results_path'] = results_path
+    global_settings['data_path'] = get_data_path_root(data_path)
+    global_settings['results_path'] = get_results_path(results_path)
+    config_path = os.path.dirname(os.path.realpath(__file__)).replace(dir_name, 'Configurations')
 
     with open(config_file, 'r') as f:
         doc = yaml.load(f)
-
-    config_path = os.path.dirname(os.path.realpath(__file__)).replace(dir_name, 'Configurations')
 
     for key, value in doc.items():
         global_settings[key] = value
         if isinstance(value, basestring):
             global_settings[key] = global_settings[key].replace("Configurations_path", config_path)
-            global_settings[key] = global_settings[key].replace("Data_path", data_path)
-            global_settings[key] = global_settings[key].replace("Results_path", results_path)
+            global_settings[key] = global_settings[key].replace("Data_path", global_settings['data_path'])
+            global_settings[key] = global_settings[key].replace("Results_path", global_settings['results_path'])
 
     global_settings['evaluations_file'] = os.path.join(global_settings['results_path'], "evaluations.json")
 
@@ -102,25 +93,27 @@ def init(config_file, data_path, results_path):
         global_settings['boost_fields'] = []
     if 'min_score' not in global_settings.keys():
         global_settings['min_score'] = 0
+    if 'patient_relevant' not in global_settings.keys():
+        global_settings['patient_relevant'] = False
+    if 'patients_pct' not in global_settings.keys():
+        global_settings['patients_pct'] = 1
 
     # ---------------------------------------ids and labels_possible_values--------------------------------------------#
 
     fields_config_file = os.path.join(global_settings['results_path'],
                                       "fields_index.json".replace("index", global_settings['index_name']))
+    labels_possible_values = {}
     if os.path.isfile(fields_config_file):
         with open(fields_config_file, 'r') as json_file:
             labels_possible_values = json.load(json_file, encoding='utf-8')
-    else:
-        labels_possible_values = {}
     global_settings['fields_config_file'] = fields_config_file
 
     ids_config_file = os.path.join(global_settings['results_path'],
                                    "ids_index.json".replace("index", global_settings['index_name']))
+    ids = {}
     if os.path.isfile(ids_config_file):
         with open(ids_config_file, 'r') as json_file:
             ids = json.load(json_file, encoding='utf-8')
-    else:
-        ids = {}
     global_settings['ids_config_file'] = ids_config_file
 
 

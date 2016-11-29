@@ -2,7 +2,6 @@ import settings
 import os
 import json
 import ESutils
-from utils import value_in_values
 
 
 def fix_ids_of_decease(ids, decease, index):
@@ -51,7 +50,7 @@ def update_form_values(form_name, fields_file):
             else:
                 raise Exception
     except:
-        print "error. couldn't update values file for {}".format(form_name)
+        raise Exception("error. couldn't update values file for {}".format(form_name))
     return
 
 
@@ -84,16 +83,20 @@ def fix_ids(index_name, type_name_p):
     settings.update_ids()
 
 
-def check(patient_ids, con, fields_values, index, p_type):
-    for p_id in patient_ids:
-        doc = con.get_doc_source(index, p_type, p_id)
-        for form in fields_values.keys():
-            if form in doc.keys():
-                golden_truth = doc[form]
-                for field in fields_values[form].keys():
-                    if "unknown" in fields_values[form][field]['values'].keys():
-                        print "unknown"
-                    else:
-                        if not value_in_values(fields_values[form][field]['values'], golden_truth[field])\
-                                and golden_truth[field] != "":
-                            print "golden truth for {} {} is {}".format(p_id, field, golden_truth[field])
+def check(patient_ids, con, current_forms_labels, index, p_type):
+    try:
+        for p_id in patient_ids:
+            doc = con.get_doc_source(index, p_type, p_id)
+            for form in current_forms_labels.keys():
+                if form in doc.keys():
+                    golden_truth = doc[form]
+                    for field in current_forms_labels[form].get_fields():
+                        if current_forms_labels[form].field_decision_is_open_question(field):
+                            pass
+                        else:
+                            if not current_forms_labels[form].value_is_possible(field, golden_truth[field])\
+                                    and golden_truth[field] != "":
+                                print "golden truth for {} {} is {}".format(p_id, field, golden_truth[field])
+        print "finished checking values consistency"
+    except:
+        raise Exception("error in check")
