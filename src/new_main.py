@@ -229,6 +229,8 @@ if __name__ == '__main__':
             raise Exception("error in calculate_conditioned_majority")
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
+    print "EDO: ", current_forms_labels['colorectaal']['pallther_chemoRT']
+    exit()
     if settings.global_settings['run_algo']:
         # try:
         predict_forms()
