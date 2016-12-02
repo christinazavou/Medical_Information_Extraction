@@ -169,16 +169,19 @@ def make_heat_maps(my_evaluation):
 
 if __name__ == '__main__':
 
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 2:
         configFilePath = "aux_config\\conf18.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         resultsPath = "..\\results"
         # resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov"
     else:
+        if len(sys.argv) < 4:
+            raise Exception("not enough arguments given")
         configFilePath = sys.argv[1]
         dataPath = sys.argv[2]
         resultsPath = sys.argv[3]
+    print "config: {}\ndata: {}\nresults: {}".format(configFilePath, dataPath, resultsPath)
 
     settings.init(configFilePath, dataPath, resultsPath)
     print "dataPath: {}\nresultsPath:{}".format(settings.global_settings['data_path'],

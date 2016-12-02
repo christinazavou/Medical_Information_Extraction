@@ -26,12 +26,16 @@ if len(sys.argv) < 2:
 else:
     resultsPath = sys.argv[RESULTS_IDX]
     resultsPath = os.path.join(environmentPath, resultsPath)
+print "dataPath: {}\nresultsPath: {}".format(dataPath, resultsPath)
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 main_file = os.path.join(this_dir, "new_main.py")
+print "thisdir: {}\nmainfile: {}".format(this_dir, main_file)
+
 start_time = time.time()
 configFilePath = "aux_config\\conf17.yml"
 run_cmd = "python {} {} {} {}".format(main_file, configFilePath, dataPath, resultsPath)
+print "run_cmd: {}".format(run_cmd)
 os.system(run_cmd)
 print "Finished read and store after {} minutes.".format((time.time() - start_time) / 60.0)
 
