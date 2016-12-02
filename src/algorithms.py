@@ -216,12 +216,12 @@ class Algorithm:
         return relevant, highlight_relevant
 
     def filter_highlights(self, highlights):
-        if highlights[self.default_field]:
+        if self.default_field in highlights and highlights[self.default_field]:
             return {self.default_field: highlights[self.default_field]}, self.default_field
         else:
-            for f in highlights:
-                if highlights[f]:
-                    return {f: highlights[f]}, f
+            for field in highlights.keys():
+                if highlights[field]:
+                    return {field: highlights[field]}, field
 
     def score_and_evidence(self, search_results):
         """Return the score of query and the relevant highlight, or (None,None) if nothing acceptable was found, or
