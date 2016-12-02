@@ -13,10 +13,10 @@ read_dossiers: false
 store_dossiers: false
 find_conditioned_majority: false
 algo: "baseline"
-run_algo: false
+run_algo: true
 forms: ["colorectaal"]
 eval_algo: true
-eval_file: "Results_path\\conf21_results.json"
+eval_file: ""
 patients_pct: 1
 
 majority_folder: "Results_path\\majority\\"

@@ -407,27 +407,26 @@ class BaseAlgorithm(Algorithm):
         return self.score_and_evidence(search_results)
 
     def update_scores(self, patient_id, scores, evidences, values, description):
-        pass
-        # global the_current_body, phbs
-        # for i in range(len(scores)):
-        #     score = scores[i]
-        #     evidence = evidences[i]
-        #     value = values.keys()[i]
-        #     phrases = set()
-        #     for d in description:
-        #         d_words = find_description_words(evidence, d)
-        #         if d_words:
-        #             phrases.add("{} {}".format(value, d_words).encode('utf-8'))
-        #     if phrases:
-        #         # search value description
-        #         fb, hb = self.filter_and_highlight_body(patient_id)
-        #         should_body = list()
-        #         for ph in list(phrases):
-        #             should_body.append(multi_match_query(ph, self.search_fields, query_type="phrase", slop=10))
-        #         phb = bool_body(should_body=should_body, min_should_match=1)
-        #         the_current_body = search_body(phb, highlight_body=hb, min_score=self.min_score)
-        #         # search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
-        #         phbs.append({'value': value, 'evidence': evidence, 'phb': the_current_body})
+        global the_current_body, phbs
+        for i in range(len(scores)):
+            score = scores[i]
+            evidence = evidences[i]
+            value = values.keys()[i]
+            phrases = set()
+            for d in description:
+                d_words = find_description_words(evidence, d)
+                if d_words:
+                    phrases.add("{} {}".format(value, d_words))
+            if phrases:
+                # search value description
+                fb, hb = self.filter_and_highlight_body(patient_id)
+                should_body = list()
+                for ph in list(phrases):
+                    should_body.append(multi_match_query(ph, self.search_fields, query_type="phrase", slop=10))
+                phb = bool_body(should_body=should_body, min_should_match=1)
+                the_current_body = search_body(phb, highlight_body=hb, min_score=self.min_score)
+                # search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
+                phbs.append({'value': value, 'evidence': evidence, 'phb': the_current_body})
 
     def store_phbs(self, results_file):
         global phbs

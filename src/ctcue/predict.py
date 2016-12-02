@@ -61,7 +61,7 @@ if __name__ == "__main__":
     ]
 
     X, result = predict_prob(clf, text)
-    print result
+    # print result
 
     text = ["19 oktober 2009 Mevr. , geboren  , Geachte collega, Uw bovengenoemde patiënte was van 22-08-2011 tot " \
            "25-08-2011 opgenomen op de afdeling van de Isala, locatie blaat. Reden van opname: Stoornis en " \
@@ -88,7 +88,7 @@ if __name__ == "__main__":
 
     # get prediction of weather this concept is actually related to the patient or not
     X, result = predict_prob(clf, text)
-    print result
+    # print result
 
     text = [
         u'<DIS> : nee.'
@@ -96,8 +96,9 @@ if __name__ == "__main__":
 
     # get prediction of weather this concept is actually related to the patient or not
     X, result = predict_prob(clf, text)
-    print result
-
-    # text = "something else"
-    # X, result = predict_prob(clf, text)
     # print result
+
+    text = ["Sociale anamnese: woont in <DIS>", "<DIS> atig zieke patiënt,"]
+    text = [u'Sociale anamnese: woont in <DIS>", "<DIS> atig zieke patiënt,']
+    X, result = predict_prob(clf, text)
+    print result

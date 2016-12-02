@@ -143,14 +143,16 @@ def find_description_words(highlight_sentences, description):
         return []
     words = set()
     for h_sentence in highlight_sentences:
+        h_sentence = h_sentence.encode('utf-8')
         s = h_sentence.split(' ')
         m = [re.match("<em>.*</em>", word) for word in s]
         for m_i in m:
             if m_i:
                 word = m_i.group().replace('<em>', '').replace('</em>', '')
+                word = word.encode('utf-8')
                 if word in description:
                     words.add(word)
-        return " ".join(words)
+        return u' '.join(words)
 
 
 # def txt_in_description(description, txt):
@@ -178,7 +180,7 @@ if __name__ == "__main__":
     # x = get_dataframe('..\\Data\\colorectaal\\selection_colorectaal.csv', current_fields)
     # print get_from_dataframe(x, '33237', 'COMORB')
 
-    high = [
+    evidence = [
                   "wel eens in <em>de</em> steek gelaten? -Nee -Heeft u zich <em>de</em> laatste tijd somber <em>of</em> neerslachtig gevoeld? -Ja -Heeft u zich <em>de</em> laatste tijd nerveus <em>of</em> angstig gevoeld",
                   "verliep ongecompliceerd. <em>De</em> tractus digestivus kwam vlot op gang, <em>de</em> pijn <em>is</em> onder controle en <em>de</em> wondjes zien er rustig uit. Patiente <em>is</em> in goede conditie naar",
                   "werk contact met, en/<em>of</em> woonachtig op een bedrijf met varkens, vleeskalveren <em>of</em> vleeskuikens -Nee -Drager <em>van</em> MRSA -Nee -Drager <em>van</em> BRMO, ESBL, VRE, CRE",
@@ -188,9 +190,9 @@ if __name__ == "__main__":
                   "th/abd -Mw <em>is</em> aangemeld <em>voor</em> MDO <em>van</em> 16-11-2015 -Vervolgafspraak -16-11 dr <em>de</em> Vos + MDP - -Regievpk",
                   "werk contact met, en/<em>of</em> woonachtig op een bedrijf met varkens, vleeskalveren <em>of</em> vleeskuikens -Nee -Drager <em>van</em> MRSA -Nee -Drager <em>van</em> BRMO, ESBL, VRE, CRE",
                   "-Anamnese -Algemeen form. MDL -Verwijzer -Huisarts Wyk, J.A. <em>van</em> der -Reden <em>van</em> komst -Sedatiegesprek <em>voor</em> coloscopie Mw. Nijveldt. -MDL Voorgeschiedenis -2014",
-                  "mg -Nuchter -Ja -Actie op dag <em>van</em> opname -Naar lab -Lab op dag opname -Hb-Bloedgroep -Rhesus -Medicatie advies -Rest <em>van</em> <em>de</em> medicatie continueren- -Overleg"
+                  "mg -Nuchter -Ja -Actie de \u00e9\u00e9n op dag <em>van</em> opname -Naar lab -Lab op dag opname -Hb-Bloedgroep -Rhesus -Medicatie advies -Rest <em>van</em> <em>de</em> medicatie continueren- -Overleg"
                ]
-    des = [
+    description = [
                 "Locatie van de \u2018belangrijkste\u2019 tumor. De tumor welke het meest bepalend is voor de prognose of behandeling.",
                 "primaire tumor",
                 "primair carcinoom",
@@ -198,3 +200,10 @@ if __name__ == "__main__":
                 "carcinoom"
             ]
     v = 'Caecum'
+    value = "de \u00e9\u00e9n na"
+    phrases = set()
+    for d in description:
+        d_words = find_description_words(evidence, d)
+        if d_words:
+            phrases.add("{} {}".format(value, d_words))
+    print phrases
