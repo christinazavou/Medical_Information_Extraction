@@ -404,6 +404,22 @@ class BaseAlgorithm(Algorithm):
 
     def update_scores(self, patient_id, scores, evidences, values, description):
         pass
+        # for i in range(len(scores)):
+        #     score = scores[i]
+        #     evidence = evidences[i]
+        #     value = values.keys()[i]
+        #     phrases = set()
+        #     for d in description:
+        #         d_words = find_description_words(evidence, d)
+        #         if d_words:
+        #             phrases.add("{} {}".format(value, d_words))
+        #     # search value description
+        #     fb, hb = self.filter_and_highlight_body(patient_id)
+        #     should_body = list()
+        #     for ph in list(phrases):
+        #         should_body.append(multi_match_query(ph, self.search_fields, query_type="phrase", slop=10))
+        #     body = bool_body(should_body=should_body, min_should_match=1)
+        #     return body
 
     def pick_value_decision(self, patient_id, values, description):
         """

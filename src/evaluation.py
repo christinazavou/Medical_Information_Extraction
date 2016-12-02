@@ -123,31 +123,33 @@ class Evaluation:
             print "no predictions"
             return
         for field in predictions:
-            if field in self.forms_labels_dicts[form_id].get_fields():
+            if field in self.forms_labels_dicts[form_id].get_fields():  # for fields i want to evaluate
                 condition = self.forms_labels_dicts[form_id].get_field_condition(field)
                 if condition_satisfied(targets, condition):
                     predicted = predictions[field]['value']
                     if not isinstance(predicted, basestring):
-                        print "Ops. not correct."
-                        exit(-1)
+                        raise Exception("Ops. not correct.")
                     self.chosen_labels_num[form_id][field] += 1
-                    if not key_in_values(self.forms_labels_dicts[form_id].get_field_values_dict(field), "unknown"):
+                    if 'unknown' not in self.forms_labels_dicts[form_id].get_field_values(field):
                         # score for : one out of k
                         if predicted == targets[field]:
                             self.chosen_labels_accuracy[form_id][field] += 1.0
-                        idx_predicted = self.heat_maps[form_id][field][0].index(predicted)
-                        idx_target = self.heat_maps[form_id][field][0].index(targets[field])
+                        try:
+                            idx_predicted = self.heat_maps[form_id][field][0].index(predicted)
+                            idx_target = self.heat_maps[form_id][field][0].index(targets[field])
+                        except:
+                            raise Exception("predicted: {}\ntarget[{}]: {}".format(predicted, field, targets[field]))
                         self.heat_maps[form_id][field][1][idx_predicted][idx_target] += 1
                     else:
                         pass
-                        p = "unknown" if predicted != "" else ""
-                        t = "unknown" if targets[field] != "" else ""
-                        idx_predicted = self.heat_maps[form_id][field][0].index(p)
-                        idx_target = self.heat_maps[form_id][field][0].index(t)
-                        self.heat_maps[form_id][field][1][idx_predicted][idx_target] += 1  # not ecactly correct...
-                        # ... just captures if nan or not
-                        # score for : open-question (BLEU)
-                        self.chosen_labels_accuracy[form_id][field] += bleu_evaluation(predicted, targets[field])
+                        # p = "unknown" if predicted != "" else ""
+                        # t = "unknown" if targets[field] != "" else ""
+                        # idx_predicted = self.heat_maps[form_id][field][0].index(p)
+                        # idx_target = self.heat_maps[form_id][field][0].index(t)
+                        # self.heat_maps[form_id][field][1][idx_predicted][idx_target] += 1  # not ecactly correct...
+                        # # ... just captures if nan or not
+                        # # score for : open-question (BLEU)
+                        # self.chosen_labels_accuracy[form_id][field] += bleu_evaluation(predicted, targets[field])
                 else:
                     self.unconditioned_num[form_id][field] += 1
 

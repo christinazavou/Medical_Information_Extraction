@@ -138,21 +138,26 @@ def condition_sat(df, p_id, condition):
         return False
 
 
-def find_description_words(highlight, description):
-    s = highlight.split(' ')
-    m = [re.match("<em>.*</em>", word) for word in s]
-    words = []
-    for m_i in m:
-        if m_i:
-            words.append(m_i.group().replace('<em>', '').replace('</em>', ''))
-    print "words:", words
+def find_description_words(highlight_sentences, description):
+    if not highlight_sentences:
+        return []
+    words = set()
+    for h_sentence in highlight_sentences:
+        s = h_sentence.split(' ')
+        m = [re.match("<em>.*</em>", word) for word in s]
+        for m_i in m:
+            if m_i:
+                word = m_i.group().replace('<em>', '').replace('</em>', '')
+                if word in description:
+                    words.add(word)
+        return " ".join(words)
 
 
-def txt_in_description(description, txt):
-    for d in description:
-        if txt in d:
-            return True
-    return False
+# def txt_in_description(description, txt):
+#     for d in description:
+#         if txt in d:
+#             return True
+#     return False
 
 
 if __name__ == "__main__":
@@ -185,5 +190,11 @@ if __name__ == "__main__":
                   "-Anamnese -Algemeen form. MDL -Verwijzer -Huisarts Wyk, J.A. <em>van</em> der -Reden <em>van</em> komst -Sedatiegesprek <em>voor</em> coloscopie Mw. Nijveldt. -MDL Voorgeschiedenis -2014",
                   "mg -Nuchter -Ja -Actie op dag <em>van</em> opname -Naar lab -Lab op dag opname -Hb-Bloedgroep -Rhesus -Medicatie advies -Rest <em>van</em> <em>de</em> medicatie continueren- -Overleg"
                ]
-    des = "Locatie van de \u2018belangrijkste\u2019 tumor. De tumor welke het meest bepalend is voor de prognose of behandeling."
-    find_description_words(high[0], des)
+    des = [
+                "Locatie van de \u2018belangrijkste\u2019 tumor. De tumor welke het meest bepalend is voor de prognose of behandeling.",
+                "primaire tumor",
+                "primair carcinoom",
+                "tumor",
+                "carcinoom"
+            ]
+    v = 'Caecum'

@@ -170,7 +170,7 @@ def make_heat_maps(my_evaluation):
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
-        configFilePath = "aux_config\\conf21.yml"
+        configFilePath = "aux_config\\conf23.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         resultsPath = "..\\results"
