@@ -94,7 +94,7 @@ def check(patient_ids, con, current_forms_labels, index, p_type):
                         if current_forms_labels[form].field_decision_is_open_question(field):
                             pass
                         else:
-                            if not current_forms_labels[form].value_is_possible(field, golden_truth[field])\
+                            if golden_truth[field] not in current_forms_labels[form].get_field_values(field)\
                                     and golden_truth[field] != "":
                                 print "golden truth for {} {} is {}".format(p_id, field, golden_truth[field])
         print "finished checking values consistency"

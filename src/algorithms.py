@@ -390,7 +390,7 @@ class BaseAlgorithm(Algorithm):
         fb, hb = self.filter_and_highlight_body(patient_id)
         qb = bool_body(must_body=vb, filter_body=fb)
         if self.use_description_1ofk:
-            print "na ginei phrase value description"
+            # todo: "na ginei phrase value description"
             db = self.description_query(description)
             qb = bool_body(must_body=vb, should_body=db, filter_body=fb, min_should_match=1)
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)

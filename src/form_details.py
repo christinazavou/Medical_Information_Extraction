@@ -53,10 +53,10 @@ class Form:
                     return True, False
         return False, None
 
-    def value_is_possible(self, field, value):
-        values = self.get_field_values(field)
-        for val in values:
-            possible_values = self.get_field_value_possible_values(field, val)
-            if value in possible_values:
-                return True
-        return False
+    # def value_is_possible(self, field, value):
+    #     values = self.get_field_values(field)
+    #     for val in values:
+    #         possible_values = self.get_field_value_possible_values(field, val)
+    #         if value in possible_values:
+    #             return True
+    #     return False
