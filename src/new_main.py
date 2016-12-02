@@ -230,14 +230,14 @@ if __name__ == '__main__':
     """---------------------------------------------Run algorithm----------------------------------------------------"""
 
     if settings.global_settings['run_algo']:
-        try:
-            predict_forms()
-        except:
-            raise Exception("error in predict_forms")
+        # try:
+        predict_forms()
+        # except:
+        #     raise Exception("error in predict_forms")
     """---------------------------------------------Evaluate---------------------------------------------------------"""
 
     if settings.global_settings['eval_algo']:
-        try:
-            evaluate_predictions()
-        except:
-            raise Exception("error in evaluate_predictions")
+        # try:
+        evaluate_predictions()
+        # except:
+        #     raise Exception("error in evaluate_predictions")
