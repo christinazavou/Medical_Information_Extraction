@@ -147,11 +147,11 @@
                 "restagering CT THORAX ABDOMEN"
             ],
             "values":{
-                "Nee":[
-                    "Nee"
+                "Yes":[
+                    "Yes"
                 ],
-                "Ja":[
-                    "Ja"
+                "No":[
+                    "No"
                 ]
             }
         },
@@ -1654,11 +1654,11 @@
                 "palliatief Chemoradiatie"
             ],
             "values":{
-                "Nee":[
-                    "Nee"
+                "Yes":[
+                    "Yes"
                 ],
-                "Ja":[
-                    "Ja"
+                "No":[
+                    "No"
                 ]
             }
         }

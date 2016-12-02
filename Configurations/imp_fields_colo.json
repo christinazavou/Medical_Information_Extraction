@@ -198,11 +198,11 @@
                 "CT THORAX/ABDOMEN"
             ],
             "values":{
-                "Nee":[
-                    "Nee"
+                "Yes":[
+                    "Yes"
                 ],
-                "Ja":[
-                    "Ja"
+                "No":[
+                    "No"
                 ]
             }
         },
@@ -590,11 +590,11 @@
                 "Chemoradiatie"
             ],
             "values":{
-                "Nee":[
-                    "Nee"
+                "Yes":[
+                    "Yes"
                 ],
-                "Ja":[
-                    "Ja"
+                "No":[
+                    "No"
                 ]
             }
         },

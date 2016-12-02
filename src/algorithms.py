@@ -99,7 +99,7 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 # }
 
 
-print_freq = 0.3
+print_freq = 0.02
 fragments = 10
 
 global the_current_body
