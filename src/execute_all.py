@@ -50,12 +50,12 @@ main_file = os.path.join(this_dir, "new_main.py")
 # os.system(run_cmd)
 # print "Finished prediction and evaluation with boost after {} minutes.".format((time.time() - start_time) / 60.0)
 #
-# start_time = time.time()
-# configFilePath = "aux_config\\conf20.yml"
-# run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
-# print "run_cmd: {}".format(run_cmd)
-# os.system(run_cmd)
-# print "Finished prediction and evaluation with phrases after {} minutes.".format((time.time() - start_time) / 60.0)
+start_time = time.time()
+configFilePath = "aux_config\\conf20.yml"
+run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
+print "run_cmd: {}".format(run_cmd)
+os.system(run_cmd)
+print "Finished prediction and evaluation with phrases after {} minutes.".format((time.time() - start_time) / 60.0)
 #
 # start_time = time.time()
 # configFilePath = "aux_config\\conf22.yml"
@@ -64,12 +64,12 @@ main_file = os.path.join(this_dir, "new_main.py")
 # os.system(run_cmd)
 # print "Finished prediction and evaluation with phrases after {} minutes.".format((time.time() - start_time) / 60.0)
 #
-start_time = time.time()
-configFilePath = "aux_config\\conf23.yml"
-run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
-print "run_cmd: {}".format(run_cmd)
-os.system(run_cmd)
-print "Finished prediction and evaluation after {} minutes.".format((time.time() - start_time) / 60.0)
+# start_time = time.time()
+# configFilePath = "aux_config\\conf23.yml"
+# run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
+# print "run_cmd: {}".format(run_cmd)
+# os.system(run_cmd)
+# print "Finished prediction and evaluation after {} minutes.".format((time.time() - start_time) / 60.0)
 
 # print "Now zipping..."
 # zip(final_zip_root, final_zip_root)
