@@ -16,6 +16,7 @@ import sys
 
 RESULTS_IDX = 1
 environmentPath = os.getcwd()
+print "environment path {}\n sysargv0: {}\n sysargv1: {}".format(environmentPath, sys.argv[0], sys.argv[1])
 if 'Zavou' in environmentPath:
     dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
 else:
