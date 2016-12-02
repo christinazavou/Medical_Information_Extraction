@@ -149,7 +149,7 @@ def find_description_words(highlight_sentences, description):
             if m_i:
                 word = m_i.group().replace('<em>', '').replace('</em>', '')
                 if word in description:
-                    words.add(word)
+                    words.add(word.encode('utf-8'))
         return " ".join(words)
 
 
