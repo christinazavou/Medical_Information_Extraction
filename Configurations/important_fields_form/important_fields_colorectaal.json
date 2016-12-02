@@ -1,85 +1,5 @@
 {
     "colorectaal":{
-        "COMORB":{
-            "condition":"",
-            "description":[
-                "Comorbiditeit aanwezig"
-            ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBCAR":{
-            "condition":"COMORB = Ja",
-            "description":[
-                "Cardiaal"
-            ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBPUL":{
-            "condition":"",
-            "description": ["Pulmonaal"],
-            "values": {"Ja": ["Ja"],"Nee": ["Nee"], "Onbekend": []}
-        },
-        "COMORBNEU":{
-            "condition":"",
-            "description": ["Neurologisch"],
-            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
-        },
-        "COMORBDIA":{
-            "condition":"COMORB = Ja",
-            "description":[
-                "Diabetes"
-            ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBMDA":{
-            "condition":"",
-            "description": ["Gastrointestinaal"],
-            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
-        },
-        "COMORBURO":{
-            "condition":"COMORB = Ja",
-            "description":[
-                "Urogenitaal"
-            ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBVAS":{
-            "condition":"",
-            "description": ["Vasculair"],
-            "values": {"Ja": ["Ja"], "Nee": ["Nee"], "Onbekend": []}
-           },
         "LOCPRIM":{
             "condition":"",
             "description":[
@@ -252,24 +172,6 @@
                 ]
             }
         },
-        "SCOPDIST":{
-            "condition":"LOCPRIM = Rectum",
-            "description":[
-                "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters.nomen."
-            ],
-            "values":{
-                "unknown":[]
-            }
-        },
-        "SCOPDIST2":{
-            "condition":"LOCPRIM != Caecum",
-            "description":[
-                "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters"
-            ],
-            "values":{
-                "unknown":[]
-            }
-        },
         "SCOPNUMB":{
             "condition":"LOCPRIM = Rectum",
             "description":[
@@ -304,21 +206,6 @@
                 ]
             }
         },
-        "SCORECM2":{
-              "condition":"LOCPRIM != Caecum",
-              "description": ["cM score ('dubbel' tumor)"],
-              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
-         },
-        "RESTAG_SCORECM_1":{
-              "condition":"",
-              "description": ["cM score"],
-              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
-         },
-        "RESTAG_SCORECM2_1":{
-              "condition":"LOCPRIM != Caecum",
-              "description": ["cM score ('dubbel' tumor)"],
-              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
-         },
         "SCORECN":{
             "condition":"",
             "description":[
@@ -339,26 +226,6 @@
                 ]
             }
         },
-        "SCORECN2":{
-            "condition":"LOCPRIM != Caecum",
-            "description": ["cN score ('dubbel' tumor)"],
-            "values": {
-                "N0": ["N0"],
-                "N1": ["N1"],
-                "N2": ["N2"],
-                "Nx / onbekend": ["Nx / onbekend"]
-            }
-         },
-        "RESTAG_SCORECN_1":{
-              "condition":"",
-              "description": ["cN score"],
-              "values": {"N0":["N0"],"N1":["N1"],"N2":["N2"],"Nx / onbekend":["Nx / onbekend"]}
-         },
-        "RESTAG_SCORECN2_1":{
-              "condition":"LOCPRIM != Caecum",
-              "description": ["cN score ('dubbel' tumor)"],
-              "values": {"N0":["N0"],"N1":["N1"],"N2":["N2"],"Nx / onbekend":["Nx / onbekend"]}
-         },
         "SCORECT":{
             "condition":"",
             "description":[
@@ -366,19 +233,19 @@
             ],
             "values":{
                 "T1":[
-                    "T1",
+                    "T1"
                 ],
                 "T2":[
-                    "T2",
+                    "T2"
                 ],
                 "T3":[
-                    "T3",
+                    "T3"
                 ],
                 "T4":[
-                    "T4",
+                    "T4"
                 ],
                 "Tx / onbekend":[
-                    "Tx / onbekend",
+                    "Tx / onbekend"
                 ]
             }
         },
@@ -389,19 +256,19 @@
             ],
             "values":{
                 "T1":[
-                    "T1",
+                    "T1"
                 ],
                 "T2":[
-                    "T2",
+                    "T2"
                 ],
                 "T3":[
-                    "T3",
+                    "T3"
                 ],
                 "T4":[
-                    "T4",
+                    "T4"
                 ],
                 "Tx / onbekend":[
-                    "Tx / onbekend",
+                    "Tx / onbekend"
                 ]
             }
         },
@@ -433,11 +300,6 @@
                 ]
             }
         },
-        "pall_NO_reden":{
-              "condition":"geenresec_palltherYN = No",
-              "description": ["Reden"],
-              "values": {"Comorbiditeit":["Comorbiditeit"],"wens patiënt":["wens patiënt"],"overleden":["overleden"]}
-         },
         "geenresec_palltherYN":{
             "condition":"mdo_chir = Nee",
             "description":[
@@ -466,16 +328,6 @@
                 ]
             }
         },
-        "geenresectie_anders":{
-              "condition":"mdo_chir = Nee",
-              "description": ["Reden: Anders"],
-              "values": {"unknown": []}
-         },
-        "geenresectie_meta":{
-              "condition":"mdo_chir = Nee",
-              "description": ["Reden: Gemetastaseerd"],
-              "values": {"No":["No"],"Yes":["Yes"]}
-         },
         "klachten_klacht1":{
             "condition":"",
             "description":[
@@ -498,43 +350,10 @@
                 ]
             }
         },
-        "klachten_klacht3":{
-            "condition":"",
-            "description":[
-                "Urgente klachten"
-            ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
         "klachten_klacht4":{
             "condition":"",
             "description":[
                 "Anemie"
-            ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "klachten_klacht88":{
-            "condition":"",
-            "description":[
-                "Anders"
-            ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "klachten_klacht99":{
-            "condition":"",
-            "description":[
-                "Onbekend"
             ],
             "values":{
                 "Yes":[
@@ -597,11 +416,6 @@
                     "No"
                 ]
             }
-        },
-        "pallther_RTstudie":{
-              "description": ["Radiotherapie in studieverband"],
-              "condition": "",
-              "values": {"Nee": ["Nee"], "Ja": ["Ja"]}
-         }
+        }
     }
 }
