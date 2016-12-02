@@ -144,7 +144,7 @@ def find_description_words(highlight, description):
     words = []
     for m_i in m:
         if m_i:
-            words.append(m_i.group())
+            words.append(m_i.group().replace('<em>', '').replace('</em>', ''))
     print "words:", words
 
 

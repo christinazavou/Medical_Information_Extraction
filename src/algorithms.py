@@ -99,7 +99,7 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 # }
 
 
-print_freq = 0.02
+print_freq = 0.001
 fragments = 10
 
 global the_current_body
@@ -120,11 +120,14 @@ def combine_assignment(value, evidence=None, score=None, comment=None):
 
 def get_from_dict(dict_to_search, key, path):
     """because ES results are sometimes inconsistent check both ways (of finding total, highlight and score)"""
-    if key in dict_to_search.keys():
-        return dict_to_search[key]
-    if key in dict_to_search[path].keys():
-        return dict_to_search[path][key]
-    return None
+    try:
+        if key in dict_to_search.keys():
+            return dict_to_search[key]
+        if key in dict_to_search[path].keys():
+            return dict_to_search[path][key]
+        return None
+    except:
+        print "error for dict_to_search {}".format(json.dumps(dict_to_search))
 
 
 def pick_score_and_index(scores):
@@ -227,7 +230,7 @@ class Algorithm:
         total = get_from_dict(search_results['hits'], 'total', 'hits')
         if total:
             highlights = get_from_dict(search_results['hits']['hits'][0], 'highlight', '_source')
-            highlights, f = self.filter_highlights(highlights)
+            highlights, f = self.filter_highlights(highlights)  # to return highlights of one field only
             is_relevant, highlight_relevant = self.is_accepted(highlights, f)
             if is_relevant:
                 score_search = get_from_dict(search_results['hits']['hits'][0], '_score', '_source')  # query's score
@@ -399,6 +402,9 @@ class BaseAlgorithm(Algorithm):
         search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
         return self.score_and_evidence(search_results)
 
+    def update_scores(self, patient_id, scores, evidences, values, description):
+        pass
+
     def pick_value_decision(self, patient_id, values, description):
         """
         """
@@ -407,6 +413,9 @@ class BaseAlgorithm(Algorithm):
         for i, value in enumerate(values):
             if value != 'Anders':
                 scores[i], evidences[i] = self.get_value_score(patient_id, values[value], description)
+
+        self.update_scores(patient_id, scores, evidences, values, description)
+
         score, idx = pick_score_and_index(scores)
         if score > self.min_score:
             return combine_assignment(values.keys()[idx], evidences[idx], scores[idx])
