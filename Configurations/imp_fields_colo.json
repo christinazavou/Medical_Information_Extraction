@@ -1,0 +1,607 @@
+{
+    "colorectaal":{
+        "COMORB":{
+            "condition":"",
+            "description":[
+                "Comorbiditeit aanwezig"
+            ],
+            "values":{
+                "Ja":[
+                    "Ja"
+                ],
+                "Nee":[
+                    "Nee"
+                ],
+                "Onbekend":[]
+            }
+        },
+        "COMORBCAR":{
+            "condition":"COMORB = Ja",
+            "description":[
+                "Cardiaal"
+            ],
+            "values":{
+                "Ja":[
+                    "Ja"
+                ],
+                "Nee":[
+                    "Nee"
+                ],
+                "Onbekend":[]
+            }
+        },
+        "COMORBPUL":{
+            "condition":"",
+            "description": ["Pulmonaal"],
+            "values": {"Ja": ["Ja"],"Nee": ["Nee"], "Onbekend": []}
+        },
+        "COMORBNEU":{
+            "condition":"",
+            "description": ["Neurologisch"],
+            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
+        },
+        "COMORBDIA":{
+            "condition":"COMORB = Ja",
+            "description":[
+                "Diabetes"
+            ],
+            "values":{
+                "Ja":[
+                    "Ja"
+                ],
+                "Nee":[
+                    "Nee"
+                ],
+                "Onbekend":[]
+            }
+        },
+        "COMORBMDA":{
+            "condition":"",
+            "description": ["Gastrointestinaal"],
+            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
+        },
+        "COMORBURO":{
+            "condition":"COMORB = Ja",
+            "description":[
+                "Urogenitaal"
+            ],
+            "values":{
+                "Ja":[
+                    "Ja"
+                ],
+                "Nee":[
+                    "Nee"
+                ],
+                "Onbekend":[]
+            }
+        },
+        "COMORBVAS":{
+            "condition":"",
+            "description": ["Vasculair"],
+            "values": {"Ja": ["Ja"], "Nee": ["Nee"], "Onbekend": []}
+           },
+        "LOCPRIM":{
+            "condition":"",
+            "description":[
+                "Locatie van de \u2018belangrijkste\u2019 tumor. De tumor welke het meest bepalend is voor de prognose of behandeling."
+            ],
+            "values":{
+                "Anders":[],
+                "Appendix":[
+                    "Appendix"
+                ],
+                "Caecum":[
+                    "Caecum"
+                ],
+                "Colon ascendens":[
+                    "Colon ascendens"
+                ],
+                "Colon descendens":[
+                    "Colon descendens"
+                ],
+                "Colon sigmoideum":[
+                    "Colon sigmoideum"
+                ],
+                "Colon transversum":[
+                    "Colon transversum"
+                ],
+                "Flexura hepatica":[
+                    "Flexura hepatica"
+                ],
+                "Flexura splenica":[
+                    "Flexura splenica"
+                ],
+                "Rectum":[
+                    "Rectum"
+                ]
+            }
+        },
+        "LOCPRIM2":{
+            "condition":"LOCPRIM != Caecum",
+            "description":[
+                "Locatie van de 'dubbel' tumor. Het gaat hier om de \u00e9\u00e9n na belangrijkste tumor wat betreft prognose of behandeling."
+            ],
+            "values":{
+                "Anders":[],
+                "Appendix":[
+                    "Appendix"
+                ],
+                "Caecum":[
+                    "Caecum"
+                ],
+                "Colon ascendens":[
+                    "Colon ascendens"
+                ],
+                "Colon descendens":[
+                    "Colon descendens"
+                ],
+                "Colon sigmoideum":[
+                    "Colon sigmoideum"
+                ],
+                "Colon transversum":[
+                    "Colon transversum"
+                ],
+                "Flexura hepatica":[
+                    "Flexura hepatica"
+                ],
+                "Flexura splenica":[
+                    "Flexura splenica"
+                ],
+                "Rectum":[
+                    "Rectum"
+                ]
+            }
+        },
+        "PROCOK":{
+            "condition":"",
+            "description":[],
+            "values":{
+                "(Extended) Hemicolectomie links":[
+                    "(Extended) Hemicolectomie links"
+                ],
+                "(Extended) Hemicolectomie rechts":[
+                    "(Extended) Hemicolectomie rechts"
+                ],
+                "(Low) anterior-resectie/sigmoidresectie":[
+                    "(Low) anterior-resectie/sigmoidresectie"
+                ],
+                "Abdomino-perianale resectie":[
+                    "Abdomino-perianale resectie"
+                ],
+                "Ileocoecaal (+appendectomie)":[
+                    "Ileocoecaal (+appendectomie)"
+                ],
+                "Overig (niet-resectieve procedure)":[],
+                "Panproctocolectomie":[
+                    "Panproctocolectomie"
+                ],
+                "Subtotale colectomie (coecum tot rectum)":[
+                    "Subtotale colectomie (coecum tot rectum)"
+                ],
+                "Transanaal endoscopische procedure":[
+                    "Transanaal endoscopische procedure"
+                ],
+                "Transanaal endoscopische procedure gevolgd door abdomino-perineale resectie":[
+                    "Transanaal endoscopische abdomino perinealeresectie"
+                ],
+                "Transanaal endoscopische procedure gevolgd door anterior resectie":[
+                    "Transanaal endoscopische procedure gevolgd door anterior resectie"
+                ],
+                "Transversum resectie":[
+                    "Transversum resectie"
+                ]
+            }
+        },
+        "RESTAG_CT":{
+            "condition":"",
+            "description":[
+                "CT THORAX/ABDOMEN"
+            ],
+            "values":{
+                "Nee":[
+                    "Nee"
+                ],
+                "Ja":[
+                    "Ja"
+                ]
+            }
+        },
+        "RESTAG_SCORECT2_1":{
+            "condition":"LOCPRIM != Caecum",
+            "description":[
+                "cT score ('dubbel' tumor)"
+            ],
+            "values": {
+                "T1": [
+                    "T1"
+                ],
+                "T2": [
+                    "T2"
+                ],
+                "T3": [
+                    "T3"
+                ],
+                "T4": [
+                    "T4"
+                ],
+                "Tx / onbekend": [
+                    "Tx / onbekend"
+                ]
+            }
+        },
+        "RESTAG_SCORECT_1":{
+            "condition":"",
+            "description":[
+                "cT score"
+            ],
+            "values":{
+                "T1":[
+                    "T1"
+                ],
+                "T2":[
+                    "T2"
+                ],
+                "T3":[
+                    "T3"
+                ],
+                "T4":[
+                    "T4"
+                ],
+                "Tx / onbekend":[
+                    "Tx / onbekend"
+                ]
+            }
+        },
+        "SCOPDIST":{
+            "condition":"LOCPRIM = Rectum",
+            "description":[
+                "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters.nomen."
+            ],
+            "values":{
+                "unknown":[]
+            }
+        },
+        "SCOPDIST2":{
+            "condition":"LOCPRIM != Caecum",
+            "description":[
+                "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters"
+            ],
+            "values":{
+                "unknown":[]
+            }
+        },
+        "SCOPNUMB":{
+            "condition":"LOCPRIM = Rectum",
+            "description":[
+                "Aantal gevonden tumoren. Het betreft het totaal aantal gevonden primaire colorectale carcinomen."
+            ],
+            "values":{
+                "1":[
+                    "1"
+                ],
+                "2":[
+                    "2"
+                ],
+                "3":[
+                    "3"
+                ]
+            }
+        },
+        "SCORECM":{
+            "condition":"",
+            "description":[
+                "cM score"
+            ],
+            "values":{
+                "M0":[
+                    "M0"
+                ],
+                "M1":[
+                    "M1"
+                ],
+                "Mx / onbekend":[
+                    "Mx / onbekend"
+                ]
+            }
+        },
+        "SCORECM2":{
+              "condition":"LOCPRIM != Caecum",
+              "description": ["cM score ('dubbel' tumor)"],
+              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
+         },
+        "RESTAG_SCORECM_1":{
+              "condition":"",
+              "description": ["cM score"],
+              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
+         },
+        "RESTAG_SCORECM2_1":{
+              "condition":"LOCPRIM != Caecum",
+              "description": ["cM score ('dubbel' tumor)"],
+              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
+         },
+        "SCORECN":{
+            "condition":"",
+            "description":[
+                "cN score"
+            ],
+            "values":{
+                "N0":[
+                    "N0"
+                ],
+                "N1":[
+                    "N1"
+                ],
+                "N2":[
+                    "N2"
+                ],
+                "Nx / onbekend":[
+                    "Nx / onbekend"
+                ]
+            }
+        },
+        "SCORECN2":{
+            "condition":"LOCPRIM != Caecum",
+            "description": ["cN score ('dubbel' tumor)"],
+            "values": {
+                "N0": ["N0"],
+                "N1": ["N1"],
+                "N2": ["N2"],
+                "Nx / onbekend": ["Nx / onbekend"]
+            }
+         },
+        "RESTAG_SCORECN_1":{
+              "condition":"",
+              "description": ["cN score"],
+              "values": {"N0":["N0"],"N1":["N1"],"N2":["N2"],"Nx / onbekend":["Nx / onbekend"]}
+         },
+        "RESTAG_SCORECN2_1":{
+              "condition":"LOCPRIM != Caecum",
+              "description": ["cN score ('dubbel' tumor)"],
+              "values": {"N0":["N0"],"N1":["N1"],"N2":["N2"],"Nx / onbekend":["Nx / onbekend"]}
+         },
+        "SCORECT":{
+            "condition":"",
+            "description":[
+                "cT score"
+            ],
+            "values":{
+                "T1":[
+                    "T1",
+                ],
+                "T2":[
+                    "T2",
+                ],
+                "T3":[
+                    "T3",
+                ],
+                "T4":[
+                    "T4",
+                ],
+                "Tx / onbekend":[
+                    "Tx / onbekend",
+                ]
+            }
+        },
+        "SCORECT2":{
+            "condition":"LOCPRIM != Caecum",
+            "description":[
+                "cT score ('dubbel' tumor)"
+            ],
+            "values":{
+                "T1":[
+                    "T1",
+                ],
+                "T2":[
+                    "T2",
+                ],
+                "T3":[
+                    "T3",
+                ],
+                "T4":[
+                    "T4",
+                ],
+                "Tx / onbekend":[
+                    "Tx / onbekend",
+                ]
+            }
+        },
+        "TYPPROCOK":{
+            "condition":"PROCOK = Overig (niet-resectieve procedure)",
+            "description":[],
+            "values":{
+                "Anders":[],
+                "Bypass":[
+                    "Bypass"
+                ],
+                "Colostoma":[
+                    "Colostoma"
+                ],
+                "Ileostoma":[
+                    "Ileostoma"
+                ],
+                "Laparoscopie":[
+                    "Laparoscopie"
+                ],
+                "Laparotomie ":[
+                    "Laparotomie"
+                ],
+                "TEM":[
+                    "TEM"
+                ],
+                "Transversum resectie":[
+                    "Transversum resectie"
+                ]
+            }
+        },
+        "pall_NO_reden":{
+              "condition":"geenresec_palltherYN = No",
+              "description": ["Reden"],
+              "values": {"Comorbiditeit":["Comorbiditeit"],"wens patiënt":["wens patiënt"],"overleden":["overleden"]}
+         },
+        "geenresec_palltherYN":{
+            "condition":"mdo_chir = Nee",
+            "description":[
+                "Palliatieve therapie"
+            ],
+            "values":{
+                "No":[
+                    "No"
+                ],
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "geenresectie_irres":{
+            "condition":"mdo_chir = Nee",
+            "description":[
+                "Reden: Irresectabel"
+            ],
+            "values":{
+                "No":[
+                    "No"
+                ],
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "geenresectie_anders":{
+              "condition":"mdo_chir = Nee",
+              "description": ["Reden: Anders"],
+              "values": {"unknown": []}
+         },
+        "geenresectie_meta":{
+              "condition":"mdo_chir = Nee",
+              "description": ["Reden: Gemetastaseerd"],
+              "values": {"No":["No"],"Yes":["Yes"]}
+         },
+        "klachten_klacht1":{
+            "condition":"",
+            "description":[
+                "Rectaal bloedverlies"
+            ],
+            "values":{
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "klachten_klacht2":{
+            "condition":"",
+            "description":[
+                "Veranderde defaecatie"
+            ],
+            "values":{
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "klachten_klacht3":{
+            "condition":"",
+            "description":[
+                "Urgente klachten"
+            ],
+            "values":{
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "klachten_klacht4":{
+            "condition":"",
+            "description":[
+                "Anemie"
+            ],
+            "values":{
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "klachten_klacht88":{
+            "condition":"",
+            "description":[
+                "Anders"
+            ],
+            "values":{
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "klachten_klacht99":{
+            "condition":"",
+            "description":[
+                "Onbekend"
+            ],
+            "values":{
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "mdo_chir":{
+            "condition":"",
+            "description":[
+                "Pati\u00ebnt zal chirurgisch worden behandeld"
+            ],
+            "values":{
+                "Ja":[
+                    "Ja"
+                ],
+                "Nee":[
+                    "Nee"
+                ]
+            }
+        },
+        "pallther_RT":{
+            "condition":"geenresec_palltherYN = Yes",
+            "description":[
+                "Radiotherapie"
+            ],
+            "values":{
+                "No":[
+                    "No"
+                ],
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "pallther_chemo":{
+            "condition":"geenresec_palltherYN = Yes",
+            "description":[
+                "Chemotherapie"
+            ],
+            "values":{
+                "No":[
+                    "No"
+                ],
+                "Yes":[
+                    "Yes"
+                ]
+            }
+        },
+        "pallther_chemoRT":{
+            "condition":"",
+            "description":[
+                "Chemoradiatie"
+            ],
+            "values":{
+                "Nee":[
+                    "Nee"
+                ],
+                "Ja":[
+                    "Ja"
+                ]
+            }
+        },
+        "pallther_RTstudie":{
+              "description": ["Radiotherapie in studieverband"],
+              "condition": "",
+              "values": {"Nee": ["Nee"], "Ja": ["Ja"]}
+         }
+    }
+}

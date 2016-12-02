@@ -12,8 +12,9 @@ from patient_relevant_utils import PatientRelevance
 from utils import condition_satisfied, value_in_description, key_in_values
 # from queries import date_query
 from data_analysis import plot_counts
-from queries import match_query_with_operator, term_query, search_body, highlight_query, \
-    query_string, big_phrases_small_phrases, bool_body, disjunction_of_conjunctions
+from queries import match_query_with_operator, term_query, search_body, highlight_query, multi_match_query,\
+     query_string, big_phrases_small_phrases, bool_body, disjunction_of_conjunctions, match_phrase_query
+from utils import find_description_words
 
 """
 Input:
@@ -98,7 +99,7 @@ note: i removed pre processing steps since only using elasticsearch dutch analyz
 # }
 
 
-print_freq = 0
+print_freq = 0.3
 fragments = 10
 
 global the_current_body
@@ -197,32 +198,46 @@ class Algorithm:
         """assign value for multi-value field"""
         pass
 
+    # def value_description_as_phrase(self, p_id, highlights, description, values):
+
     def is_accepted(self, highlights, highlight_field):
         """
         Check if highlights are in overall (or at least one is) relevant to patient
         """
         if not highlights:
             print "no highlights: ", the_current_body
+            return True, None
         if self.patient_relevant is False:  # the check if evidences(highlights) are relevant to patient is switched off
             return True, -1  # to print the highlights and see what it finds
-        if not highlights:
-            return False, None
         relevant, highlight_relevant = self.pr.check_highlights_relevance(highlights[highlight_field])
         return relevant, highlight_relevant
 
-    def score_and_evidence(self, search_results, highlight_field):
+    def filter_highlights(self, highlights):
+        if highlights[self.default_field]:
+            return {self.default_field: highlights[self.default_field]}, self.default_field
+        else:
+            for f in highlights:
+                if highlights[f]:
+                    return {f: highlights[f]}, f
+
+    def score_and_evidence(self, search_results):
         """Return the score of query and the relevant highlight, or (None,None) if nothing acceptable was found, or
         all highlights if relevant test was not applied."""
         global comment_relevance
         total = get_from_dict(search_results['hits'], 'total', 'hits')
         if total:
             highlights = get_from_dict(search_results['hits']['hits'][0], 'highlight', '_source')
-            is_relevant, highlight_relevant = self.is_accepted(highlights, highlight_field)
+            highlights, f = self.filter_highlights(highlights)
+            is_relevant, highlight_relevant = self.is_accepted(highlights, f)
             if is_relevant:
                 score_search = get_from_dict(search_results['hits']['hits'][0], '_score', '_source')  # query's score
-                if highlight_relevant == -1:  # no relevance test was applied. print all highlights
-                    return score_search, highlights
-                return score_search, highlight_relevant
+                if highlight_relevant:
+                    if highlight_relevant == -1:  # relevance test not applied(print all highlights)
+                        return score_search, highlights
+                if not highlight_relevant and score_search == 0:
+                    comment_relevance += "(no highlights. zero score.)"
+                    return None, None
+                return score_search, highlight_relevant  # returns score and relevant highlights (None if no highlights)
             else:
                 comment_relevance += "(irrelevant results)"
         else:
@@ -233,11 +248,14 @@ class Algorithm:
 class BaseAlgorithm(Algorithm):
 
     def __init__(self, con, index_name, search_type, forms_labels_dicts, patient_relevant,
-                 default_field=None, boost_fields=None, min_score=0, use_description_1ofk=False):
+                 default_field=None, boost_fields=None, min_score=0, use_description_1ofk=False,
+                 description_as_phrase=False, value_as_phrase=False):
         super(BaseAlgorithm, self).__init__(con, index_name, search_type, forms_labels_dicts,
                                             default_field, boost_fields, patient_relevant, min_score)
         self.use_description_1ofk = use_description_1ofk
         self.search_fields = [self.default_field] + self.boost_fields
+        self.description_as_phrase = description_as_phrase
+        self.value_as_phrase = value_as_phrase
 
     def specific_assign(self, assign_patients, assign_forms):
         for patient_id in assign_patients:
@@ -256,8 +274,6 @@ class BaseAlgorithm(Algorithm):
         for field in self.forms_labels_dicts[form_id].get_fields():  # for each field (to be assign) in form
             condition = self.forms_labels_dicts[form_id].get_field_condition(field)
             if condition_satisfied(doc_form, condition):
-                values = self.forms_labels_dicts[form_id].get_field_values(field)
-                description = self.forms_labels_dicts[form_id].get_field_description(field)
                 if self.forms_labels_dicts[form_id].field_decision_is_open_question(field):
                     label_assignment = self.assign_open_question()
                 else:
@@ -270,24 +286,36 @@ class BaseAlgorithm(Algorithm):
 
     def filter_and_highlight_body(self, patient_id):
         filter_body = term_query("_id", patient_id)
-        highlight_body = highlight_query(self.default_field, ["<em>"], ['</em>'], frgm_num=fragments)
+        highlight_body = highlight_query(self.search_fields, ["<em>"], ['</em>'], frgm_num=fragments)
         return filter_body, highlight_body
 
     def value_query(self, possible_values):
         should_body = list()
         big, small = big_phrases_small_phrases(possible_values)
-        should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
-        for d in big:
-            should_body.append(match_query_with_operator(self.default_field, d, min_pct='40%'))
+        if self.value_as_phrase:
+            for v in small:
+                should_body.append(multi_match_query(v, self.search_fields, query_type="phrase", slop=10))
+        else:
+            should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
+        for v in big:
+            should_body.append(
+                multi_match_query(v, self.search_fields, query_type='best_fields', operator='OR', pct='40%'))
         body = bool_body(should_body=should_body, min_should_match=1)
         return body
 
     def description_query(self, description):
+        """Description is a list of possible descriptions to the field.
+        Return a bool query that returns results if at least one of the possible descriptions is found"""
         should_body = list()
         big, small = big_phrases_small_phrases(description)
-        should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
+        if self.description_as_phrase:
+            for d in small:
+                should_body.append(multi_match_query(d, self.search_fields, query_type="phrase", slop=10))
+        else:
+            should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
         for d in big:
-            should_body.append(match_query_with_operator(self.default_field, d, min_pct='40%'))
+            should_body.append(
+                multi_match_query(d, self.search_fields, query_type="best_fields", operator='OR', pct='40%'))
         body = bool_body(should_body=should_body, min_should_match=1)
         return body
 
@@ -311,9 +339,9 @@ class BaseAlgorithm(Algorithm):
             if random.uniform(0, 1) < print_freq:
                 print "the_current_body: {}".format(json.dumps(the_current_body))
             search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
-            score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
+            score_search, evidence_search = self.score_and_evidence(search_results)
             if score_search:
-                return combine_assignment(value, evidence_search, score_search)
+                return combine_assignment(value, evidence_search, score_search)  # will print if no highlights but score
             else:
                 return combine_assignment(value="", comment=comment_relevance)
 
@@ -330,10 +358,11 @@ class BaseAlgorithm(Algorithm):
         if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
         search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
-        score_search, evidence_search = self.score_and_evidence(search_results, self.default_field)
+        score_search, evidence_search = self.score_and_evidence(search_results)
         if score_search:
             value = 'Yes' if key_in_values(values, 'Yes') else 'Ja'
-            return combine_assignment(value, evidence_search, score_search)
+            return combine_assignment(value, evidence_search, score_search)  # from this, we'll see when something
+            # was accepted (set to Yes) but got no highlights (evidence None)
         elif is_ternary:
             pass
             # todo
@@ -350,7 +379,7 @@ class BaseAlgorithm(Algorithm):
         if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
         search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
-        return self.score_and_evidence(search_results, self.default_field)
+        return self.score_and_evidence(search_results)
 
     def get_value_score(self, patient_id, possible_values, description):
         global comment_relevance
@@ -361,13 +390,14 @@ class BaseAlgorithm(Algorithm):
         fb, hb = self.filter_and_highlight_body(patient_id)
         qb = bool_body(must_body=vb, filter_body=fb)
         if self.use_description_1ofk:
+            print "na ginei phrase value description"
             db = self.description_query(description)
             qb = bool_body(must_body=vb, should_body=db, filter_body=fb, min_should_match=1)
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
         if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
         search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
-        return self.score_and_evidence(search_results, self.default_field)
+        return self.score_and_evidence(search_results)
 
     def pick_value_decision(self, patient_id, values, description):
         """

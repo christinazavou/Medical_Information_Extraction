@@ -33,7 +33,7 @@
         "COMORBPUL":{
             "condition":"",
             "description": ["Pulmonaal"],
-            "values": {"Ja": ["Ja"],"Nee": ["Nee"], "Onbekend": ["Onbekend"]}
+            "values": {"Ja": ["Ja"],"Nee": ["Nee"], "Onbekend": []}
         },
         "COMORBNEU":{
             "condition":"",
@@ -920,7 +920,8 @@
                     "T4N0",
                     "pTxN0",
                     "cTxN0",
-                    "TxN0"
+                    "TxN0",
+                    "N0"
                 ],
                 "N1":[
                     "pT1N1M0",

@@ -46,6 +46,12 @@ run_cmd = "python {} {} {} {}".format(main_file, configFilePath, dataPath, resul
 os.system(run_cmd)
 print "Finished prediction and evaluation with boost after {} minutes.".format((time.time() - start_time) / 60.0)
 
+start_time = time.time()
+configFilePath = "aux_config\\conf22.yml"
+run_cmd = "python {} {} {} {}".format(main_file, configFilePath, dataPath, resultsPath)
+os.system(run_cmd)
+print "Finished prediction and evaluation with phrases after {} minutes.".format((time.time() - start_time) / 60.0)
+
 # print "Now zipping..."
 # zip(final_zip_root, final_zip_root)
 # print "zip finished."

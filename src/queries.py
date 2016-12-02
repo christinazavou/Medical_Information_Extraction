@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import types
 
 
 def date_query():
@@ -59,12 +60,17 @@ def highlight_query(query_field, pre_tags, post_tags, frgm_size=150, frgm_num=5)
     body = {
         "pre_tags": pre_tags,
         "post_tags": post_tags,
+        "fields": {},
         "order": "score",
-        "fields": {query_field: {}},
         "type": "fvh",
         "fragment_size": frgm_size,
         "number_of_fragments": frgm_num
     }
+    if isinstance(query_field, types.ListType):
+        for f in query_field:
+            body["fields"][f] = {}
+    else:
+        body["fields"][query_field] = {}
     return body
 
 
@@ -142,3 +148,31 @@ def big_phrases_small_phrases(phrases, max_words=5):
         else:
             small_set.add(phrase)
     return list(big_set), list(small_set)
+
+
+def multi_match_query(query_text, query_fields, query_type, slop=None, operator=None, pct=None):
+    body = {
+        "multi_match": {
+            "query": query_text,
+            "type": query_type,
+            "fields": query_fields
+        }
+    }
+    if slop:
+        body["multi_match"]["slop"] = slop
+    if operator:
+        body["multi_match"]["operator"] = operator
+    if pct:
+        body["multi_match"]["minimum_should_match"] = pct
+    return body
+
+
+if __name__ == "__main__":
+    should_body = list()
+    should_body.append(multi_match_query("Volgende groet",
+                      ["report.description", "report.description.dutch_tf_description", "report.description.tf_description"],
+                      query_type="phrase", slop=10))
+
+    body = bool_body(should_body=should_body, min_should_match=1)
+    import json
+    print json.dumps(body)

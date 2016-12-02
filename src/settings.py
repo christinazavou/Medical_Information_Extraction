@@ -97,6 +97,10 @@ def init(config_file, data_path, results_path):
         global_settings['patient_relevant'] = False
     if 'patients_pct' not in global_settings.keys():
         global_settings['patients_pct'] = 1
+    if 'description_as_phrase' not in global_settings.keys():
+        global_settings['description_as_phrase'] = False
+    if 'value_as_phrase' not in global_settings.keys():
+        global_settings['value_as_phrase'] = False
 
     # ---------------------------------------ids and labels_possible_values--------------------------------------------#
 

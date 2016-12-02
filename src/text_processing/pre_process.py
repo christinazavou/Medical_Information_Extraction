@@ -72,7 +72,7 @@ class MyPreprocessor(object):
 def make_word_embeddings(con, type_doc, id_patients, filename, w2v_pre_processor=None):
     print "make W2V with {} and {} patients".format(type_doc, len(id_patients))
     start_time = time.time()
-    from ESutils import MyReports
+    from src.ESutils import MyReports
     reps = MyReports(con, type_doc, id_patients, w2v_pre_processor)
     word2vec = WordEmbeddings(reps, min_count=2)
     word2vec.save(filename)

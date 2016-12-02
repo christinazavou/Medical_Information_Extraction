@@ -102,7 +102,9 @@ def predict_forms():
                                                 settings.global_settings['default_field'],
                                                 settings.global_settings['boost_fields'],
                                                 settings.global_settings['min_score'],
-                                                settings.global_settings['use_description_1ofk'])
+                                                settings.global_settings['use_description_1ofk'],
+                                                settings.global_settings['description_as_phrase'],
+                                                settings.global_settings['value_as_phrase'])
         my_algorithm.assign(patient_ids_used, settings.global_settings['forms'], current_config_result)
     print "Finish assigning values."
 
