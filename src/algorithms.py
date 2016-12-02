@@ -468,15 +468,17 @@ class MajorityAlgorithm:
                             self.counts[form_id][field][value] += 1
 
     def majority_assignment(self):
-        avg_score = 0.0
+        forms_avg_scores = {}
         for form in self.counts.keys():
+            forms_avg_scores[form] = 0.0
             self.majority_scores[form] = {}
             for field in self.counts[form].keys():
                 field_counts = self.counts[form][field].values()
                 max_idx, max_val = max(enumerate(field_counts), key=operator.itemgetter(1))
                 self.majority_scores[form][field] = max_val / np.sum(np.asarray(field_counts))
-                avg_score += self.majority_scores[form][field]
-        return avg_score
+                forms_avg_scores[form] += self.majority_scores[form][field]
+            forms_avg_scores[form] /= len(self.majority_scores[form].keys())
+        return forms_avg_scores
 
     def show(self, out_folder):
         for form in self.counts.keys():

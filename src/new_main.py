@@ -72,7 +72,7 @@ def calculate_conditioned_majority():
     if not os.path.isfile(settings.global_settings['majority_file']):
         mj_algorithm = algorithms.MajorityAlgorithm(con, index_name, type_patient, current_forms_labels)
         mj_algorithm.get_conditioned_counts(patient_ids_used, current_config_forms)
-        print "avg maj score: ", mj_algorithm.majority_assignment()
+        print "avg maj scores: ", mj_algorithm.majority_assignment()
         counts = mj_algorithm.counts
         maj_scores = mj_algorithm.majority_scores
         pickle.dump(counts, open(os.path.join(settings.global_settings['results_path'], 'counts.p'), "wb"))
