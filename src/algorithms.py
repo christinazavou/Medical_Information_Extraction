@@ -275,6 +275,8 @@ class BaseAlgorithm(Algorithm):
         """assign the form fields for the current patient with the given golden truth"""
         patient_form_assign = {}  # dictionary of assignments
         for field in self.forms_labels_dicts[form_id].get_fields():  # for each field (to be assign) in form
+            if field == 'pallther_chemoRT':
+                raise Exception('EDO: {}'.format(self.forms_labels_dicts[form_id].get_field_values_dict(field)))
             condition = self.forms_labels_dicts[form_id].get_field_condition(field)
             if condition_satisfied(doc_form, condition):
                 if self.forms_labels_dicts[form_id].field_decision_is_open_question(field):
