@@ -109,6 +109,10 @@ def disjunction_of_conjunctions(phrases, skip_length=5):
     query = ""
     new_phrases = list()
     for i, phrase in enumerate(phrases):
+        if ':' in phrase:
+            phrase = phrase.replace(':', ' ')
+        if '^' in phrase:
+            phrase = phrase.replace('^', ' ')
         if ' / ' in phrase:
             phrase = phrase.replace(' / ', '/')
         if '/' in phrase:

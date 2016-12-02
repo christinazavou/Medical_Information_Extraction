@@ -180,7 +180,8 @@ class EsConnection:
                 res = self.es.search(index=index, body=body)
             return res
         except:
-            raise("except when search for:\n{}".format(body))
+            # raise Exception("except when search for:\n{}".format(json.dumps(body)))
+            print "except when search for:\n{}".format(json.dumps(body))
 
     def exists(self, index, type_name, id_doc):
         return self.es.exists(index, type_name, id_doc)
