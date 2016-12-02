@@ -171,8 +171,8 @@ if __name__ == '__main__':
 
     if len(sys.argv) < 2:
         configFilePath = "aux_config\\conf21.yml"
-        # dataPath = "..\\Data"
-        dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
+        dataPath = "..\\Data"
+        # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         resultsPath = "..\\results"
         # resultsPath = "C:\\Users\\Christina Zavou\\Documents\\results4Nov\\corrected_results_11Nov"
     else:
