@@ -26,9 +26,11 @@ majority_file: "Results_path\\majority.json"
 
 patient_relevant: true
 default_field: "report.description.dutch_tf_description"
-boost_fields: ["report.description.tf_description", "report.description", "report.description.dutch_description"]
+boost_fields: ["report.description.tf_description"]
 min_score: 0
 
+description_as_phrase: True
+value_as_phrase: True
 unknowns: "exclude"
 use_description_1ofk: true
 # ---------------------------------------------------------------------------------------------------------------------#
