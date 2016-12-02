@@ -330,10 +330,10 @@ class BaseAlgorithm(Algorithm):
         """
         global comment_relevance, the_current_body
         comment_relevance = "no description matched."
-        if value_in_description(description, 'Anders'):
+        if 'Anders' in description:
             return None
             # todo
-        elif value_in_description(description, 'Onbekend'):
+        elif 'Onbekend' in description:
             return None
             # todo
         else:
@@ -365,13 +365,13 @@ class BaseAlgorithm(Algorithm):
         search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
         score_search, evidence_search = self.score_and_evidence(search_results)
         if score_search:
-            value = 'Yes' if key_in_values(values, 'Yes') else 'Ja'
+            value = 'Yes' if 'Yes' in values.keys() else 'Ja'
             return combine_assignment(value, evidence_search, score_search)  # from this, we'll see when something
             # was accepted (set to Yes) but got no highlights (evidence None)
         elif is_ternary:
             pass
             # todo
-        value = 'No' if key_in_values(values, 'No') else 'Nee'
+        value = 'No' if 'No' in values.keys() else 'Nee'
         return combine_assignment(value, comment=comment_relevance)
 
     def assign_anders(self, patient_id, description):
@@ -437,7 +437,7 @@ class BaseAlgorithm(Algorithm):
         score, idx = pick_score_and_index(scores)
         if score > self.min_score:
             return combine_assignment(values.keys()[idx], evidences[idx], scores[idx])
-        if key_in_values(values, 'Anders'):
+        if 'Anders' in values.keys():
             idx_anders = values.keys().index('Anders')
             scores[idx_anders], evidences[idx_anders] = self.assign_anders(patient_id, description)
             if scores[idx_anders]:
