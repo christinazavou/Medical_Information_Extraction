@@ -416,7 +416,7 @@ class BaseAlgorithm(Algorithm):
             for d in description:
                 d_words = find_description_words(evidence, d)
                 if d_words:
-                    phrases.add("{} {}".format(value.encode('utf-8'), d_words.encode('utf-8')))
+                    phrases.add("{} {}".format(value, d_words).encode('utf-8'))
             if phrases:
                 # search value description
                 fb, hb = self.filter_and_highlight_body(patient_id)
