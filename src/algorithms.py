@@ -217,7 +217,9 @@ class Algorithm:
         return relevant, highlight_relevant
 
     def filter_highlights(self, highlights):
-        if self.default_field in highlights and highlights[self.default_field]:
+        if not highlights:
+            return None, None
+        if self.default_field in highlights.keys() and highlights[self.default_field]:
             return {self.default_field: highlights[self.default_field]}, self.default_field
         else:
             for field in highlights.keys():
