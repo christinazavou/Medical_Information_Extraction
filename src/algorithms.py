@@ -283,8 +283,6 @@ class BaseAlgorithm(Algorithm):
                     label_assignment = self.assign_one_of_k(patient_id, form_id, field)
                 if label_assignment:
                     patient_form_assign[field] = label_assignment
-                if field == 'pallther_chemoRT':
-                    raise Exception('EDO: {}'.format(label_assignment))
             else:
                 patient_form_assign[field] = combine_assignment('', comment="condition unsatisfied.")
         return patient_form_assign
