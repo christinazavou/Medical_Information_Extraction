@@ -106,6 +106,7 @@ def predict_forms():
                                                 settings.global_settings['description_as_phrase'],
                                                 settings.global_settings['value_as_phrase'])
         my_algorithm.assign(patient_ids_used, settings.global_settings['forms'], current_config_result)
+        my_algorithm.store_phbs(current_config_result)
     print "Finish assigning values."
 
 
@@ -170,7 +171,7 @@ def make_heat_maps(my_evaluation):
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
-        configFilePath = "aux_config\\conf23.yml"
+        configFilePath = "aux_config\\conf21.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         resultsPath = "..\\results"

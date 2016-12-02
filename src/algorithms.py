@@ -104,6 +104,7 @@ fragments = 10
 
 global the_current_body
 global comment_relevance
+global phbs
 
 
 def combine_assignment(value, evidence=None, score=None, comment=None):
@@ -260,6 +261,9 @@ class BaseAlgorithm(Algorithm):
         self.description_as_phrase = description_as_phrase
         self.value_as_phrase = value_as_phrase
 
+        global phbs
+        phbs = []
+
     def specific_assign(self, assign_patients, assign_forms):
         for patient_id in assign_patients:
             self.con.refresh(self.index_name)
@@ -403,23 +407,32 @@ class BaseAlgorithm(Algorithm):
         return self.score_and_evidence(search_results)
 
     def update_scores(self, patient_id, scores, evidences, values, description):
-        pass
-        # for i in range(len(scores)):
-        #     score = scores[i]
-        #     evidence = evidences[i]
-        #     value = values.keys()[i]
-        #     phrases = set()
-        #     for d in description:
-        #         d_words = find_description_words(evidence, d)
-        #         if d_words:
-        #             phrases.add("{} {}".format(value, d_words))
-        #     # search value description
-        #     fb, hb = self.filter_and_highlight_body(patient_id)
-        #     should_body = list()
-        #     for ph in list(phrases):
-        #         should_body.append(multi_match_query(ph, self.search_fields, query_type="phrase", slop=10))
-        #     body = bool_body(should_body=should_body, min_should_match=1)
-        #     return body
+        global the_current_body, phbs
+        for i in range(len(scores)):
+            score = scores[i]
+            evidence = evidences[i]
+            value = values.keys()[i]
+            phrases = set()
+            for d in description:
+                d_words = find_description_words(evidence, d)
+                if d_words:
+                    phrases.add("{} {}".format(value, d_words))
+            if phrases:
+                # search value description
+                fb, hb = self.filter_and_highlight_body(patient_id)
+                should_body = list()
+                for ph in list(phrases):
+                    should_body.append(multi_match_query(ph, self.search_fields, query_type="phrase", slop=10))
+                phb = bool_body(should_body=should_body, min_should_match=1)
+                the_current_body = search_body(phb, highlight_body=hb, min_score=self.min_score)
+                # search_results = self.con.search(index=self.index_name, body=the_current_body, doc_type=self.search_type)
+                phbs.append({'value': value, 'evidence': evidence, 'phb': the_current_body})
+
+    def store_phbs(self, results_file):
+        global phbs
+        file_path = results_file.replace("results.json", "phbs.json")
+        with open(file_path, 'w') as f:
+            json.dump(phbs, f, encoding='utf-8', indent=4)
 
     def pick_value_decision(self, patient_id, values, description):
         """
