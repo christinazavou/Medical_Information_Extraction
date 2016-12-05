@@ -56,7 +56,7 @@ def init(config_file, data_path, results_path):
     this_dir = os.path.dirname(os.path.realpath(__file__))
     dir_name = os.path.basename(os.path.dirname(__file__))
     config_file = os.path.join(this_dir.replace(dir_name, ""), config_file)
-    CONFIG_NUM = filter(str.isdigit, global_settings['configFile'])
+    CONFIG_NUM = filter(str.isdigit, config_file)
     global_settings['configFile'] = config_file
     global_settings['data_path'] = get_data_path_root(data_path)
     global_settings['results_path'] = get_results_path(results_path)
