@@ -11,7 +11,7 @@ from form_details import Form
 global labels_possible_values
 global ids
 global global_settings
-
+global CONFIG_NUM
 
 random.seed(40)  # Always choose same patients
 
@@ -49,15 +49,14 @@ def get_preprocess_patient_name():
 
 
 def init(config_file, data_path, results_path):
-    global labels_possible_values
-    global ids
-    global global_settings
+    global labels_possible_values, ids, global_settings, CONFIG_NUM
 
     global_settings = {}
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
     dir_name = os.path.basename(os.path.dirname(__file__))
     config_file = os.path.join(this_dir.replace(dir_name, ""), config_file)
+    CONFIG_NUM = filter(str.isdigit, global_settings['configFile'])
     global_settings['configFile'] = config_file
     global_settings['data_path'] = get_data_path_root(data_path)
     global_settings['results_path'] = get_results_path(results_path)
@@ -190,9 +189,8 @@ def find_used_ids():
 
 
 def get_results_filename():
-    global global_settings
-    num_res = filter(str.isdigit, global_settings['configFile'])
-    results_filename = os.path.join(global_settings['results_path'], "confnum_results.json".replace("num", num_res))
+    global global_settings, CONFIG_NUM
+    results_filename = os.path.join(global_settings['results_path'], "confnum_results.json".replace("num", CONFIG_NUM))
     if global_settings['eval_file'] == "":
         if global_settings['run_algo']:
             global_settings['eval_file'] = results_filename
