@@ -129,6 +129,17 @@ def update_values():
         json_file.write(data)
 
 
+def get_values_from_files():
+    global global_settings
+    global labels_possible_values
+    path = global_settings['json_forms_directory']
+    for form in global_settings['forms']:
+        with open(os.path.join(path, "important_fields_{}.json".format(form)), 'r') as jf:
+            form_fields = json.load(jf, encoding='utf-8')
+        labels_possible_values[form] = form_fields[form]
+    update_values()
+
+
 def update_ids():
     global global_settings
     global ids

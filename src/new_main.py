@@ -171,7 +171,7 @@ def make_heat_maps(my_evaluation):
 if __name__ == '__main__':
 
     if len(sys.argv) < 2:
-        configFilePath = "aux_config\\conf21.yml"
+        configFilePath = "aux_config\\conf25.yml"
         dataPath = "..\\Data"
         # dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
         resultsPath = "..\\results"
@@ -208,19 +208,21 @@ if __name__ == '__main__':
 
     """-------------------------------------------set params--------------------------------------------------------"""
 
-    try:
-        # to ensure we got values with conditions
-        current_config_forms = settings.global_settings['forms']
-        for form_ in current_config_forms:
-            update_form_values(form_, os.path.join(settings.global_settings['json_forms_directory'],
-                                                   "important_fields_decease.json".replace("decease", 'form')))
-        current_forms_labels = settings.get_labels_possible_values()
-        current_config_result = settings.get_results_filename()
-        patient_ids_used = settings.find_used_ids()
-        print "total used patients: {}".format(len(patient_ids_used))
-        check(patient_ids_used, con, current_forms_labels, index_name, type_patient)
-    except:
-        raise Exception("error in set params")
+    # try:
+    # to ensure we got values with conditions
+    current_config_forms = settings.global_settings['forms']
+    # for form_ in current_config_forms:
+    #     update_form_values(form_, os.path.join(settings.global_settings['json_forms_directory'],
+    #                                            "important_fields_decease.json".replace("decease", 'form')))
+    settings.get_values_from_files()
+    print "settings.labels_possible_values:\n{}".format(settings.labels_possible_values)
+    current_forms_labels = settings.get_labels_possible_values()
+    current_config_result = settings.get_results_filename()
+    patient_ids_used = settings.find_used_ids()
+    print "total used patients: {}".format(len(patient_ids_used))
+    check(patient_ids_used, con, current_forms_labels, index_name, type_patient)
+    # except:
+    #     raise Exception("error in set params")
 
     """-------------------------------------Find majority assignment on conditioned----------------------------------"""
     if settings.global_settings['find_conditioned_majority']:
