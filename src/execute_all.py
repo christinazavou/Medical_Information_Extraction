@@ -70,16 +70,23 @@ main_file = os.path.join(this_dir, "new_main.py")
 # print "run_cmd: {}".format(run_cmd)
 # os.system(run_cmd)
 # print "Finished prediction and evaluation after {} minutes.".format((time.time() - start_time) / 60.0)
+#
+# start_time = time.time()
+# configFilePath = "aux_config\\conf24.yml"
+# run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
+# print "run_cmd: {}".format(run_cmd)
+# os.system(run_cmd)
+# print "Finished prediction and evaluation after {} minutes.".format((time.time() - start_time) / 60.0)
+#
+# start_time = time.time()
+# configFilePath = "aux_config\\conf25.yml"
+# run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
+# print "run_cmd: {}".format(run_cmd)
+# os.system(run_cmd)
+# print "Finished prediction and evaluation after {} minutes.".format((time.time() - start_time) / 60.0)
 
 start_time = time.time()
-configFilePath = "aux_config\\conf24.yml"
-run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
-print "run_cmd: {}".format(run_cmd)
-os.system(run_cmd)
-print "Finished prediction and evaluation after {} minutes.".format((time.time() - start_time) / 60.0)
-
-start_time = time.time()
-configFilePath = "aux_config\\conf25.yml"
+configFilePath = "aux_config\\conf26.yml"
 run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configFilePath, dataPath, resultsPath)
 print "run_cmd: {}".format(run_cmd)
 os.system(run_cmd)
