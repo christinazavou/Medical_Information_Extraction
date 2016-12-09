@@ -4,7 +4,7 @@ from queries import search_body, highlight_query, multi_match_query, query_strin
     bool_body, disjunction_of_conjunctions, has_parent_query
 import random
 import json
-from utils import find_highlighted_words, find_word_distribution
+from utils import find_highlighted_words, find_word_distribution, condition_satisfied
 from patient_relevant_utils import PatientRelevance
 
 
@@ -139,12 +139,16 @@ class Algorithm(object):
 
     def make_patient_form_assignment(self, assignment):
         for field in assignment.form.fields:
-            if field.is_unary() or field.is_binary():
-                self.assign_unary_binary(assignment, field)
-            elif field.is_open_question():
-                pass
+            if condition_satisfied(assignment.patient.golden_truth, field.condition):
+                if field.is_unary() or field.is_binary():
+                    self.assign_unary_binary(assignment, field)
+                elif field.is_open_question():
+                    pass
+                else:
+                    self.pick_value_decision(assignment, field)
             else:
-                self.pick_value_decision(assignment, field)
+                pass
+                # assignment.fields_assignments.append(FieldAssignment(...))  # don't consider such cases
 
     def assign_unary_binary(self, assignment, field):  # assignment is a PatientFormAssignment
         must_body = list()
