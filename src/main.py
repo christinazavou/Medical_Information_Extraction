@@ -45,7 +45,7 @@ if __name__ == "__main__":
     # todo: put reports in csv files with date sort... so that smaller ids give older reports !
 
     if len(sys.argv) < 4:
-        settings = RunConfiguration(23, '..\\Data', '..\\results').settings
+        settings = RunConfiguration(23, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 

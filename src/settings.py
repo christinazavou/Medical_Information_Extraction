@@ -24,6 +24,8 @@ class RunConfiguration(object):
             configurations_dict = yaml.load(cf)
         self.DATA_PATH = data_path  # configurations_dict['DATA_PATH']
         self.RESULTS_PATH = results_path  # configurations_dict['RESULTS_PATH']
+        if not os.path.isdir(self.RESULTS_PATH):
+            os.mkdir(self.RESULTS_PATH)
         for key, value in configurations_dict.items():
             self.settings[key] = self.translate_path(value)
         self.settings['CONFIGURATIONS_PATH'] = CONFIGURATIONS_PATH

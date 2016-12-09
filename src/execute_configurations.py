@@ -7,8 +7,10 @@ RESULTS_IDX = 1
 
 if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
     dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
+elif os.path.isdir('C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data'):
+    dataPath = 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data'
 else:
-    dataPath = "..\\Data"
+    print "no data folder found"
 
 if len(sys.argv) < 2:
     resultsPath = "..\\results"
