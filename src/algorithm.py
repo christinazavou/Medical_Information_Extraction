@@ -6,6 +6,7 @@ import random
 import json
 from utils import find_highlighted_words, find_word_distribution, condition_satisfied
 from patient_relevant_utils import PatientRelevance
+import pickle
 
 
 print_freq = 0.002
@@ -242,3 +243,14 @@ class Algorithm(object):
             idx = random.choice(range(len(values)))
             field_assignment = FieldAssignment(field.id, values[idx], comment='nothing matched. random assignment')
             assignment.fields_assignments.append(field_assignment)
+
+    def save(self, f):
+        pass
+
+    def __get_state__(self):
+        # return self.dataset_forms
+        pass
+
+    def __set_state__(self, dataset_forms):
+        # self.dataset_forms = dataset_forms
+        pass

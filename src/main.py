@@ -76,6 +76,7 @@ if __name__ == "__main__":
         es_index.index(settings['index_body_file'])
         index_dataset_patients(data.dataset_forms)
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
+        data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
 
     print "-------"
     print len(data.dataset_forms)

@@ -3,6 +3,11 @@ from es_connection import EsConnection
 import pickle
 import json
 import pickle
+from utils import pre_process_report
+import random
+
+
+FREQ = 0.002
 
 
 class EsIndex(object):
@@ -45,7 +50,10 @@ class EsIndex(object):
         elif parent_type and parent_id and data:
             for d in range(len(data)):
                 self.docs[doc_type].append((d, parent_id))
-                self.es.index_child_doc(self.id, doc_type, d, parent_id, data[d])
+                report = pre_process_report(data[d])
+                if random.uniform(0, 1) < FREQ:
+                    print "report: {}".format(report)
+                self.es.index_child_doc(self.id, doc_type, d, parent_id, report)
             # self.es.index_all_children(self.id, doc_type, parent_id, data)
         else:
             print "wrong arguments in put_doc()"

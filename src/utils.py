@@ -2,6 +2,7 @@
 import re
 import csv
 from collections import Counter
+import types
 
 
 # def read_dossier(dossier_folder, accepted_file_names):
@@ -72,3 +73,27 @@ def find_highlighted_words(txt):
 
 def find_word_distribution(words):
     return Counter(words)
+
+
+def remove_tokens(source_text):
+    to_remove = ['newlin', 'newline', 'NEWLINE', 'NEWLIN']
+    return " ".join([word for word in source_text.split() if word not in to_remove])
+
+
+def remove_codes(source_text):
+    s = source_text.split(' ')
+    m = [re.match("\(%.*%\)", word) for word in s]
+    to_return = source_text
+    for m_i in m:
+        if m_i:
+            to_return = to_return.replace(m_i.group(), "")
+    m = [re.match("\[.*\]", word) for word in s]
+    for m_i in m:
+        if m_i:
+            to_return = to_return.replace(m_i.group(), "")
+    return to_return
+
+
+def pre_process_report(report_dict):
+    report_dict['description'] = remove_tokens(remove_codes(report_dict['description']))
+    return report_dict
