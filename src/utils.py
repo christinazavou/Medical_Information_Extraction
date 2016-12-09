@@ -4,10 +4,6 @@ import csv
 from collections import Counter
 
 
-# def get_from_dataframe(dataframe, patient_id, field_name):
-#     result = dataframe[dataframe['PatientNr'] == patient_id]
-#     return result[field_name].as_matrix()[0]
-#
 # def read_dossier(dossier_folder, accepted_file_names):
 #     dossier = dict()
 #     for filename in glob.glob(os.path.join(dossier_folder, '*.csv')):
