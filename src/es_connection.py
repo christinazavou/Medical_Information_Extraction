@@ -4,6 +4,10 @@ from elasticsearch import TransportError, SSLError
 import time
 import json
 import copy
+import random
+
+
+FREQ = 0.02
 
 
 class EsConnection(object):
@@ -51,15 +55,27 @@ class EsConnection(object):
         """FASTER"""
         bulk_data = []
         for i, data in enumerate(data_list):
+            # op_dict = {
+            #     u'index': {
+            #         u'_id': str(i).encode('utf-8'),
+            #         u'parent': str(parent_id).encode('utf-8')
+            #     }
+            # }
+            # bulk_data.append(op_dict)
+            # bulk_data.append(json.dumps(data, encoding='utf-8'))
+        # if random.uniform(0, 1) < FREQ:
+        #     print u'bulk data: {}'.format(bulk_data)
             op_dict = {
-                u'index': {
-                    u'_id': i,
-                    u'parent': parent_id
+                'index': {
+                    '_id': i,
+                    'parent': parent_id
                 }
             }
             bulk_data.append(op_dict)
-            bulk_data.append(json.dumps(data, encoding='utf-8'))
-        # print "bulk data: {}".format(json.dumps(bulk_data, encoding='utf-8'))
+            tostr = json.dumps(data, encoding='utf-8')
+            bulk_data.append(str(tostr))
+        if random.uniform(0, 1) < FREQ:
+            print 'bulk data: {}'.format(bulk_data)
         self.con.bulk(index=index_name, body=bulk_data, doc_type=doc_type, refresh=True)
 
     def index_child_doc(self, index_name, doc_type, doc_id, parent_id, data_body):
@@ -70,8 +86,12 @@ class EsConnection(object):
                 "parent": parent_id
             }
         }
-        bulk_data.append(op_dict)
-        bulk_data.append(data_body)
+        # bulk_data.append(op_dict)
+        # bulk_data.append(data_body)
+        bulk_data.append(json.dumps(op_dict, encoding='utf-8'))
+        bulk_data.append(json.dumps(data_body, encoding='utf-8'))
+        if random.uniform(0, 1) < FREQ:
+            print 'bulk data: {}'.format(bulk_data)
         self.con.bulk(index=index_name, body=bulk_data, doc_type=doc_type, refresh=True)
 
     def index_doc(self, index_name, doc_type, doc_id, data_body):

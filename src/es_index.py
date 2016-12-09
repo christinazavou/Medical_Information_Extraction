@@ -45,7 +45,8 @@ class EsIndex(object):
         elif parent_type and parent_id and data:
             for d in range(len(data)):
                 self.docs[doc_type].append((d, parent_id))
-            self.es.index_all_children(self.id, doc_type, parent_id, data)
+                self.es.index_child_doc(self.id, doc_type, d, parent_id, data[d])
+            # self.es.index_all_children(self.id, doc_type, parent_id, data)
         else:
             print "wrong arguments in put_doc()"
 
