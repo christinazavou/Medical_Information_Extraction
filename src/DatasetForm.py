@@ -38,22 +38,24 @@ class DataSetForm(Form):
         return None
 
     def patient_values_consistent_with_form(self, golden_truth):
-        # consistent = True
-        # for field in self.fields:
-        #     if field.condition == "":
-        #         # then either value or NaN are accepted
-        #         continue
-        #     else:
-        #         # then if condition is satisfied the field shouldn't be nan. except if its an unary field
-        #         if condition_satisfied(golden_truth, field.condition) and not field.is_unary():
-        #             consistent = field.in_values(golden_truth[field])
-        #             if not consistent:
-        #                 break
-        # return consistent
         consistent = True
         for field in self.fields:
-            if condition_satisfied(golden_truth, field.condition) and not field.is_unary():
-                consistent = field.in_values(golden_truth[field.id])
-                if not consistent:
-                    break
+            if field.condition == "":
+                # then either value or NaN are accepted
+                continue
+            else:
+                # then if condition is satisfied the field shouldn't be nan. except if its an unary field
+                if condition_satisfied(golden_truth, field.condition) and not field.is_unary():
+                    consistent = field.in_values(golden_truth[field.id])
+                    if not consistent:
+                        break
         return consistent
+
+        # """OR: to remove patients with missing category ...removes almost everyone: """
+        # consistent = True
+        # for field in self.fields:
+        #     if condition_satisfied(golden_truth, field.condition) and not field.is_unary():
+        #         consistent = field.in_values(golden_truth[field.id])
+        #         if not consistent:
+        #             break
+        # return consistent
