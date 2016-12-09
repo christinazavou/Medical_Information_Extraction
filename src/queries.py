@@ -171,12 +171,23 @@ def multi_match_query(query_text, query_fields, query_type, slop=None, operator=
     return body
 
 
-if __name__ == "__main__":
-    should_body = list()
-    should_body.append(multi_match_query("Volgende groet",
-                      ["report.description", "report.description.dutch_tf_description", "report.description.tf_description"],
-                      query_type="phrase", slop=10))
+def has_parent_query(parent_type, parent_id):
+    body = {
+        "has_parent": {
+            "type": parent_type,
+            "query":  term_query("_id", parent_id)
+        }
+    }
+    return body
 
-    body = bool_body(should_body=should_body, min_should_match=1)
+
+if __name__ == "__main__":
+    # should_body = list()
+    # should_body.append(multi_match_query("Volgende groet",
+    #                   ["report.description", "report.description.dutch_tf_description", "report.description.tf_description"],
+    #                   query_type="phrase", slop=10))
+    #
+    # body = bool_body(should_body=should_body, min_should_match=1)
     import json
-    print json.dumps(body)
+    # print json.dumps(body)
+    print json.dumps(has_parent_query("patient","3340"))

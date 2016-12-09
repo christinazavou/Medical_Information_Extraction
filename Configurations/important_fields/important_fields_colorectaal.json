@@ -1,1900 +1,406 @@
 {
-    "colorectaal":{
-        "COMORB":{
-            "condition":"",
-            "description":[
-                "Comorbiditeit aanwezig"
+    "LOCPRIM":{
+        "condition":"",
+        "description":[
+            "primaire tumor",
+            "primair carcinoom",
+            "tumor",
+            "carcinoom"
+        ],
+        "values":{
+            "Anders":[],
+            "Appendix":[
+                "Appendix"
             ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBCAR":{
-            "condition":"COMORB = Ja",
-            "description":[
-                "Cardiaal"
+            "Caecum":[
+                "Caecum",
+                "caecumcarcinoom",
+                "caecumtumor"
             ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBPUL":{
-            "condition":"",
-            "description": ["Pulmonaal"],
-            "values": {"Ja": ["Ja"],"Nee": ["Nee"], "Onbekend": []}
-        },
-        "COMORBNEU":{
-            "condition":"",
-            "description": ["Neurologisch"],
-            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
-        },
-        "COMORBDIA":{
-            "condition":"COMORB = Ja",
-            "description":[
-                "Diabetes"
+            "Colon ascendens":[
+                "Colon ascendens"
             ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBMDA":{
-            "condition":"",
-            "description": ["Gastrointestinaal"],
-            "values": {"Ja":["Ja"],"Nee":["Nee"],"Onbekend":[]}
-        },
-        "COMORBURO":{
-            "condition":"COMORB = Ja",
-            "description":[
-                "Urogenitaal"
+            "Colon descendens":[
+                "Colon descendens"
             ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ],
-                "Onbekend":[]
-            }
-        },
-        "COMORBVAS":{
-            "condition":"",
-            "description": ["Vasculair"],
-            "values": {"Ja": ["Ja"], "Nee": ["Nee"], "Onbekend": []}
-           },
-        "LOCPRIM":{
-            "condition":"",
-            "description":[
-                "Locatie van de \u2018belangrijkste\u2019 tumor. De tumor welke het meest bepalend is voor de prognose of behandeling.",
-                "primaire tumor",
-                "primair carcinoom",
-                "tumor",
-                "carcinoom"
+            "Colon sigmoideum":[
+                "Colon sigmoideum",
+                "sigmoid",
+                "sigmoidtumor",
+                "sigmoidcarcinoom"
             ],
-            "values":{
-                "Anders":[],
-                "Appendix":[
-                    "Appendix"
-                ],
-                "Caecum":[
-                    "Caecum",
-                    "caecumcarcinoom",
-                    "caecumtumor"
-                ],
-                "Colon ascendens":[
-                    "Colon ascendens"
-                ],
-                "Colon descendens":[
-                    "Colon descendens"
-                ],
-                "Colon sigmoideum":[
-                    "Colon sigmoideum",
-                    "sigmoid",
-                    "sigmoidtumor",
-                    "sigmoidcarcinoom"
-                ],
-                "Colon transversum":[
-                    "Colon transversum"
-                ],
-                "Flexura hepatica":[
-                    "Flexura hepatica"
-                ],
-                "Flexura splenica":[
-                    "Flexura splenica"
-                ],
-                "Rectum":[
-                    "Rectum",
-                    "recumtumor",
-                    "rectumcarcinoom"
-                ]
-            }
-        },
-        "LOCPRIM2":{
-            "condition":"LOCPRIM != Caecum",
-            "description":[
-                "Locatie van de 'dubbel' tumor. Het gaat hier om de \u00e9\u00e9n na belangrijkste tumor wat betreft prognose of behandeling.",
-                "2e primaire tumor",
-                "tweede primaire tumor",
-                "2e tumor",
-                "tweede tumor",
-                "secundaire tumor",
-                "secundair carcinoom"
+            "Colon transversum":[
+                "Colon transversum"
             ],
-            "values":{
-                "Anders":[],
-                "Appendix":[
-                    "Appendix"
-                ],
-                "Caecum":[
-                    "Caecum",
-                    "caecumcarcinoom",
-                    "caecumtumor"
-                ],
-                "Colon ascendens":[
-                    "Colon ascendens"
-                ],
-                "Colon descendens":[
-                    "Colon descendens"
-                ],
-                "Colon sigmoideum":[
-                    "Colon sigmoideum",
-                    "sigmoid",
-                    "sigmoidtumor",
-                    "sigmoidcarcinoom"
-                ],
-                "Colon transversum":[
-                    "Colon transversum"
-                ],
-                "Flexura hepatica":[
-                    "Flexura hepatica"
-                ],
-                "Flexura splenica":[
-                    "Flexura splenica"
-                ],
-                "Rectum":[
-                    "Rectum",
-                    "recumtumor",
-                    "rectumcarcinoom"
-                ]
-            }
-        },
-        "PROCOK":{
-            "condition":"",
-            "description":[],
-            "values":{
-                "(Extended) Hemicolectomie links":[
-                    "(Extended) Hemicolectomie links",
-                    "Hemicolectomie links"
-                ],
-                "(Extended) Hemicolectomie rechts":[
-                    "(Extended) Hemicolectomie rechts",
-                    "Hemicolectomie rechts"
-                ],
-                "(Low) anterior-resectie/sigmoidresectie":[
-                    "(Low) anterior-resectie/sigmoidresectie",
-                    "low anteriorresectie",
-                    "low anterior resectie",
-                    "sigmoidresectie",
-                    "sigmoid resectie"
-                ],
-                "Abdomino-perianale resectie":[
-                    "Abdomino-perianale resectie",
-                    "Abdomino perianaleresectie"
-                ],
-                "Ileocoecaal (+appendectomie)":[
-                    "Ileocoecaal (+appendectomie)",
-                    "Ileocoecaal resectie"
-                ],
-                "Overig (niet-resectieve procedure)":[],
-                "Panproctocolectomie":[
-                    "Panproctocolectomie"
-                ],
-                "Subtotale colectomie (coecum tot rectum)":[
-                    "Subtotale colectomie (coecum tot rectum)",
-                    "Subtotale colectomie"
-                ],
-                "Transanaal endoscopische procedure":[
-                    "Transanaal endoscopische procedure",
-                    "Transanaal endoscopische",
-                    "Transanaal endoscopisch"
-                ],
-                "Transanaal endoscopische procedure gevolgd door abdomino-perineale resectie":[
-                    "Transanaal endoscopische abdomino perinealeresectie"
-                ],
-                "Transanaal endoscopische procedure gevolgd door anterior resectie":[
-                    "Transanaal endoscopische procedure gevolgd door anterior resectie",
-                    "Transanaal endoscopisch low anteriorresectie",
-                    "Transanaal endoscopisch low anterior resectie",
-                    "Transanaal endoscopisch sigmoidresectie",
-                    "sigmoid resectie"
-                ],
-                "Transversum resectie":[
-                    "Transversum resectie"
-                ]
-            }
-        },
-        "RESTAG_CT":{
-            "condition":"",
-            "description":[
-                "CT THORAX/ABDOMEN",
-                "restagering CT THORAX ABDOMEN"
+            "Flexura hepatica":[
+                "Flexura hepatica"
             ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ],
-                "No":[
-                    "No"
-                ]
-            }
-        },
-        "RESTAG_SCORECT2_1":{
-            "condition":"LOCPRIM != Caecum",
-            "description":[
-                "cT score ('dubbel' tumor)",
-                "2e primaire tumor",
-                "tweede primaire tumor",
-                "2e tumor",
-                "tweede tumor",
-                "tweede carcinoom",
-                "2e carcinoom",
-                "secundaire tumor",
-                "secundair carcinoom"
+            "Flexura splenica":[
+                "Flexura splenica"
             ],
-            "values": {
-                "T1": [
-                    "pT1N0M0",
-                    "cT1N0M0",
-                    "T1N0M0",
-                    "pT1N0M1",
-                    "cT1N0M1",
-                    "T1N0M1",
-                    "pT1N0Mx",
-                    "cT1N0Mx",
-                    "T1N0Mx",
-                    "pT1N1M0",
-                    "cT1N1M0",
-                    "T1N1M0",
-                    "pT1N1M1",
-                    "cT1N1M1",
-                    "T1N1M1",
-                    "pT1N1Mx",
-                    "cT1N1Mx",
-                    "T1N1Mx",
-                    "pT1N2M0",
-                    "cT1N2M0",
-                    "T1N2M0",
-                    "pT1N2M1",
-                    "cT1N2M1",
-                    "T1N2M1",
-                    "pT1N2Mx",
-                    "cT1N2Mx",
-                    "T1N2Mx",
-                    "pT1NxM0",
-                    "cT1NxM0",
-                    "T1NxM0",
-                    "pT1NxM1",
-                    "cT1NxM1",
-                    "T1NxM1",
-                    "pT1NxMx",
-                    "cT1NxMx",
-                    "T1NxMx",
-                    "pT1N0",
-                    "cT1N0",
-                    "T1N0",
-                    "pT1N1",
-                    "cT1N1",
-                    "T1N1",
-                    "pT1N2",
-                    "cT1N2",
-                    "T1N2",
-                    "pT1Nx",
-                    "cT1Nx",
-                    "T1Nx",
-                    "T1"
-                ],
-                "T2": [
-                    "pT2N0M0",
-                    "cT2N0M0",
-                    "T2N0M0",
-                    "pT2N0M1",
-                    "cT2N0M1",
-                    "T2N0M1",
-                    "pT2N0Mx",
-                    "cT2N0Mx",
-                    "T2N0Mx",
-                    "pT2N1M0",
-                    "cT2N1M0",
-                    "T2N1M0",
-                    "pT2N1M1",
-                    "cT2N1M1",
-                    "T2N1M1",
-                    "pT2N1Mx",
-                    "cT2N1Mx",
-                    "T2N1Mx",
-                    "pT2N2M0",
-                    "cT2N2M0",
-                    "T2N2M0",
-                    "pT2N2M1",
-                    "cT2N2M1",
-                    "T2N2M1",
-                    "pT2N2Mx",
-                    "cT2N2Mx",
-                    "T2N2Mx",
-                    "pT2NxM0",
-                    "cT2NxM0",
-                    "T2NxM0",
-                    "pT2NxM1",
-                    "cT2NxM1",
-                    "T2NxM1",
-                    "pT2NxMx",
-                    "cT2NxMx",
-                    "T2NxMx",
-                    "pT2N0",
-                    "cT2N0",
-                    "T2N0",
-                    "pT2N1",
-                    "cT2N1",
-                    "T2N1",
-                    "pT2N2",
-                    "cT2N2",
-                    "T2N2",
-                    "pT2Nx",
-                    "cT2Nx",
-                    "T2Nx",
-                    "T2"
-                ],
-                "T3": [
-                    "pT3N0M0",
-                    "cT3N0M0",
-                    "T3N0M0",
-                    "pT3N0M1",
-                    "cT3N0M1",
-                    "T3N0M1",
-                    "pT3N0Mx",
-                    "cT3N0Mx",
-                    "T3N0Mx",
-                    "pT3N1M0",
-                    "cT3N1M0",
-                    "T3N1M0",
-                    "pT3N1M1",
-                    "cT3N1M1",
-                    "T3N1M1",
-                    "pT3N1Mx",
-                    "cT3N1Mx",
-                    "T3N1Mx",
-                    "pT3N2M0",
-                    "cT3N2M0",
-                    "T3N2M0",
-                    "pT3N2M1",
-                    "cT3N2M1",
-                    "T3N2M1",
-                    "pT3N2Mx",
-                    "cT3N2Mx",
-                    "T3N2Mx",
-                    "pT3NxM0",
-                    "cT3NxM0",
-                    "T3NxM0",
-                    "pT3NxM1",
-                    "cT3NxM1",
-                    "T3NxM1",
-                    "pT3NxMx",
-                    "cT3NxMx",
-                    "T3NxMx",
-                    "pT3N0",
-                    "cT3N0",
-                    "T3N0",
-                    "pT3N1",
-                    "cT3N1",
-                    "T3N1",
-                    "pT3N2",
-                    "cT3N2",
-                    "T3N2",
-                    "pT3Nx",
-                    "cT3Nx",
-                    "T3Nx",
-                    "T3"
-                ],
-                "T4": [
-                    "pT4N0M0",
-                    "cT4N0M0",
-                    "T4N0M0",
-                    "pT4N0M1",
-                    "cT4N0M1",
-                    "T4N0M1",
-                    "pT4N0Mx",
-                    "cT4N0Mx",
-                    "T4N0Mx",
-                    "pT4N1M0",
-                    "cT4N1M0",
-                    "T4N1M0",
-                    "pT4N1M1",
-                    "cT4N1M1",
-                    "T4N1M1",
-                    "pT4N1Mx",
-                    "cT4N1Mx",
-                    "T4N1Mx",
-                    "pT4N2M0",
-                    "cT4N2M0",
-                    "T4N2M0",
-                    "pT4N2M1",
-                    "cT4N2M1",
-                    "T4N2M1",
-                    "pT4N2Mx",
-                    "cT4N2Mx",
-                    "T4N2Mx",
-                    "pT4NxM0",
-                    "cT4NxM0",
-                    "T4NxM0",
-                    "pT4NxM1",
-                    "cT4NxM1",
-                    "T4NxM1",
-                    "pT4NxMx",
-                    "cT4NxMx",
-                    "T4NxMx",
-                    "pT4N0",
-                    "cT4N0",
-                    "T4N0",
-                    "pT4N1",
-                    "cT4N1",
-                    "T4N1",
-                    "pT4N2",
-                    "cT4N2",
-                    "T4N2",
-                    "pT4Nx",
-                    "cT4Nx",
-                    "T4Nx",
-                    "T4"
-                ],
-                "Tx / onbekend": [
-                    "pTxN0M0",
-                    "cTxN0M0",
-                    "TxN0M0",
-                    "pTxN0M1",
-                    "cTxN0M1",
-                    "TxN0M1",
-                    "pTxN0Mx",
-                    "cTxN0Mx",
-                    "TxN0Mx",
-                    "pTxN1M0",
-                    "cTxN1M0",
-                    "TxN1M0",
-                    "pTxN1M1",
-                    "cTxN1M1",
-                    "TxN1M1",
-                    "pTxN1Mx",
-                    "cTxN1Mx",
-                    "TxN1Mx",
-                    "pTxN2M0",
-                    "cTxN2M0",
-                    "TxN2M0",
-                    "pTxN2M1",
-                    "cTxN2M1",
-                    "TxN2M1",
-                    "pTxN2Mx",
-                    "cTxN2Mx",
-                    "TxN2Mx",
-                    "pTxNxM0",
-                    "cTxNxM0",
-                    "TxNxM0",
-                    "pTxNxM1",
-                    "cTxNxM1",
-                    "TxNxM1",
-                    "pTxNxMx",
-                    "cTxNxMx",
-                    "TxNxMx",
-                    "pTxN0",
-                    "cTxN0",
-                    "TxN0",
-                    "pTxN1",
-                    "cTxN1",
-                    "TxN1",
-                    "pTxN2",
-                    "cTxN2",
-                    "TxN2",
-                    "pTxNx",
-                    "cTxNx",
-                    "TxNx",
-                    "Tx / onbekend"
-                ]
-            }
-        },
-        "RESTAG_SCORECT_1":{
-            "condition":"",
-            "description":[
-                "cT score",
-                "restagering carcinoom",
-                "restagering tumor"
+            "Rectum":[
+                "Rectum",
+                "recumtumor",
+                "rectumcarcinoom"
+            ]
+        }
+    },
+    "PROCOK":{
+        "condition":"",
+        "description":[],
+        "values":{
+            "(Extended) Hemicolectomie links":[
+                "Hemicolectomie links"
             ],
-            "values":{
-                "T1":[
-                    "pT1N0M0",
-                    "cT1N0M0",
-                    "T1N0M0",
-                    "pT1N0M1",
-                    "cT1N0M1",
-                    "T1N0M1",
-                    "pT1N0Mx",
-                    "cT1N0Mx",
-                    "T1N0Mx",
-                    "pT1N1M0",
-                    "cT1N1M0",
-                    "T1N1M0",
-                    "pT1N1M1",
-                    "cT1N1M1",
-                    "T1N1M1",
-                    "pT1N1Mx",
-                    "cT1N1Mx",
-                    "T1N1Mx",
-                    "pT1N2M0",
-                    "cT1N2M0",
-                    "T1N2M0",
-                    "pT1N2M1",
-                    "cT1N2M1",
-                    "T1N2M1",
-                    "pT1N2Mx",
-                    "cT1N2Mx",
-                    "T1N2Mx",
-                    "pT1NxM0",
-                    "cT1NxM0",
-                    "T1NxM0",
-                    "pT1NxM1",
-                    "cT1NxM1",
-                    "T1NxM1",
-                    "pT1NxMx",
-                    "cT1NxMx",
-                    "T1NxMx",
-                    "pT1N0",
-                    "cT1N0",
-                    "T1N0",
-                    "pT1N1",
-                    "cT1N1",
-                    "T1N1",
-                    "pT1N2",
-                    "cT1N2",
-                    "T1N2",
-                    "pT1Nx",
-                    "cT1Nx",
-                    "T1Nx",
-                    "T1"
-                ],
-                "T2":[
-                    "pT2N0M0",
-                    "cT2N0M0",
-                    "T2N0M0",
-                    "pT2N0M1",
-                    "cT2N0M1",
-                    "T2N0M1",
-                    "pT2N0Mx",
-                    "cT2N0Mx",
-                    "T2N0Mx",
-                    "pT2N1M0",
-                    "cT2N1M0",
-                    "T2N1M0",
-                    "pT2N1M1",
-                    "cT2N1M1",
-                    "T2N1M1",
-                    "pT2N1Mx",
-                    "cT2N1Mx",
-                    "T2N1Mx",
-                    "pT2N2M0",
-                    "cT2N2M0",
-                    "T2N2M0",
-                    "pT2N2M1",
-                    "cT2N2M1",
-                    "T2N2M1",
-                    "pT2N2Mx",
-                    "cT2N2Mx",
-                    "T2N2Mx",
-                    "pT2NxM0",
-                    "cT2NxM0",
-                    "T2NxM0",
-                    "pT2NxM1",
-                    "cT2NxM1",
-                    "T2NxM1",
-                    "pT2NxMx",
-                    "cT2NxMx",
-                    "T2NxMx",
-                    "pT2N0",
-                    "cT2N0",
-                    "T2N0",
-                    "pT2N1",
-                    "cT2N1",
-                    "T2N1",
-                    "pT2N2",
-                    "cT2N2",
-                    "T2N2",
-                    "pT2Nx",
-                    "cT2Nx",
-                    "T2Nx",
-                    "T2"
-                ],
-                "T3":[
-                    "pT3N0M0",
-                    "cT3N0M0",
-                    "T3N0M0",
-                    "pT3N0M1",
-                    "cT3N0M1",
-                    "T3N0M1",
-                    "pT3N0Mx",
-                    "cT3N0Mx",
-                    "T3N0Mx",
-                    "pT3N1M0",
-                    "cT3N1M0",
-                    "T3N1M0",
-                    "pT3N1M1",
-                    "cT3N1M1",
-                    "T3N1M1",
-                    "pT3N1Mx",
-                    "cT3N1Mx",
-                    "T3N1Mx",
-                    "pT3N2M0",
-                    "cT3N2M0",
-                    "T3N2M0",
-                    "pT3N2M1",
-                    "cT3N2M1",
-                    "T3N2M1",
-                    "pT3N2Mx",
-                    "cT3N2Mx",
-                    "T3N2Mx",
-                    "pT3NxM0",
-                    "cT3NxM0",
-                    "T3NxM0",
-                    "pT3NxM1",
-                    "cT3NxM1",
-                    "T3NxM1",
-                    "pT3NxMx",
-                    "cT3NxMx",
-                    "T3NxMx",
-                    "pT3N0",
-                    "cT3N0",
-                    "T3N0",
-                    "pT3N1",
-                    "cT3N1",
-                    "T3N1",
-                    "pT3N2",
-                    "cT3N2",
-                    "T3N2",
-                    "pT3Nx",
-                    "cT3Nx",
-                    "T3Nx",
-                    "T3"
-                ],
-                "T4":[
-                    "pT4N0M0",
-                    "cT4N0M0",
-                    "T4N0M0",
-                    "pT4N0M1",
-                    "cT4N0M1",
-                    "T4N0M1",
-                    "pT4N0Mx",
-                    "cT4N0Mx",
-                    "T4N0Mx",
-                    "pT4N1M0",
-                    "cT4N1M0",
-                    "T4N1M0",
-                    "pT4N1M1",
-                    "cT4N1M1",
-                    "T4N1M1",
-                    "pT4N1Mx",
-                    "cT4N1Mx",
-                    "T4N1Mx",
-                    "pT4N2M0",
-                    "cT4N2M0",
-                    "T4N2M0",
-                    "pT4N2M1",
-                    "cT4N2M1",
-                    "T4N2M1",
-                    "pT4N2Mx",
-                    "cT4N2Mx",
-                    "T4N2Mx",
-                    "pT4NxM0",
-                    "cT4NxM0",
-                    "T4NxM0",
-                    "pT4NxM1",
-                    "cT4NxM1",
-                    "T4NxM1",
-                    "pT4NxMx",
-                    "cT4NxMx",
-                    "T4NxMx",
-                    "pT4N0",
-                    "cT4N0",
-                    "T4N0",
-                    "pT4N1",
-                    "cT4N1",
-                    "T4N1",
-                    "pT4N2",
-                    "cT4N2",
-                    "T4N2",
-                    "pT4Nx",
-                    "cT4Nx",
-                    "T4Nx",
-                    "T4"
-                ],
-                "Tx / onbekend":[
-                    "pTxN0M0",
-                    "cTxN0M0",
-                    "TxN0M0",
-                    "pTxN0M1",
-                    "cTxN0M1",
-                    "TxN0M1",
-                    "pTxN0Mx",
-                    "cTxN0Mx",
-                    "TxN0Mx",
-                    "pTxN1M0",
-                    "cTxN1M0",
-                    "TxN1M0",
-                    "pTxN1M1",
-                    "cTxN1M1",
-                    "TxN1M1",
-                    "pTxN1Mx",
-                    "cTxN1Mx",
-                    "TxN1Mx",
-                    "pTxN2M0",
-                    "cTxN2M0",
-                    "TxN2M0",
-                    "pTxN2M1",
-                    "cTxN2M1",
-                    "TxN2M1",
-                    "pTxN2Mx",
-                    "cTxN2Mx",
-                    "TxN2Mx",
-                    "pTxNxM0",
-                    "cTxNxM0",
-                    "TxNxM0",
-                    "pTxNxM1",
-                    "cTxNxM1",
-                    "TxNxM1",
-                    "pTxNxMx",
-                    "cTxNxMx",
-                    "TxNxMx",
-                    "pTxN0",
-                    "cTxN0",
-                    "TxN0",
-                    "pTxN1",
-                    "cTxN1",
-                    "TxN1",
-                    "pTxN2",
-                    "cTxN2",
-                    "TxN2",
-                    "pTxNx",
-                    "cTxNx",
-                    "TxNx",
-                    "Tx / onbekend"
-                ]
-            }
-        },
-        "SCOPDIST":{
-            "condition":"LOCPRIM = Rectum",
-            "description":[
-                "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters.nomen."
+            "(Extended) Hemicolectomie rechts":[
+                "Hemicolectomie rechts"
             ],
-            "values":{
-                "unknown":[]
-            }
-        },
-        "SCOPDIST2":{
-            "condition":"LOCPRIM != Caecum",
-            "description":[
-                "Afstand tot de anus in centimeters (bij rectumcarcinoom). Scopische afstand van de tumor tot de anus in het geval van een rectumcarcinoom in centimeters"
+            "(Low) anterior-resectie/sigmoidresectie":[
+                "low anteriorresectie",
+                "low anterior resectie",
+                "sigmoidresectie",
+                "sigmoid resectie"
             ],
-            "values":{
-                "unknown":[]
-            }
-        },
-        "SCOPNUMB":{
-            "condition":"LOCPRIM = Rectum",
-            "description":[
-                "Aantal gevonden tumoren. Het betreft het totaal aantal gevonden primaire colorectale carcinomen.",
-                "tumoren"
+            "Abdomino-perianale resectie":[
+                "Abdomino perianaleresectie"
             ],
-            "values":{
-                "1":[
-                    "1"
-                ],
-                "2":[
-                    "2"
-                ],
-                "3":[
-                    "3"
-                ]
-            }
-        },
-        "SCORECM":{
-            "condition":"",
-            "description":[
-                "cM score",
-                "carcinoom",
-                "tumor"
+            "Ileocoecaal (+appendectomie)":[
+                "Ileocoecaal resectie"
             ],
-            "values":{
-                "M0":[
-                    "M0"
-                ],
-                "M1":[
-                    "M1"
-                ],
-                "Mx / onbekend":[
-                    "Mx / onbekend"
-                ]
-            }
-        },
-        "SCORECM2":{
-              "condition":"LOCPRIM != Caecum",
-              "description": ["cM score ('dubbel' tumor)"],
-              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
-         },
-        "RESTAG_SCORECM_1":{
-              "condition":"",
-              "description": ["cM score"],
-              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
-         },
-        "RESTAG_SCORECM2_1":{
-              "condition":"LOCPRIM != Caecum",
-              "description": ["cM score ('dubbel' tumor)"],
-              "values": {"M0":["M0"],"M1":["M1"],"Mx / onbekend":["Mx / onbekend"]}
-         },
-        "SCORECN":{
-            "condition":"",
-            "description":[
-                "cN score",
-                "carcinoom",
-                "tumor"
+            "Overig (niet-resectieve procedure)":[],
+            "Panproctocolectomie":[
+                "Panproctocolectomie"
             ],
-            "values":{
-                "N0":[
-                    "pT1N0M0",
-                    "cT1N0M0",
-                    "T1N0M0",
-                    "pT1N0M1",
-                    "cT1N0M1",
-                    "T1N0M1",
-                    "pT1N0Mx",
-                    "cT1N0Mx",
-                    "T1N0Mx",
-                    "pT2N0M0",
-                    "cT2N0M0",
-                    "T2N0M0",
-                    "pT2N0M1",
-                    "cT2N0M1",
-                    "T2N0M1",
-                    "pT2N0Mx",
-                    "cT2N0Mx",
-                    "T2N0Mx",
-                    "pT3N0M0",
-                    "cT3N0M0",
-                    "T3N0M0",
-                    "pT3N0M1",
-                    "cT3N0M1",
-                    "T3N0M1",
-                    "pT3N0Mx",
-                    "cT3N0Mx",
-                    "T3N0Mx",
-                    "pT4N0M0",
-                    "cT4N0M0",
-                    "T4N0M0",
-                    "pT4N0M1",
-                    "cT4N0M1",
-                    "T4N0M1",
-                    "pT4N0Mx",
-                    "cT4N0Mx",
-                    "T4N0Mx",
-                    "pTxN0M0",
-                    "cTxN0M0",
-                    "TxN0M0",
-                    "pTxN0M1",
-                    "cTxN0M1",
-                    "TxN0M1",
-                    "pTxN0Mx",
-                    "cTxN0Mx",
-                    "TxN0Mx",
-                    "pT1N0",
-                    "cT1N0",
-                    "T1N0",
-                    "pT2N0",
-                    "cT2N0",
-                    "T2N0",
-                    "pT3N0",
-                    "cT3N0",
-                    "T3N0",
-                    "pT4N0",
-                    "cT4N0",
-                    "T4N0",
-                    "pTxN0",
-                    "cTxN0",
-                    "TxN0",
-                    "N0"
-                ],
-                "N1":[
-                    "pT1N1M0",
-                    "cT1N1M0",
-                    "T1N1M0",
-                    "pT1N1M1",
-                    "cT1N1M1",
-                    "T1N1M1",
-                    "pT1N1Mx",
-                    "cT1N1Mx",
-                    "T1N1Mx",
-                    "pT2N1M0",
-                    "cT2N1M0",
-                    "T2N1M0",
-                    "pT2N1M1",
-                    "cT2N1M1",
-                    "T2N1M1",
-                    "pT2N1Mx",
-                    "cT2N1Mx",
-                    "T2N1Mx",
-                    "pT3N1M0",
-                    "cT3N1M0",
-                    "T3N1M0",
-                    "pT3N1M1",
-                    "cT3N1M1",
-                    "T3N1M1",
-                    "pT3N1Mx",
-                    "cT3N1Mx",
-                    "T3N1Mx",
-                    "pT4N1M0",
-                    "cT4N1M0",
-                    "T4N1M0",
-                    "pT4N1M1",
-                    "cT4N1M1",
-                    "T4N1M1",
-                    "pT4N1Mx",
-                    "cT4N1Mx",
-                    "T4N1Mx",
-                    "pTxN1M0",
-                    "cTxN1M0",
-                    "TxN1M0",
-                    "pTxN1M1",
-                    "cTxN1M1",
-                    "TxN1M1",
-                    "pTxN1Mx",
-                    "cTxN1Mx",
-                    "TxN1Mx",
-                    "pT1N1",
-                    "cT1N1",
-                    "T1N1",
-                    "pT2N1",
-                    "cT2N1",
-                    "T2N1",
-                    "pT3N1",
-                    "cT3N1",
-                    "T3N1",
-                    "pT4N1",
-                    "cT4N1",
-                    "T4N1",
-                    "pTxN1",
-                    "cTxN1",
-                    "TxN1",
-                    "N1"
-                ],
-                "N2":[
-                    "pT1N2M0",
-                    "cT1N2M0",
-                    "T1N2M0",
-                    "pT1N2M1",
-                    "cT1N2M1",
-                    "T1N2M1",
-                    "pT1N2Mx",
-                    "cT1N2Mx",
-                    "T1N2Mx",
-                    "pT2N2M0",
-                    "cT2N2M0",
-                    "T2N2M0",
-                    "pT2N2M1",
-                    "cT2N2M1",
-                    "T2N2M1",
-                    "pT2N2Mx",
-                    "cT2N2Mx",
-                    "T2N2Mx",
-                    "pT3N2M0",
-                    "cT3N2M0",
-                    "T3N2M0",
-                    "pT3N2M1",
-                    "cT3N2M1",
-                    "T3N2M1",
-                    "pT3N2Mx",
-                    "cT3N2Mx",
-                    "T3N2Mx",
-                    "pT4N2M0",
-                    "cT4N2M0",
-                    "T4N2M0",
-                    "pT4N2M1",
-                    "cT4N2M1",
-                    "T4N2M1",
-                    "pT4N2Mx",
-                    "cT4N2Mx",
-                    "T4N2Mx",
-                    "pTxN2M0",
-                    "cTxN2M0",
-                    "TxN2M0",
-                    "pTxN2M1",
-                    "cTxN2M1",
-                    "TxN2M1",
-                    "pTxN2Mx",
-                    "cTxN2Mx",
-                    "TxN2Mx",
-                    "pT1N2",
-                    "cT1N2",
-                    "T1N2",
-                    "pT2N2",
-                    "cT2N2",
-                    "T2N2",
-                    "pT3N2",
-                    "cT3N2",
-                    "T3N2",
-                    "pT4N2",
-                    "cT4N2",
-                    "T4N2",
-                    "pTxN2",
-                    "cTxN2",
-                    "TxN2",
-                    "N2"
-                ],
-                "Nx / onbekend":[
-                    "pT1NxM0",
-                    "cT1NxM0",
-                    "T1NxM0",
-                    "pT1NxM1",
-                    "cT1NxM1",
-                    "T1NxM1",
-                    "pT1NxMx",
-                    "cT1NxMx",
-                    "T1NxMx",
-                    "pT2NxM0",
-                    "cT2NxM0",
-                    "T2NxM0",
-                    "pT2NxM1",
-                    "cT2NxM1",
-                    "T2NxM1",
-                    "pT2NxMx",
-                    "cT2NxMx",
-                    "T2NxMx",
-                    "pT3NxM0",
-                    "cT3NxM0",
-                    "T3NxM0",
-                    "pT3NxM1",
-                    "cT3NxM1",
-                    "T3NxM1",
-                    "pT3NxMx",
-                    "cT3NxMx",
-                    "T3NxMx",
-                    "pT4NxM0",
-                    "cT4NxM0",
-                    "T4NxM0",
-                    "pT4NxM1",
-                    "cT4NxM1",
-                    "T4NxM1",
-                    "pT4NxMx",
-                    "cT4NxMx",
-                    "T4NxMx",
-                    "pTxNxM0",
-                    "cTxNxM0",
-                    "TxNxM0",
-                    "pTxNxM1",
-                    "cTxNxM1",
-                    "TxNxM1",
-                    "pTxNxMx",
-                    "cTxNxMx",
-                    "TxNxMx",
-                    "pT1Nx",
-                    "cT1Nx",
-                    "T1Nx",
-                    "pT2Nx",
-                    "cT2Nx",
-                    "T2Nx",
-                    "pT3Nx",
-                    "cT3Nx",
-                    "T3Nx",
-                    "pT4Nx",
-                    "cT4Nx",
-                    "T4Nx",
-                    "pTxNx",
-                    "cTxNx",
-                    "TxNx",
-                    "Nx / onbekend"
-                ]
-            }
-        },
-        "SCORECN2":{
-            "condition":"LOCPRIM != Caecum",
-            "description": ["cN score ('dubbel' tumor)"],
-            "values": {
-                "N0": ["N0"],
-                "N1": ["N1"],
-                "N2": ["N2"],
-                "Nx / onbekend": ["Nx / onbekend"]
-            }
-         },
-        "RESTAG_SCORECN_1":{
-              "condition":"",
-              "description": ["cN score"],
-              "values": {"N0":["N0"],"N1":["N1"],"N2":["N2"],"Nx / onbekend":["Nx / onbekend"]}
-         },
-        "RESTAG_SCORECN2_1":{
-              "condition":"LOCPRIM != Caecum",
-              "description": ["cN score ('dubbel' tumor)"],
-              "values": {"N0":["N0"],"N1":["N1"],"N2":["N2"],"Nx / onbekend":["Nx / onbekend"]}
-         },
-        "SCORECT":{
-            "condition":"",
-            "description":[
-                "cT score",
-                "carcinoom",
-                "tumor"
+            "Subtotale colectomie (coecum tot rectum)":[
+                "Subtotale colectomie"
             ],
-            "values":{
-                "T1":[
-                    "T1",
-                    "pT1N0M0",
-                    "cT1N0M0",
-                    "T1N0M0",
-                    "pT1N0M1",
-                    "cT1N0M1",
-                    "T1N0M1",
-                    "pT1N0Mx",
-                    "cT1N0Mx",
-                    "T1N0Mx",
-                    "pT1N1M0",
-                    "cT1N1M0",
-                    "T1N1M0",
-                    "pT1N1M1",
-                    "cT1N1M1",
-                    "T1N1M1",
-                    "pT1N1Mx",
-                    "cT1N1Mx",
-                    "T1N1Mx",
-                    "pT1N2M0",
-                    "cT1N2M0",
-                    "T1N2M0",
-                    "pT1N2M1",
-                    "cT1N2M1",
-                    "T1N2M1",
-                    "pT1N2Mx",
-                    "cT1N2Mx",
-                    "T1N2Mx",
-                    "pT1NxM0",
-                    "cT1NxM0",
-                    "T1NxM0",
-                    "pT1NxM1",
-                    "cT1NxM1",
-                    "T1NxM1",
-                    "pT1NxMx",
-                    "cT1NxMx",
-                    "T1NxMx",
-                    "pT1N0",
-                    "cT1N0",
-                    "T1N0",
-                    "pT1N1",
-                    "cT1N1",
-                    "T1N1",
-                    "pT1N2",
-                    "cT1N2",
-                    "T1N2",
-                    "pT1Nx",
-                    "cT1Nx",
-                    "T1Nx"
-                ],
-                "T2":[
-                    "T2",
-                    "pT2N0M0",
-                    "cT2N0M0",
-                    "T2N0M0",
-                    "pT2N0M1",
-                    "cT2N0M1",
-                    "T2N0M1",
-                    "pT2N0Mx",
-                    "cT2N0Mx",
-                    "T2N0Mx",
-                    "pT2N1M0",
-                    "cT2N1M0",
-                    "T2N1M0",
-                    "pT2N1M1",
-                    "cT2N1M1",
-                    "T2N1M1",
-                    "pT2N1Mx",
-                    "cT2N1Mx",
-                    "T2N1Mx",
-                    "pT2N2M0",
-                    "cT2N2M0",
-                    "T2N2M0",
-                    "pT2N2M1",
-                    "cT2N2M1",
-                    "T2N2M1",
-                    "pT2N2Mx",
-                    "cT2N2Mx",
-                    "T2N2Mx",
-                    "pT2NxM0",
-                    "cT2NxM0",
-                    "T2NxM0",
-                    "pT2NxM1",
-                    "cT2NxM1",
-                    "T2NxM1",
-                    "pT2NxMx",
-                    "cT2NxMx",
-                    "T2NxMx",
-                    "pT2N0",
-                    "cT2N0",
-                    "T2N0",
-                    "pT2N1",
-                    "cT2N1",
-                    "T2N1",
-                    "pT2N2",
-                    "cT2N2",
-                    "T2N2",
-                    "pT2Nx",
-                    "cT2Nx",
-                    "T2Nx"
-                ],
-                "T3":[
-                    "T3",
-                    "pT3N0M0",
-                    "cT3N0M0",
-                    "T3N0M0",
-                    "pT3N0M1",
-                    "cT3N0M1",
-                    "T3N0M1",
-                    "pT3N0Mx",
-                    "cT3N0Mx",
-                    "T3N0Mx",
-                    "pT3N1M0",
-                    "cT3N1M0",
-                    "T3N1M0",
-                    "pT3N1M1",
-                    "cT3N1M1",
-                    "T3N1M1",
-                    "pT3N1Mx",
-                    "cT3N1Mx",
-                    "T3N1Mx",
-                    "pT3N2M0",
-                    "cT3N2M0",
-                    "T3N2M0",
-                    "pT3N2M1",
-                    "cT3N2M1",
-                    "T3N2M1",
-                    "pT3N2Mx",
-                    "cT3N2Mx",
-                    "T3N2Mx",
-                    "pT3NxM0",
-                    "cT3NxM0",
-                    "T3NxM0",
-                    "pT3NxM1",
-                    "cT3NxM1",
-                    "T3NxM1",
-                    "pT3NxMx",
-                    "cT3NxMx",
-                    "T3NxMx",
-                    "pT3N0",
-                    "cT3N0",
-                    "T3N0",
-                    "pT3N1",
-                    "cT3N1",
-                    "T3N1",
-                    "pT3N2",
-                    "cT3N2",
-                    "T3N2",
-                    "pT3Nx",
-                    "cT3Nx",
-                    "T3Nx"
-                ],
-                "T4":[
-                    "T4",
-                    "pT4N0M0",
-                    "cT4N0M0",
-                    "T4N0M0",
-                    "pT4N0M1",
-                    "cT4N0M1",
-                    "T4N0M1",
-                    "pT4N0Mx",
-                    "cT4N0Mx",
-                    "T4N0Mx",
-                    "pT4N1M0",
-                    "cT4N1M0",
-                    "T4N1M0",
-                    "pT4N1M1",
-                    "cT4N1M1",
-                    "T4N1M1",
-                    "pT4N1Mx",
-                    "cT4N1Mx",
-                    "T4N1Mx",
-                    "pT4N2M0",
-                    "cT4N2M0",
-                    "T4N2M0",
-                    "pT4N2M1",
-                    "cT4N2M1",
-                    "T4N2M1",
-                    "pT4N2Mx",
-                    "cT4N2Mx",
-                    "T4N2Mx",
-                    "pT4NxM0",
-                    "cT4NxM0",
-                    "T4NxM0",
-                    "pT4NxM1",
-                    "cT4NxM1",
-                    "T4NxM1",
-                    "pT4NxMx",
-                    "cT4NxMx",
-                    "T4NxMx",
-                    "pT4N0",
-                    "cT4N0",
-                    "T4N0",
-                    "pT4N1",
-                    "cT4N1",
-                    "T4N1",
-                    "pT4N2",
-                    "cT4N2",
-                    "T4N2",
-                    "pT4Nx",
-                    "cT4Nx",
-                    "T4Nx"
-                ],
-                "Tx / onbekend":[
-                    "Tx / onbekend",
-                    "pTxN0M0",
-                    "cTxN0M0",
-                    "TxN0M0",
-                    "pTxN0M1",
-                    "cTxN0M1",
-                    "TxN0M1",
-                    "pTxN0Mx",
-                    "cTxN0Mx",
-                    "TxN0Mx",
-                    "pTxN1M0",
-                    "cTxN1M0",
-                    "TxN1M0",
-                    "pTxN1M1",
-                    "cTxN1M1",
-                    "TxN1M1",
-                    "pTxN1Mx",
-                    "cTxN1Mx",
-                    "TxN1Mx",
-                    "pTxN2M0",
-                    "cTxN2M0",
-                    "TxN2M0",
-                    "pTxN2M1",
-                    "cTxN2M1",
-                    "TxN2M1",
-                    "pTxN2Mx",
-                    "cTxN2Mx",
-                    "TxN2Mx",
-                    "pTxNxM0",
-                    "cTxNxM0",
-                    "TxNxM0",
-                    "pTxNxM1",
-                    "cTxNxM1",
-                    "TxNxM1",
-                    "pTxNxMx",
-                    "cTxNxMx",
-                    "TxNxMx",
-                    "pTxN0",
-                    "cTxN0",
-                    "TxN0",
-                    "pTxN1",
-                    "cTxN1",
-                    "TxN1",
-                    "pTxN2",
-                    "cTxN2",
-                    "TxN2",
-                    "pTxNx",
-                    "cTxNx",
-                    "TxNx"
-                ]
-            }
-        },
-        "SCORECT2":{
-            "condition":"LOCPRIM != Caecum",
-            "description":[
-                "cT score ('dubbel' tumor)",
-                "2e primaire tumor",
-                "tweede primaire tumor",
-                "2e tumor",
-                "tweede tumor",
-                "tweede carcinoom",
-                "2e carcinoom",
-                "secundaire tumor",
-                "secundair carcinoom"
+            "Transanaal endoscopische procedure":[
+                "Transanaal endoscopische",
+                "Transanaal endoscopisch"
             ],
-            "values":{
-                "T1":[
-                    "T1",
-                    "pT1N0M0",
-                    "cT1N0M0",
-                    "T1N0M0",
-                    "pT1N0M1",
-                    "cT1N0M1",
-                    "T1N0M1",
-                    "pT1N0Mx",
-                    "cT1N0Mx",
-                    "T1N0Mx",
-                    "pT1N1M0",
-                    "cT1N1M0",
-                    "T1N1M0",
-                    "pT1N1M1",
-                    "cT1N1M1",
-                    "T1N1M1",
-                    "pT1N1Mx",
-                    "cT1N1Mx",
-                    "T1N1Mx",
-                    "pT1N2M0",
-                    "cT1N2M0",
-                    "T1N2M0",
-                    "pT1N2M1",
-                    "cT1N2M1",
-                    "T1N2M1",
-                    "pT1N2Mx",
-                    "cT1N2Mx",
-                    "T1N2Mx",
-                    "pT1NxM0",
-                    "cT1NxM0",
-                    "T1NxM0",
-                    "pT1NxM1",
-                    "cT1NxM1",
-                    "T1NxM1",
-                    "pT1NxMx",
-                    "cT1NxMx",
-                    "T1NxMx",
-                    "pT1N0",
-                    "cT1N0",
-                    "T1N0",
-                    "pT1N1",
-                    "cT1N1",
-                    "T1N1",
-                    "pT1N2",
-                    "cT1N2",
-                    "T1N2",
-                    "pT1Nx",
-                    "cT1Nx",
-                    "T1Nx"
-                ],
-                "T2":[
-                    "T2",
-                    "pT2N0M0",
-                    "cT2N0M0",
-                    "T2N0M0",
-                    "pT2N0M1",
-                    "cT2N0M1",
-                    "T2N0M1",
-                    "pT2N0Mx",
-                    "cT2N0Mx",
-                    "T2N0Mx",
-                    "pT2N1M0",
-                    "cT2N1M0",
-                    "T2N1M0",
-                    "pT2N1M1",
-                    "cT2N1M1",
-                    "T2N1M1",
-                    "pT2N1Mx",
-                    "cT2N1Mx",
-                    "T2N1Mx",
-                    "pT2N2M0",
-                    "cT2N2M0",
-                    "T2N2M0",
-                    "pT2N2M1",
-                    "cT2N2M1",
-                    "T2N2M1",
-                    "pT2N2Mx",
-                    "cT2N2Mx",
-                    "T2N2Mx",
-                    "pT2NxM0",
-                    "cT2NxM0",
-                    "T2NxM0",
-                    "pT2NxM1",
-                    "cT2NxM1",
-                    "T2NxM1",
-                    "pT2NxMx",
-                    "cT2NxMx",
-                    "T2NxMx",
-                    "pT2N0",
-                    "cT2N0",
-                    "T2N0",
-                    "pT2N1",
-                    "cT2N1",
-                    "T2N1",
-                    "pT2N2",
-                    "cT2N2",
-                    "T2N2",
-                    "pT2Nx",
-                    "cT2Nx",
-                    "T2Nx"
-                ],
-                "T3":[
-                    "T3",
-                    "pT3N0M0",
-                    "cT3N0M0",
-                    "T3N0M0",
-                    "pT3N0M1",
-                    "cT3N0M1",
-                    "T3N0M1",
-                    "pT3N0Mx",
-                    "cT3N0Mx",
-                    "T3N0Mx",
-                    "pT3N1M0",
-                    "cT3N1M0",
-                    "T3N1M0",
-                    "pT3N1M1",
-                    "cT3N1M1",
-                    "T3N1M1",
-                    "pT3N1Mx",
-                    "cT3N1Mx",
-                    "T3N1Mx",
-                    "pT3N2M0",
-                    "cT3N2M0",
-                    "T3N2M0",
-                    "pT3N2M1",
-                    "cT3N2M1",
-                    "T3N2M1",
-                    "pT3N2Mx",
-                    "cT3N2Mx",
-                    "T3N2Mx",
-                    "pT3NxM0",
-                    "cT3NxM0",
-                    "T3NxM0",
-                    "pT3NxM1",
-                    "cT3NxM1",
-                    "T3NxM1",
-                    "pT3NxMx",
-                    "cT3NxMx",
-                    "T3NxMx",
-                    "pT3N0",
-                    "cT3N0",
-                    "T3N0",
-                    "pT3N1",
-                    "cT3N1",
-                    "T3N1",
-                    "pT3N2",
-                    "cT3N2",
-                    "T3N2",
-                    "pT3Nx",
-                    "cT3Nx",
-                    "T3Nx"
-                ],
-                "T4":[
-                    "T4",
-                    "pT4N0M0",
-                    "cT4N0M0",
-                    "T4N0M0",
-                    "pT4N0M1",
-                    "cT4N0M1",
-                    "T4N0M1",
-                    "pT4N0Mx",
-                    "cT4N0Mx",
-                    "T4N0Mx",
-                    "pT4N1M0",
-                    "cT4N1M0",
-                    "T4N1M0",
-                    "pT4N1M1",
-                    "cT4N1M1",
-                    "T4N1M1",
-                    "pT4N1Mx",
-                    "cT4N1Mx",
-                    "T4N1Mx",
-                    "pT4N2M0",
-                    "cT4N2M0",
-                    "T4N2M0",
-                    "pT4N2M1",
-                    "cT4N2M1",
-                    "T4N2M1",
-                    "pT4N2Mx",
-                    "cT4N2Mx",
-                    "T4N2Mx",
-                    "pT4NxM0",
-                    "cT4NxM0",
-                    "T4NxM0",
-                    "pT4NxM1",
-                    "cT4NxM1",
-                    "T4NxM1",
-                    "pT4NxMx",
-                    "cT4NxMx",
-                    "T4NxMx",
-                    "pT4N0",
-                    "cT4N0",
-                    "T4N0",
-                    "pT4N1",
-                    "cT4N1",
-                    "T4N1",
-                    "pT4N2",
-                    "cT4N2",
-                    "T4N2",
-                    "pT4Nx",
-                    "cT4Nx",
-                    "T4Nx"
-                ],
-                "Tx / onbekend":[
-                    "Tx / onbekend",
-                    "pTxN0M0",
-                    "cTxN0M0",
-                    "TxN0M0",
-                    "pTxN0M1",
-                    "cTxN0M1",
-                    "TxN0M1",
-                    "pTxN0Mx",
-                    "cTxN0Mx",
-                    "TxN0Mx",
-                    "pTxN1M0",
-                    "cTxN1M0",
-                    "TxN1M0",
-                    "pTxN1M1",
-                    "cTxN1M1",
-                    "TxN1M1",
-                    "pTxN1Mx",
-                    "cTxN1Mx",
-                    "TxN1Mx",
-                    "pTxN2M0",
-                    "cTxN2M0",
-                    "TxN2M0",
-                    "pTxN2M1",
-                    "cTxN2M1",
-                    "TxN2M1",
-                    "pTxN2Mx",
-                    "cTxN2Mx",
-                    "TxN2Mx",
-                    "pTxNxM0",
-                    "cTxNxM0",
-                    "TxNxM0",
-                    "pTxNxM1",
-                    "cTxNxM1",
-                    "TxNxM1",
-                    "pTxNxMx",
-                    "cTxNxMx",
-                    "TxNxMx",
-                    "pTxN0",
-                    "cTxN0",
-                    "TxN0",
-                    "pTxN1",
-                    "cTxN1",
-                    "TxN1",
-                    "pTxN2",
-                    "cTxN2",
-                    "TxN2",
-                    "pTxNx",
-                    "cTxNx",
-                    "TxNx"
-                ]
-            }
-        },
-        "TYPPROCOK":{
-            "condition":"PROCOK = Overig (niet-resectieve procedure)",
-            "description":[],
-            "values":{
-                "Anders":[],
-                "Bypass":[
-                    "Bypass"
-                ],
-                "Colostoma":[
-                    "Colostoma"
-                ],
-                "Ileostoma":[
-                    "Ileostoma"
-                ],
-                "Laparoscopie":[
-                    "Laparoscopie",
-                    "Laparoscopisch"
-                ],
-                "Laparotomie ":[
-                    "Laparotomie"
-                ],
-                "TEM":[
-                    "TEM"
-                ],
-                "Transversum resectie":[
-                    "Transversum resectie"
-                ]
-            }
-        },
-        "pall_NO_reden":{
-              "condition":"geenresec_palltherYN = No",
-              "description": ["Reden"],
-              "values": {"Comorbiditeit":["Comorbiditeit"],"wens patiënt":["wens patiënt"],"overleden":["overleden"]}
-         },
-        "geenresec_palltherYN":{
-            "condition":"mdo_chir = Nee",
-            "description":[
-                "Palliatieve therapie",
-                "Palliatieve",
-                "palliatief"
+            "Transanaal endoscopische procedure gevolgd door abdomino-perineale resectie":[
+                "Transanaal endoscopische abdomino perinealeresectie"
             ],
-            "values":{
-                "No":[
-                    "No"
-                ],
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "geenresectie_irres":{
-            "condition":"mdo_chir = Nee",
-            "description":[
-                "Reden: Irresectabel",
-                "Irresectabel tumor",
-                "Irresectabel carcinoom"
+            "Transanaal endoscopische procedure gevolgd door anterior resectie":[
+                "Transanaal endoscopisch low anteriorresectie",
+                "Transanaal endoscopisch low anterior resectie",
+                "Transanaal endoscopisch sigmoidresectie",
+                "sigmoid resectie"
             ],
-            "values":{
-                "No":[
-                    "No"
-                ],
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "geenresectie_anders":{
-              "condition":"mdo_chir = Nee",
-              "description": ["Reden: Anders"],
-              "values": {"unknown": []}
-         },
-        "geenresectie_meta":{
-              "condition":"mdo_chir = Nee",
-              "description": ["Reden: Gemetastaseerd"],
-              "values": {"No":["No"],"Yes":["Yes"]}
-         },
-        "klachten_klacht1":{
-            "condition":"",
-            "description":[
-                "Rectaal bloedverlies"
+            "Transversum resectie":[
+                "Transversum resectie"
+            ]
+        }
+    },
+    "RESTAG_CT":{
+        "condition":"",
+        "description":[
+            "restagering CT THORAX ABDOMEN"
+        ],
+        "values":{
+            "Yes":[],
+            "No":[]
+        }
+    },
+    "SCORECT":{
+        "condition":"",
+        "description":[
+            "carcinoom",
+            "tumor"
+        ],
+        "values":{
+            "T1":[
+                "pT1N0M0",
+                "cT1N0M0",
+                "T1N0M0",
+                "pT1N0M1",
+                "cT1N0M1",
+                "T1N0M1",
+                "pT1N0Mx",
+                "cT1N0Mx",
+                "T1N0Mx",
+                "pT1N1M0",
+                "cT1N1M0",
+                "T1N1M0",
+                "pT1N1M1",
+                "cT1N1M1",
+                "T1N1M1",
+                "pT1N1Mx",
+                "cT1N1Mx",
+                "T1N1Mx",
+                "pT1N2M0",
+                "cT1N2M0",
+                "T1N2M0",
+                "pT1N2M1",
+                "cT1N2M1",
+                "T1N2M1",
+                "pT1N2Mx",
+                "cT1N2Mx",
+                "T1N2Mx",
+                "pT1NxM0",
+                "cT1NxM0",
+                "T1NxM0",
+                "pT1NxM1",
+                "cT1NxM1",
+                "T1NxM1",
+                "pT1NxMx",
+                "cT1NxMx",
+                "T1NxMx",
+                "pT1N0",
+                "cT1N0",
+                "T1N0",
+                "pT1N1",
+                "cT1N1",
+                "T1N1",
+                "pT1N2",
+                "cT1N2",
+                "T1N2",
+                "pT1Nx",
+                "cT1Nx",
+                "T1Nx"
             ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "klachten_klacht2":{
-            "condition":"",
-            "description":[
-                "Veranderde defaecatie",
-                "veranderd defaecatiepatroon"
+            "T2":[
+                "pT2N0M0",
+                "cT2N0M0",
+                "T2N0M0",
+                "pT2N0M1",
+                "cT2N0M1",
+                "T2N0M1",
+                "pT2N0Mx",
+                "cT2N0Mx",
+                "T2N0Mx",
+                "pT2N1M0",
+                "cT2N1M0",
+                "T2N1M0",
+                "pT2N1M1",
+                "cT2N1M1",
+                "T2N1M1",
+                "pT2N1Mx",
+                "cT2N1Mx",
+                "T2N1Mx",
+                "pT2N2M0",
+                "cT2N2M0",
+                "T2N2M0",
+                "pT2N2M1",
+                "cT2N2M1",
+                "T2N2M1",
+                "pT2N2Mx",
+                "cT2N2Mx",
+                "T2N2Mx",
+                "pT2NxM0",
+                "cT2NxM0",
+                "T2NxM0",
+                "pT2NxM1",
+                "cT2NxM1",
+                "T2NxM1",
+                "pT2NxMx",
+                "cT2NxMx",
+                "T2NxMx",
+                "pT2N0",
+                "cT2N0",
+                "T2N0",
+                "pT2N1",
+                "cT2N1",
+                "T2N1",
+                "pT2N2",
+                "cT2N2",
+                "T2N2",
+                "pT2Nx",
+                "cT2Nx",
+                "T2Nx"
             ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "klachten_klacht3":{
-            "condition":"",
-            "description":[
-                "Urgente klachten"
+            "T3":[
+                "pT3N0M0",
+                "cT3N0M0",
+                "T3N0M0",
+                "pT3N0M1",
+                "cT3N0M1",
+                "T3N0M1",
+                "pT3N0Mx",
+                "cT3N0Mx",
+                "T3N0Mx",
+                "pT3N1M0",
+                "cT3N1M0",
+                "T3N1M0",
+                "pT3N1M1",
+                "cT3N1M1",
+                "T3N1M1",
+                "pT3N1Mx",
+                "cT3N1Mx",
+                "T3N1Mx",
+                "pT3N2M0",
+                "cT3N2M0",
+                "T3N2M0",
+                "pT3N2M1",
+                "cT3N2M1",
+                "T3N2M1",
+                "pT3N2Mx",
+                "cT3N2Mx",
+                "T3N2Mx",
+                "pT3NxM0",
+                "cT3NxM0",
+                "T3NxM0",
+                "pT3NxM1",
+                "cT3NxM1",
+                "T3NxM1",
+                "pT3NxMx",
+                "cT3NxMx",
+                "T3NxMx",
+                "pT3N0",
+                "cT3N0",
+                "T3N0",
+                "pT3N1",
+                "cT3N1",
+                "T3N1",
+                "pT3N2",
+                "cT3N2",
+                "T3N2",
+                "pT3Nx",
+                "cT3Nx",
+                "T3Nx"
             ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "klachten_klacht4":{
-            "condition":"",
-            "description":[
-                "Anemie"
+            "T4":[
+                "pT4N0M0",
+                "cT4N0M0",
+                "T4N0M0",
+                "pT4N0M1",
+                "cT4N0M1",
+                "T4N0M1",
+                "pT4N0Mx",
+                "cT4N0Mx",
+                "T4N0Mx",
+                "pT4N1M0",
+                "cT4N1M0",
+                "T4N1M0",
+                "pT4N1M1",
+                "cT4N1M1",
+                "T4N1M1",
+                "pT4N1Mx",
+                "cT4N1Mx",
+                "T4N1Mx",
+                "pT4N2M0",
+                "cT4N2M0",
+                "T4N2M0",
+                "pT4N2M1",
+                "cT4N2M1",
+                "T4N2M1",
+                "pT4N2Mx",
+                "cT4N2Mx",
+                "T4N2Mx",
+                "pT4NxM0",
+                "cT4NxM0",
+                "T4NxM0",
+                "pT4NxM1",
+                "cT4NxM1",
+                "T4NxM1",
+                "pT4NxMx",
+                "cT4NxMx",
+                "T4NxMx",
+                "pT4N0",
+                "cT4N0",
+                "T4N0",
+                "pT4N1",
+                "cT4N1",
+                "T4N1",
+                "pT4N2",
+                "cT4N2",
+                "T4N2",
+                "pT4Nx",
+                "cT4Nx",
+                "T4Nx"
             ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "klachten_klacht88":{
-            "condition":"",
-            "description":[
-                "Anders"
-            ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "klachten_klacht99":{
-            "condition":"",
-            "description":[
-                "Onbekend"
-            ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "mdo_chir":{
-            "condition":"",
-            "description":[
-                "Pati\u00ebnt zal chirurgisch worden behandeld",
-                "chirurgisch tumor",
-                "chirurgisch carcinoom",
-                "operatie tumor",
-                "operatie carcinoom",
-                "resectie tumor",
-                "resectie carcinoom"
-            ],
-            "values":{
-                "Ja":[
-                    "Ja"
-                ],
-                "Nee":[
-                    "Nee"
-                ]
-            }
-        },
-        "pallther_RT":{
-            "condition":"geenresec_palltherYN = Yes",
-            "description":[
-                "Radiotherapie",
-                "Palliatieve radiotherapie",
-                "Palliatief radiotherapie",
-                "palliatief bestralen",
-                "palliatieve bestraling"
-            ],
-            "values":{
-                "No":[
-                    "No"
-                ],
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "pallther_chemo":{
-            "condition":"geenresec_palltherYN = Yes",
-            "description":[
-                "Chemotherapie",
-                "Palliatieve chemo therapie",
-                "Palliatieve chemotherapie",
-                "palliatief chemotherapie",
-                "palliatief chemo therapie"
-            ],
-            "values":{
-                "No":[
-                    "No"
-                ],
-                "Yes":[
-                    "Yes"
-                ]
-            }
-        },
-        "pallther_chemoRT":{
-            "condition":"",
-            "description":[
-                "Chemoradiatie",
-                "palliatieve chemoradiotherapie",
-                "palliatieve Chemo-radiotherapie",
-                "palliatieve chemo radio therapie",
-                "palliatieve Chemoradiatie",
-                "palliatief chemoradiotherapie",
-                "palliatief Chemo-radiotherapie",
-                "palliatief chemo radio therapie",
-                "palliatief Chemoradiatie"
-            ],
-            "values":{
-                "Yes":[
-                    "Yes"
-                ],
-                "No":[
-                    "No"
-                ]
-            }
-        },
-        "pallther_RTstudie":{
-              "description": ["Radiotherapie in studieverband"],
-              "condition": "",
-              "values": {"Nee": ["Nee"], "Ja": ["Ja"]}
-         }
+            "Tx / onbekend":[
+                "pTxN0M0",
+                "cTxN0M0",
+                "TxN0M0",
+                "pTxN0M1",
+                "cTxN0M1",
+                "TxN0M1",
+                "pTxN0Mx",
+                "cTxN0Mx",
+                "TxN0Mx",
+                "pTxN1M0",
+                "cTxN1M0",
+                "TxN1M0",
+                "pTxN1M1",
+                "cTxN1M1",
+                "TxN1M1",
+                "pTxN1Mx",
+                "cTxN1Mx",
+                "TxN1Mx",
+                "pTxN2M0",
+                "cTxN2M0",
+                "TxN2M0",
+                "pTxN2M1",
+                "cTxN2M1",
+                "TxN2M1",
+                "pTxN2Mx",
+                "cTxN2Mx",
+                "TxN2Mx",
+                "pTxNxM0",
+                "cTxNxM0",
+                "TxNxM0",
+                "pTxNxM1",
+                "cTxNxM1",
+                "TxNxM1",
+                "pTxNxMx",
+                "cTxNxMx",
+                "TxNxMx",
+                "pTxN0",
+                "cTxN0",
+                "TxN0",
+                "pTxN1",
+                "cTxN1",
+                "TxN1",
+                "pTxN2",
+                "cTxN2",
+                "TxN2",
+                "pTxNx",
+                "cTxNx",
+                "TxNx"
+            ]
+        }
+    },
+    "klachten_klacht1":{
+        "condition":"",
+        "description":[
+            "Rectaal bloedverlies"
+        ],
+        "values":{
+            "Yes":[]
+        }
+    },
+    "klachten_klacht2":{
+        "condition":"",
+        "description":[
+            "Veranderde defaecatie",
+            "veranderd defaecatiepatroon"
+        ],
+        "values":{
+            "Yes":[]
+        }
+    },
+    "klachten_klacht4":{
+        "condition":"",
+        "description":["Anemie"],
+        "values":{
+            "Yes":[]
+        }
+    },
+    "mdo_chir":{
+        "condition":"",
+        "description":[
+            "chirurgisch tumor",
+            "chirurgisch carcinoom",
+            "operatie tumor",
+            "operatie carcinoom",
+            "resectie tumor",
+            "resectie carcinoom"
+        ],
+        "values":{
+            "Ja":[],
+            "Nee":[]
+        }
     }
+
 }

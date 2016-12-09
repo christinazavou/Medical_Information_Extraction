@@ -1,61 +1,56 @@
+#CONFIGURATIONS_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\Configurations'
+#DATA_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\Data'
+#RESULTS_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\resutls'
 
-# ---------------------------------- ------Program configuration ------------------------------------------------------#
+json_form_file: "CONFIGURATIONS_PATH\\important_fields\\important_fields_DECEASE.json"
+csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
+form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
+
+majority_folder: "RESULTS_PATH\\majority\\"
+distributions_folder: "RESULTS_PATH\\distributions_NUM\\"
+heat_maps_folder: "RESULTS_PATH\\heat_maps_NUM\\"
+majority_file: "RESULTS_PATH\\majority.json"
+
+index_body_file: "CONFIGURATIONS_PATH\\two_tf_two_tfidf_index_children_v5.json"
+patient_map_file: "CONFIGURATIONS_PATH\\mapping.json"
+
 # ---------------------------------------------------------------------------------------------------------------------#
-# --------------------------------------------------paths--------------------------------------------------------------#
-host: {"host": "localhost", "port": 9200}
-json_forms_directory: "Configurations_path\\important_fields\\"  # can remove last '\\'
-csv_form_path: "Data_path\\decease\\selection_decease.csv"
-in_dossiers_path: "Data_path\\decease\\patients_selection_decease\\"
-out_dossiers_path: "Data_path\\decease\\patients_selection_decease_json\\"
-# ---------------------------------------------------------------------------------------------------------------------#
-# ----------------------------------------------excecution config------------------------------------------------------#
-read_dossiers: false
-store_dossiers: false
+
+read_and_store_dossiers: false
 find_conditioned_majority: false
-algo: "baseline"
-run_algo: true
-forms: ["colorectaal"]
-eval_algo: true
-eval_file: ""
+algorithm: "baseline"
+run_algorithm: true
+evaluate_algorithm: true
+evaluate_file: ""
 patients_pct: 1
 
-majority_folder: "Results_path\\majority\\"
-distributions_folder: "Results_path\\distributions_num\\"
-heat_maps_folder: "Results_path\\heat_maps_num\\"
-majority_file: "Results_path\\majority.json"
-
 patient_relevant: true
-default_field: "report.description.dutch_tf_description"
-boost_fields: ["report.description.tf_description"]
+default_field: "description.dutch_tf_description"
+boost_fields: ["description.tf_description"]
 min_score: 0
-
 description_as_phrase: True
 value_as_phrase: True
-unknowns: "exclude"
 use_description_1ofk: true
-# ---------------------------------------------------------------------------------------------------------------------#
-# ----------------------------------------------fields config ---------------------------------------------------------#
+
+unknowns: "exclude"
+forms: ["colorectaal"]
 assign_all: False
-colorectaal: ['LOCPRIM','LOCPRIM2',
+colorectaal: [
+              'LOCPRIM',
               'klachten_klacht1','klachten_klacht2', 'klachten_klacht4',
-              'SCORECT','SCORECT2', 'RESTAG_SCORECT_1','RESTAG_SCORECT2_1','RESTAG_CT',
-              'SCORECN',
-              #'SCORECM',
-              'PROCOK','TYPPROCOK',
+              'SCORECT', #'RESTAG_CT',
+              'PROCOK', #'TYPPROCOK',
               'mdo_chir',
-              'geenresectie_irres','geenresec_palltherYN',
-              'pallther_chemo','pallther_RT','pallther_chemoRT',#'pallther_RTstudie',
-#              'COMORB','COMORBCAR','COMORBVAS','COMORBDIA','COMORBPUL',
-#              'COMORBNEU','COMORBMDA','COMORBURO',
-              'SCOPNUMB']
+              #'geenresectie_irres','geenresec_palltherYN',
+              #'pallther_chemo','pallther_RT','pallther_chemoRT',
+              #'SCOPNUMB'
+              ]
+
 # ---------------------------------------------------------------------------------------------------------------------#
-# --------------------------------------------------naming config------------------------------------------------------#
+
+connection: {"host": "localhost", "port": 9200}
 index_name: "mie_tfidf"
-map_index_file: "Configurations_path\\two_tf_two_tfidf_index_v2.json"
 type_name_p: "patient"
 type_name_f: "form"
 type_name_s: "report_description_sentence"
-# ---------------------------------------------------------------------------------------------------------------------#
-# --------------------------------------------------extra config-------------------------------------------------------#
-run_W2V: False
-patient_W2V: ""
+type_name_p: "patient_report"

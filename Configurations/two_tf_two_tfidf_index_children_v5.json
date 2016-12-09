@@ -1,0 +1,71 @@
+{
+    "settings":{
+      "number_of_shards": 5,
+      "number_of_replicas": 1,
+      "analysis": {
+        "filter": {
+            "dutch_stop": {
+              "type":  "stop", "stopwords":  "_dutch_"
+            },
+            "dutch_stemmer": {
+              "type":  "stemmer", "language":   "dutch"
+            }
+          },
+          "analyzer": {
+            "dutch": {
+              "tokenizer":  "standard",
+              "filter": [
+                "lowercase",
+                "dutch_stop",
+                "dutch_stemmer",
+                "asciifolding"
+              ]
+            }
+          }
+        },
+     "similarity": {
+        "no_idf_bm25": {
+            "type": "BM25",
+            "b":    0
+            }
+        }
+    },
+    "mappings":{
+      "patient":{},
+      "report": {
+        "_parent":{
+          "type": "patient"
+        },
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "description": {
+            "type": "text",
+            "term_vector": "with_positions_offsets",
+            "fields": {
+              "dutch_tf_description": {
+                "type": "text",
+                "analyzer": "dutch",
+                "similarity": "no_idf_bm25",
+                "term_vector": "with_positions_offsets"
+              },
+              "dutch_description": {
+                "type": "text",
+                "analyzer": "dutch",
+                "term_vector": "with_positions_offsets"
+              },
+              "tf_description": {
+                "type": "text",
+                "similarity": "no_idf_bm25",
+                "term_vector": "with_positions_offsets"
+              }
+            }
+          }
+        }
+      }
+    }
+}

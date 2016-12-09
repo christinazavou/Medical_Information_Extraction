@@ -3,8 +3,6 @@
 import pickle
 import os
 from ctcue import predict
-from utils import replace_sentence_tokens, split_into_sentences
-import json
 
 
 class PatientRelevance:
@@ -31,28 +29,8 @@ class PatientRelevance:
             return True, score
         return False, score
 
-    def check_highlights_relevance(self, highlights):
-        text_to_check_highlights = list()
-        max_score = 0
-        max_highlight = ""
-        for i, highlight in enumerate(highlights):
-            highlight_with_dis = replace_sentence_tokens(highlight, "<DIS>")
-            highlight_sentences = split_into_sentences(highlight_with_dis)
-            _, s = self.patient_related(highlight_sentences)
-            if s > max_score:
-                max_score = s
-                max_highlight = highlight
-            text_to_check_highlights += highlight_sentences
-        relevant, score = self.patient_related(text_to_check_highlights)
-        if relevant:
-            return True, highlights
-        if max_score > 0.5:
-            # print "ONLY SOME SCORE"
-            return True, max_highlight
-        self.irrelevant_highlights.append(highlights)
-        return False, None
-
-    def store_irrelevant_highlights(self, file_path):
-        file_path = file_path.replace("results.json", "irrelevant.json")
-        with open(file_path, 'w') as f:
-            json.dump(self.irrelevant_highlights, f, encoding='utf-8', indent=4)
+    def check_report_relevance(self, report, words):
+        for word in words:
+            report = report.replace(word, "<DIS>")
+        related, score = self.patient_related(report)
+        return related, score
