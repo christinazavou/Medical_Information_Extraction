@@ -13,6 +13,7 @@ class Patient(object):
         self.id = patient_id
         self.dossier_path = dossier_path
         self.num_of_reports = 0
+        self.golden_truth = {}
 
     def dossier_contains(self, filename):
         return os.path.isfile(os.path.join(self.dossier_path, filename))
@@ -21,6 +22,20 @@ class Patient(object):
         reports = csv2list_of_dicts(os.path.join(self.dossier_path, 'report.csv'))
         self.num_of_reports = len(reports)
         return reports
+
+    def get_from_dataframe(self, dataframe, field_name):
+        result = dataframe[dataframe['PatientNr'] == self.id]
+        print "field: {} result: {} patient: {}".format(field_name, result[field_name].as_matrix()[0], self.id)
+        return result[field_name].as_matrix()[0]
+
+    def read_golden_truth(self, dataframe, form):
+        for field in form.fields:
+            res = self.get_from_dataframe(dataframe, field.id)
+            print "res: {} not res: {}".format(res, (not res))
+            if (field.is_unary() and not res) or res:
+                self.golden_truth[field.id] = res
+            else:
+                self.golden_truth = None  # SO THAT I WONT INDEX THIS PATIENT
 
     def to_json(self):
         """Converts the class into JSON."""
