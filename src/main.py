@@ -70,9 +70,12 @@ if __name__ == "__main__":
         index_dataset_patients(data.dataset_forms)
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
 
+    print "-------"
     print len(data.dataset_forms)
     print es_index.id
+    print len(data.dataset_forms[0].patients)
     print [str(f) for f in data.dataset_forms[0].fields]
+    print "-------"
 
     algorithm = Algorithm('baseline', True, 0, ['description'], True, True, True)
     for form in data.dataset_forms:
