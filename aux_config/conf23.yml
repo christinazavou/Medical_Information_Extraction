@@ -49,7 +49,7 @@ colorectaal: [
 # ---------------------------------------------------------------------------------------------------------------------#
 
 connection: {"host": "localhost", "port": 9200}
-index_name: "mie_tfidf"
+index_name: "mie_new"
 type_name_p: "patient"
 type_name_f: "form"
 type_name_s: "report_description_sentence"

@@ -60,13 +60,13 @@ if __name__ == "__main__":
         init_dataset_patients(data.dataset_forms)
         data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
 
-    if os.path.isfile(os.path.join(settings['RESULTS_PATH'], 'testing.p')):
-        es_index = EsIndex(f=os.path.join(settings['RESULTS_PATH'], 'testing.p'))
+    if os.path.isfile(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p')):
+        es_index = EsIndex(f=os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
     else:
-        es_index = EsIndex('testing')
+        es_index = EsIndex(settings['index_name'])
         es_index.index(settings['index_body_file'])
         index_dataset_patients(data.dataset_forms)
-        es_index.save(os.path.join(settings['RESULTS_PATH'], 'testing.p'))
+        es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
 
     print len(data.dataset_forms)
     print es_index.id
