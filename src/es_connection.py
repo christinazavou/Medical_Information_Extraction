@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 from elasticsearch import Elasticsearch
 from elasticsearch import TransportError, SSLError
 import time
 import json
+import copy
 
 
 class EsConnection(object):
@@ -57,6 +59,7 @@ class EsConnection(object):
             }
             bulk_data.append(op_dict)
             bulk_data.append(data)
+        # print "bulk data: {}".format(json.dumps(bulk_data))
         self.con.bulk(index=index_name, body=bulk_data, doc_type=doc_type, refresh=True)
 
     def index_child_doc(self, index_name, doc_type, doc_id, parent_id, data_body):

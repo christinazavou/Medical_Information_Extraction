@@ -37,7 +37,9 @@ def index_dataset_patients(forms):
         for patient in form.patients:
             patient_reports = patient.read_report_csv()  # list of dicts i.e. reports
             es_index.put_doc('patient', patient.id)
+            print "patient inserted"
             es_index.put_doc('report', parent_type='patient', parent_id=patient.id, data=patient_reports)
+            print "reports inserted"
             print "patient id: {} and his reports finished indexing".format(patient.id)
 
 
