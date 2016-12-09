@@ -85,6 +85,7 @@ class EsConnection(object):
         }
         bulk_data.append(op_dict)
         bulk_data.append(data_body)
+        # print "bulk_data for {} is {}".format(doc_id, json.dumps(bulk_data))
         self.con.bulk(index=index_name, body=bulk_data, refresh=True)
 
     def put_map(self, map_file, index, doc_type):

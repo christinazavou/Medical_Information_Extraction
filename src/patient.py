@@ -25,12 +25,13 @@ class Patient(object):
 
     def get_from_dataframe(self, dataframe, field_name):
         result = dataframe[dataframe['PatientNr'] == self.id]
+        if not result[field_name].as_matrix()[0]:
+            print "not ", result[field_name].as_matrix()[0]
         return result[field_name].as_matrix()[0]
 
     def read_golden_truth(self, dataframe, form):  # already checked who are consistent
         for field in form.fields:
             self.golden_truth[field.id] = self.get_from_dataframe(dataframe, field.id)
-        print "golden truth of patient {} is {}".format(self.id, json.dumps(self.golden_truth))
         return self.golden_truth
 
     def to_json(self):

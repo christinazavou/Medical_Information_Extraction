@@ -6,6 +6,10 @@ from DatasetForm import DataSetForm
 from es_index import EsIndex
 from algorithm import Algorithm
 import sys
+import random
+
+
+FREQ = 0.025
 
 
 CONFIGURATION_IDX = 1
@@ -37,10 +41,13 @@ def index_dataset_patients(forms):
         form_dataframe = form.get_dataframe()
         for patient in form.patients:
             patient_reports = patient.read_report_csv()  # list of dicts i.e. reports
-            golden_truth = {form.id: patient.read_golden_truth(form_dataframe, form)}
-            es_index.put_doc('patient', patient.id, data=golden_truth)
+            # golden_truth = {form.id: patient.read_golden_truth(form_dataframe, form)}
+            # es_index.put_doc('patient', patient.id, data=golden_truth)
+            patient.read_golden_truth(form_dataframe, form)  # find golden truth, but not index it
+            es_index.put_doc('patient', patient.id)
             es_index.put_doc('report', parent_type='patient', parent_id=patient.id, data=patient_reports)
-            print "patient id: {} and his reports finished indexing".format(patient.id)
+            if random.uniform(0, 1) < FREQ:
+                print "patient id: {} and his reports finished indexing".format(patient.id)
 
 
 if __name__ == "__main__":
