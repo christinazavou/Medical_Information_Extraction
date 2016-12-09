@@ -5,6 +5,7 @@ import time
 import json
 import copy
 import random
+import elasticsearch
 
 
 FREQ = 0.02
@@ -78,6 +79,24 @@ class EsConnection(object):
             print 'bulk data: {}'.format(bulk_data)
         self.con.bulk(index=index_name, body=bulk_data, doc_type=doc_type, refresh=True)
 
+    # def index_children_with_iterator(self, index_name, doc_type, parent_id, data_list):
+    #     """FASTER"""
+    #     bulk_data = []
+    #     for i, data in enumerate(data_list):
+    #         op_dict = {
+    #             'index': {
+    #                 '_id': i,
+    #                 'parent': parent_id
+    #             }
+    #         }
+    #         bulk_data.append(op_dict)
+    #         tostr = json.dumps(data, encoding='utf-8')
+    #         bulk_data.append(str(tostr))
+    #     if random.uniform(0, 1) < FREQ:
+    #         print 'bulk data: {}'.format(bulk_data)
+    #     rep_iter = reports_iterator(bulk_data)
+    #     self.con.bulk(index=index_name, body=bulk_data, doc_type=doc_type, refresh=True)
+
     def index_child_doc(self, index_name, doc_type, doc_id, parent_id, data_body):
         bulk_data = []
         op_dict = {
@@ -134,3 +153,10 @@ class EsConnection(object):
 
     def doc_exists(self, index, doc_type, doc_id):
         return self.con.exists(index, doc_type, doc_id)
+
+
+def reports_iterator(reports):
+    current = 0
+    while current < len(reports):
+        yield reports[current]
+        current += 1
