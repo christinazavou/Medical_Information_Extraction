@@ -52,14 +52,14 @@ class EsConnection(object):
         bulk_data = []
         for i, data in enumerate(data_list):
             op_dict = {
-                "index": {
-                    "_id": i,
-                    "parent": parent_id
+                u'index': {
+                    u'_id': i,
+                    u'parent': parent_id
                 }
             }
             bulk_data.append(op_dict)
-            bulk_data.append(data)
-        # print "bulk data: {}".format(json.dumps(bulk_data))
+            bulk_data.append(json.dumps(data, encoding='utf-8'))
+        # print "bulk data: {}".format(json.dumps(bulk_data, encoding='utf-8'))
         self.con.bulk(index=index_name, body=bulk_data, doc_type=doc_type, refresh=True)
 
     def index_child_doc(self, index_name, doc_type, doc_id, parent_id, data_body):
