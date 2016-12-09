@@ -8,7 +8,7 @@ from utils import find_highlighted_words, find_word_distribution
 from patient_relevant_utils import PatientRelevance
 
 
-print_freq = 0.05
+print_freq = 0.002
 fragments = 10
 
 
