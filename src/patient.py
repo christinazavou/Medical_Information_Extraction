@@ -25,17 +25,13 @@ class Patient(object):
 
     def get_from_dataframe(self, dataframe, field_name):
         result = dataframe[dataframe['PatientNr'] == self.id]
-        print "field: {} result: {} patient: {}".format(field_name, result[field_name].as_matrix()[0], self.id)
         return result[field_name].as_matrix()[0]
 
-    def read_golden_truth(self, dataframe, form):
+    def read_golden_truth(self, dataframe, form):  # already checked who are consistent
         for field in form.fields:
-            res = self.get_from_dataframe(dataframe, field.id)
-            print "res: {} not res: {}".format(res, (not res))
-            if (field.is_unary() and not res) or res:
-                self.golden_truth[field.id] = res
-            else:
-                self.golden_truth = None  # SO THAT I WONT INDEX THIS PATIENT
+            self.golden_truth[field.id] = self.get_from_dataframe(dataframe, field.id)
+        print "golden truth of patient {} is {}".format(self.id, json.dumps(self.golden_truth))
+        return self.golden_truth
 
     def to_json(self):
         """Converts the class into JSON."""
