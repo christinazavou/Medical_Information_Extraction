@@ -33,13 +33,13 @@ def init_dataset_patients(forms):
 
 
 def index_dataset_patients(forms):
-    for form in forms:
+    for form in forms:  # todo: is only for one report !! if already patient is index should not be indexed again !
+        form_dataframe = form.get_dataframe()
         for patient in form.patients:
             patient_reports = patient.read_report_csv()  # list of dicts i.e. reports
-            es_index.put_doc('patient', patient.id)
-            print "patient inserted"
+            golden_truth = {form.id: patient.read_golden_truth(form_dataframe, form)}
+            es_index.put_doc('patient', patient.id, data=golden_truth)
             es_index.put_doc('report', parent_type='patient', parent_id=patient.id, data=patient_reports)
-            print "reports inserted"
             print "patient id: {} and his reports finished indexing".format(patient.id)
 
 
