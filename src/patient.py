@@ -4,7 +4,8 @@ import os
 import csv
 import json
 import re
-from utils import csv2list_of_dicts
+from utils import csv2list_of_dicts, var_to_utf
+import copy
 
 
 class Patient(object):
@@ -21,12 +22,10 @@ class Patient(object):
     def read_report_csv(self):
         reports = csv2list_of_dicts(os.path.join(self.dossier_path, 'report.csv'))
         self.num_of_reports = len(reports)
-        return reports
+        return var_to_utf(reports)
 
     def get_from_dataframe(self, dataframe, field_name):
-        result = dataframe[dataframe['PatientNr'] == self.id]
-        if not result[field_name].as_matrix()[0]:
-            print "not ", result[field_name].as_matrix()[0]
+        result = dataframe[dataframe[u'PatientNr'] == self.id]
         return result[field_name].as_matrix()[0]
 
     def read_golden_truth(self, dataframe, form):  # already checked who are consistent

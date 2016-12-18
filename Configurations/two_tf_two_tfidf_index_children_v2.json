@@ -33,10 +33,10 @@
     "mappings":{
       "patient":{},
       "report": {
-        "_parent":{
-          "type": "patient"
-        },
         "properties": {
+          "patient":{
+            "type": "string"
+          },
           "date": {
             "type": "string"
           },

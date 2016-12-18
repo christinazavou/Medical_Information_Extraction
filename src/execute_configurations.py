@@ -21,8 +21,13 @@ else:
 this_dir = os.path.dirname(os.path.realpath(__file__))
 main_file = os.path.join(this_dir, "main.py")
 
-start_time = time.time()
-configuration = 23
-run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configuration, dataPath, resultsPath)
-os.system(run_cmd)
-print "Finished configuration {} after {} minutes.".format(configuration, (time.time() - start_time) / 60.0)
+# start_time = time.time()
+# configuration = 23
+# run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configuration, dataPath, resultsPath)
+# os.system(run_cmd)
+# print "Finished configuration {} after {} minutes.".format(configuration, (time.time() - start_time) / 60.0)
+
+ids = next(os.walk('C:\Users\Christina\Documents\Ads_Ra_0\Data\colorectaal\patients_selection_colorectaal\\'))[1]
+for id_ in ids:
+    run_cmd = "python \"{}\" \"{}\"".format("es_connection.py", id_)
+    os.system(run_cmd)

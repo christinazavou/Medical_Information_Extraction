@@ -367,7 +367,8 @@
             "Rectaal bloedverlies"
         ],
         "values":{
-            "Yes":[]
+            "Yes":[],
+            "": []
         }
     },
     "klachten_klacht2":{
@@ -377,14 +378,16 @@
             "veranderd defaecatiepatroon"
         ],
         "values":{
-            "Yes":[]
+            "Yes":[],
+            "":[]
         }
     },
     "klachten_klacht4":{
         "condition":"",
         "description":["Anemie"],
         "values":{
-            "Yes":[]
+            "Yes":[],
+            "": []
         }
     },
     "mdo_chir":{

@@ -1,5 +1,6 @@
 import json
 import pickle
+from utils import var_to_utf
 
 
 class DataSet(object):
@@ -13,7 +14,7 @@ class DataSet(object):
 
     def to_json(self):
         """Converts the class into JSON."""
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True)
+        return json.dumps(self, default=lambda o: var_to_utf(o.__dict__), sort_keys=True)
 
     def __str__(self):
         return self.to_json()

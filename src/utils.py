@@ -3,6 +3,7 @@ import re
 import csv
 from collections import Counter
 import types
+import copy
 
 
 # def read_dossier(dossier_folder, accepted_file_names):
@@ -18,56 +19,67 @@ def csv2list_of_dicts(csv_filename):
     with open(csv_filename, mode='r') as csv_file:
         csv_file_reader = csv.reader(csv_file, delimiter=',')
         header = csv_file_reader.next()
-        header = list_2_utf(header)
+        header = var_to_utf(header)
         rows = list()
         for row in csv_file_reader:
             row_dict = dict()
             for col_num in range(len(header)):
                 row_dict[header[col_num]] = row[col_num]
             rows.append(row_dict)
-        # if len(rows) == 1:
-        #     rows = rows[0]
         return rows
 
 
 def condition_satisfied(golden_truth, condition):
     # for a given patient(the golden truth) check whether the field to be field satisfies its condition(if exist) or not
-    if condition == "":
+    if condition == u'':
         return True
-    conditioned_field, condition_expression = re.split(' !?= ', condition)
-    if "!=" in condition:
-        print "!="
+    conditioned_field, condition_expression = re.split(u' !?= ', condition)
+    if u'!=' in condition:
+        print u'!='
         if golden_truth[conditioned_field] != condition_expression:
             return True
-    elif "=" in condition:
-        print "="
+    elif u'=' in condition:
+        print u'='
         if golden_truth[conditioned_field] == condition_expression:
             return True
     else:
         return False
 
 
-def list_2_utf(l):
-    return [to_utf_8(i) for i in l]
-
-
-def to_utf_8(txt):
-    if isinstance(txt, str):
-        return txt.encode('utf-8')
-    elif isinstance(txt, unicode):
-        return txt
+def var_to_utf(s):
+    if isinstance(s, list):
+        return [var_to_utf(i) for i in s]
+    if isinstance(s, dict):
+        new_dict = dict()
+        for key, value in s.items():
+            new_dict[var_to_utf(key)] = var_to_utf(copy.deepcopy(value))
+        return new_dict
+    if isinstance(s, str):
+        if is_ascii(s):
+            return s.encode('utf-8')
+        else:
+            return s.decode('utf-8')
+    elif isinstance(s, unicode):
+        return s
+    elif isinstance(s, int) or isinstance(s, float):
+        return s
     else:
-        print "not a string"
-        return None
+        print "s:"
+        print s
+        raise Exception("unknown type to encode ...")
+
+
+def is_ascii(s):
+    return all(ord(c) < 128 for c in s)
 
 
 def find_highlighted_words(txt):
-    sentence = u' '.join(txt.split(' ')).encode('utf-8')
+    sentence = u' '.join(var_to_utf(txt).split(u' '))
     words = []
-    m = [re.match("<em>.*</em>", word) for word in sentence.split()]
+    m = [re.match(u"<em>.*</em>", word) for word in sentence.split()]
     for mi in m:
         if mi:
-            words.append(mi.group().replace('<em>', '').replace('</em>', ''))
+            words.append(mi.group().replace(u'<em>', u'').replace(u'</em>', u''))
     return words
 
 
@@ -76,24 +88,27 @@ def find_word_distribution(words):
 
 
 def remove_tokens(source_text):
-    to_remove = ['newlin', 'newline', 'NEWLINE', 'NEWLIN']
-    return " ".join([word for word in source_text.split() if word not in to_remove])
+    to_remove = [u'newlin', u'newline', u'NEWLINE', u'NEWLIN']
+    return u' '.join([word for word in source_text.split() if word not in to_remove])
 
 
 def remove_codes(source_text):
-    s = source_text.split(' ')
-    m = [re.match("\(%.*%\)", word) for word in s]
+    s = source_text.split(u' ')
+    m = [re.match(u"\(%.*%\)", word) for word in s]
     to_return = source_text
     for m_i in m:
         if m_i:
-            to_return = to_return.replace(m_i.group(), "")
-    m = [re.match("\[.*\]", word) for word in s]
+            to_return = to_return.replace(m_i.group(), u'')
+    m = [re.match(u"\[.*\]", word) for word in s]
     for m_i in m:
         if m_i:
-            to_return = to_return.replace(m_i.group(), "")
+            to_return = to_return.replace(m_i.group(), u'')
     return to_return
 
 
 def pre_process_report(report_dict):
-    report_dict['description'] = remove_tokens(remove_codes(report_dict['description']))
+    report_dict[u'description'] = remove_tokens(remove_codes(report_dict[u'description']))
     return report_dict
+
+if __name__ == "__main__":
+    print type(23)

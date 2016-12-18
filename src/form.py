@@ -21,17 +21,17 @@ class Form(object):
             self.fields.append(new_field)
 
     def get_dataframe(self):
-        fields_list = ['PatientNr']
+        fields_list = [u'PatientNr']
         fields_list += [field.id for field in self.fields]
         fields_list = [str(field) for field in fields_list]
         fields_types = dict()
         for field in fields_list:
             fields_types[field] = str
-        dataframe = pd.read_csv(self.csv_file, usecols=fields_list, dtype=fields_types)
+        dataframe = pd.read_csv(self.csv_file, usecols=fields_list, dtype=fields_types, encoding='utf-8').fillna(u'')
         return dataframe
 
     def to_voc(self):
-        return {'id': self.id, 'fields':[f.to_voc() for f in self.fields]}
+        return {u'id': self.id, u'fields': [f.to_voc() for f in self.fields]}
 
     def to_json(self):
         """Converts the class into JSON."""

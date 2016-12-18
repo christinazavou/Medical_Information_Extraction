@@ -103,6 +103,44 @@ def search_body(query_body, highlight_body=None, min_score=0):
     return body
 
 
+def has_parent_query(parent_type, parent_id):
+    body = {
+        "has_parent": {
+            "type": parent_type,
+            "query":  term_query("_id", parent_id)
+        }
+    }
+    return body
+
+
+def query_string(fields, query):
+    body = {
+        "query_string": {
+            "fields": fields,
+            "query": query,
+            "use_dis_max": "true"
+        }
+    }
+    return body
+
+
+def multi_match_query(query_text, query_fields, query_type, slop=None, operator=None, pct=None):
+    body = {
+        "multi_match": {
+            "query": query_text,
+            "type": query_type,
+            "fields": query_fields
+        }
+    }
+    if slop:
+        body["multi_match"]["slop"] = slop
+    if operator:
+        body["multi_match"]["operator"] = operator
+    if pct:
+        body["multi_match"]["minimum_should_match"] = pct
+    return body
+
+
 def disjunction_of_conjunctions(phrases, skip_length=5):
     if not phrases:
         return ""
@@ -132,17 +170,6 @@ def disjunction_of_conjunctions(phrases, skip_length=5):
     return query
 
 
-def query_string(fields, query):
-    body = {
-        "query_string": {
-            "fields": fields,
-            "query": query,
-            "use_dis_max": "true"
-        }
-    }
-    return body
-
-
 def big_phrases_small_phrases(phrases, max_words=5):
     big_set = set()
     small_set = set()
@@ -154,40 +181,10 @@ def big_phrases_small_phrases(phrases, max_words=5):
     return list(big_set), list(small_set)
 
 
-def multi_match_query(query_text, query_fields, query_type, slop=None, operator=None, pct=None):
-    body = {
-        "multi_match": {
-            "query": query_text,
-            "type": query_type,
-            "fields": query_fields
-        }
-    }
-    if slop:
-        body["multi_match"]["slop"] = slop
-    if operator:
-        body["multi_match"]["operator"] = operator
-    if pct:
-        body["multi_match"]["minimum_should_match"] = pct
-    return body
+def description_value_combo(possible_descriptions, possible_values):
+    phrases = []
+    for value in possible_values:
+        for description in possible_descriptions:
+            phrases.append("{} {}".format(value, description))
+    return phrases
 
-
-def has_parent_query(parent_type, parent_id):
-    body = {
-        "has_parent": {
-            "type": parent_type,
-            "query":  term_query("_id", parent_id)
-        }
-    }
-    return body
-
-
-if __name__ == "__main__":
-    # should_body = list()
-    # should_body.append(multi_match_query("Volgende groet",
-    #                   ["report.description", "report.description.dutch_tf_description", "report.description.tf_description"],
-    #                   query_type="phrase", slop=10))
-    #
-    # body = bool_body(should_body=should_body, min_should_match=1)
-    import json
-    # print json.dumps(body)
-    print json.dumps(has_parent_query("patient","3340"))

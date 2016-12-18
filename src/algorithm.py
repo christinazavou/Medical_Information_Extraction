@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-from patient_form_assignment import PatientFormAssignment, FieldAssignment
+from patient_form_assignment import PatientFormAssignment
+from field_assignment import FieldAssignment
 from queries import search_body, highlight_query, multi_match_query, query_string, big_phrases_small_phrases, \
-    bool_body, disjunction_of_conjunctions, has_parent_query
+    bool_body, disjunction_of_conjunctions, has_parent_query, term_query, description_value_combo
 import random
 import json
 from utils import find_highlighted_words, find_word_distribution, condition_satisfied
 from patient_relevant_utils import PatientRelevance
 import pickle
+import copy
 
 
-print_freq = 0.002
+print_freq = 0.005
 fragments = 10
 
 
@@ -38,20 +40,24 @@ def pick_score_and_index(scores, verbose=False):
 class Algorithm(object):
 
     def __init__(self, name, patient_relevant=False, min_score=0, search_fields=None,
-                 use_description1ofk=None, description_as_phrase=None, value_as_phrase=None, slop=10):
-        self.name = name
-        self.con = None
-        self.index = None
-        self.assignments = list()
-        self.patient_relevance_test = PatientRelevance() if patient_relevant else None
-        self.min_score = min_score
-        self.search_fields = 'description' if not search_fields else search_fields
-        self.use_description1ofk = use_description1ofk if use_description1ofk else False
-        self.description_as_phrase = description_as_phrase if description_as_phrase else False
-        self.value_as_phrase = value_as_phrase if value_as_phrase else False
-        self.parent_type = 'patient'
-        self.search_type = 'report'
-        self.slop = slop
+                 use_description1ofk=0, description_as_phrase=None, value_as_phrase=None, slop=10, f=None):
+        if f:
+            copy_instance = pickle.load(open(f, 'rb'))
+            print "OK"
+        else:
+            self.name = name
+            self.con = None
+            self.index = None
+            self.assignments = list()
+            self.patient_relevance_test = PatientRelevance() if patient_relevant else None
+            self.min_score = min_score
+            self.search_fields = 'description' if not search_fields else search_fields
+            self.use_description1ofk = use_description1ofk if use_description1ofk else 0
+            self.description_as_phrase = description_as_phrase if description_as_phrase else False
+            self.value_as_phrase = value_as_phrase if value_as_phrase else False
+            self.parent_type = 'patient'
+            self.search_type = 'report'
+            self.slop = slop
 
     # todo: if dutch_tf_description then highlights consist of slightly different words..how to identify ...
 
@@ -72,6 +78,8 @@ class Algorithm(object):
         comment = ""
         hits = search_results['hits']['hits']
         if hits:
+            if random.random<print_freq:
+                print "search_resutls: {}".format(search_results)
             comment += "hits found"
             relevant_reports_ids = [hit['_id'] for hit in hits]
             scores_reports_ids = [hit['_score'] for hit in hits]
@@ -97,37 +105,23 @@ class Algorithm(object):
                 score, idx = pick_score_and_index(scores_reports_ids)
                 return score, relevant_reports_ids[idx], "{}. word distribution = {}".format(comment, word_distribution)
             else:
-                return None, None, "no relevant reports"
+                return None, None, comment+"no relevant reports"
         else:
             return None, None, "no hits"
 
-    def value_query(self, possible_values):
-        should_body = list()
-        big, small = big_phrases_small_phrases(possible_values)
-        if self.value_as_phrase:
-            for v in small:
-                should_body.append(multi_match_query(v, self.search_fields, query_type="phrase", slop=self.slop))
-        else:
-            should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
-        for v in big:
-            should_body.append(
-                multi_match_query(v, self.search_fields, query_type='best_fields', operator='OR', pct='40%'))
-        body = bool_body(should_body=should_body, min_should_match=1)
-        return body
-
-    def description_query(self, description):
+    def possibilities_query(self, possible_strings):
         """Description is a list of possible descriptions to the field.
         Return a bool query that returns results if at least one of the possible descriptions is found"""
         should_body = list()
-        big, small = big_phrases_small_phrases(description)
+        big, small = big_phrases_small_phrases(possible_strings)
         if self.description_as_phrase:
-            for d in small:
-                should_body.append(multi_match_query(d, self.search_fields, query_type="phrase", slop=self.slop))
+            for p in small:
+                should_body.append(multi_match_query(p, self.search_fields, query_type="phrase", slop=self.slop))
         else:
             should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
-        for d in big:
+        for p in big:
             should_body.append(
-                multi_match_query(d, self.search_fields, query_type="best_fields", operator='OR', pct='40%'))
+                multi_match_query(p, self.search_fields, query_type="best_fields", operator='OR', pct='40%'))
         body = bool_body(should_body=should_body, min_should_match=1)
         return body
 
@@ -136,24 +130,24 @@ class Algorithm(object):
         return highlight_body
 
     def has_parent_body(self, parent_id):
-        return has_parent_query(self.parent_type, parent_id)
+        # return has_parent_query(self.parent_type, parent_id)
+        return term_query("patient", parent_id)
 
     def make_patient_form_assignment(self, assignment):
         for field in assignment.form.fields:
             if condition_satisfied(assignment.patient.golden_truth, field.condition):
-                if field.is_unary() or field.is_binary():
-                    self.assign_unary_binary(assignment, field)
+                if field.is_binary():
+                    self.assign_binary(assignment, field)
                 elif field.is_open_question():
                     pass
                 else:
                     self.pick_value_decision(assignment, field)
             else:
-                pass
-                # assignment.fields_assignments.append(FieldAssignment(...))  # don't consider such cases
+                pass  # don't consider such cases
 
-    def assign_unary_binary(self, assignment, field):  # assignment is a PatientFormAssignment
+    def assign_binary(self, assignment, field):  # assignment is a PatientFormAssignment
         must_body = list()
-        db = self.description_query(field.description)
+        db = self.possibilities_query(field.description)
         must_body.append(db)
         hb = self.highlight_body()
         pb = self.has_parent_body(assignment.patient.id)
@@ -169,10 +163,11 @@ class Algorithm(object):
             field_assignment = FieldAssignment(field.id, value, best_hit_score, best_hit, comment)
             assignment.fields_assignments.append(field_assignment)
             return
-        if field.is_binary():
-            value = 'No' if field.in_values('No') else 'Nee'
-        else:
-            value = ''
+        value = ''
+        if field.in_values('No'):
+            value = 'No'
+        if field.in_values('Nee'):
+            value = 'Nee'
         field_assignment = FieldAssignment(field.id, value, best_hit_score, best_hit, comment)
         assignment.fields_assignments.append(field_assignment)
 
@@ -180,7 +175,7 @@ class Algorithm(object):
         """To assign anders check if description can be found and return the score and evidence of such a query"""
         if field.description:
             must_body = list()
-            db = self.description_query(field.description)
+            db = self.possibilities_query(field.description)
             must_body.append(db)
             hb = self.highlight_body()
             pb = self.has_parent_body(assignment.patient.id)
@@ -198,16 +193,20 @@ class Algorithm(object):
     def get_value_score(self, assignment, field, value):
         """Check if value can be found and return its score and evidence"""
         must_body = list()
-        vb = self.value_query(field.get_value_possible_values(value))
-        must_body.append(vb)
         hb = self.highlight_body()
         pb = self.has_parent_body(assignment.patient.id)
         must_body.append(pb)
-        qb = bool_body(must_body=must_body)
-        if self.use_description1ofk:
-            # todo: make it as a "value description " phrase
-            db = self.description_query(field.description)
-            qb = bool_body(must_body=must_body, should_body=db, min_should_match=1)
+        if self.use_description1ofk == 0 or self.use_description1ofk == 1:
+            vb = self.possibilities_query(field.get_value_possible_values(value))
+            must_body.append(vb)
+            qb = bool_body(must_body=must_body)
+            if self.use_description1ofk == 1:
+                db = self.possibilities_query(field.description)
+                qb = bool_body(must_body=must_body, should_body=db, min_should_match=1)
+        else:
+            qdv = description_value_combo(field.description, field.get_value_possible_values(value))
+            qb = bool_body(must_body=must_body, should_body=qdv, min_should_match=1)  # or add to qdv must
+
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
         if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
@@ -224,7 +223,7 @@ class Algorithm(object):
             if field.get_value_possible_values(value):
                 values_scores[i], values_best_hits[i], values_comments[i] = self.get_value_score(assignment, field, value)
             else:
-                last_choice.append(value)
+                last_choice.append(value)  # the ones w
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
             field_assignment = FieldAssignment(field.id, values[idx], score, values_best_hits[idx], values_comments[idx])
@@ -245,12 +244,25 @@ class Algorithm(object):
             assignment.fields_assignments.append(field_assignment)
 
     def save(self, f):
-        pass
+        pickle.dump(self, open(f, 'wb'))
 
-    def __get_state__(self):
-        # return self.dataset_forms
-        pass
+    def __setstate__(self, name, con, index, assignments, patient_relevance_test, min_score, search_fields,
+                     use_description1ofk, description_as_phrase, value_as_phrase, parent_type, search_type, slop):
+        self.name = name
+        self.con = con
+        self.index = index
+        self.assignments = assignments
+        self.patient_relevance_test = patient_relevance_test
+        self.min_score = min_score
+        self.search_fields = search_fields
+        self.use_description1ofk = use_description1ofk
+        self.description_as_phrase = description_as_phrase
+        self.value_as_phrase = value_as_phrase
+        self.parent_type = parent_type
+        self.search_type = search_type
+        self.slop = slop
 
-    def __set_state__(self, dataset_forms):
-        # self.dataset_forms = dataset_forms
-        pass
+    def __getstate__(self):
+        return self.name, self.con, self.index, self.assignments, self.patient_relevance_test, self.min_score,\
+               self.search_fields, self.use_description1ofk, self.description_as_phrase, self.value_as_phrase, \
+               self.parent_type, self.search_type, self.slop

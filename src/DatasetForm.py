@@ -20,14 +20,14 @@ class DataSetForm(Form):
         existing_form_patients = self.find_patient_folder_ids()
         dataframe = self.get_dataframe()
         for row in dataframe.iterrows():
-            patient_id = row[1]['PatientNr']
+            patient_id = row[1][u'PatientNr']
             patient_folder = os.path.join(self.form_patients_folder, patient_id)
             golden_truth = row[1]
             cp = self.consistent_patient(patient_id, existing_form_patients, patient_folder, golden_truth)
             if cp:
                 self.patients.append(cp)
             else:
-                print "patient {} not consistent with form {}".format(patient_id, self.id)
+                print u'patient {} not consistent with form {}'.format(patient_id, self.id)
 
     def consistent_patient(self, patient_id, folder_ids, patient_folder, golden_truth):
         if patient_id in folder_ids:
@@ -40,15 +40,20 @@ class DataSetForm(Form):
     def patient_values_consistent_with_form(self, golden_truth):
         consistent = True
         for field in self.fields:
-            if field.condition == "":
+            if field.condition == u'':
                 # then either value or NaN are accepted
                 continue
             else:
                 # then if condition is satisfied the field shouldn't be nan. except if its an unary field
+                """
                 if condition_satisfied(golden_truth, field.condition) and not field.is_unary():
                     consistent = field.in_values(golden_truth[field.id])
                     if not consistent:
                         break
+                """
+                if condition_satisfied(golden_truth, field.condition) and not field.in_values(golden_truth[field.id]):
+                    consistent = False
+                    break
         return consistent
 
         # """OR: to remove patients with missing category ...removes almost everyone: """
