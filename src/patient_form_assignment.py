@@ -9,11 +9,11 @@ class PatientFormAssignment(object):
         self.form = form
         self.fields_assignments = []
 
-    def get_field_assignment(self, field_name):
-        for field_assignment in self.fields_assignments:
-            if field_name in field_assignment.to_voc().keys():
-                return field_assignment
-        return None
+    # def get_field_assignment(self, field_name):
+    #     for field_assignment in self.fields_assignments:
+    #         if field_name in field_assignment.to_voc().keys():
+    #             return field_assignment
+    #     return None
 
     def to_voc(self):
         voc = {'patient': self.patient.id, 'form': self.form.id, 'assignments': [fa.to_voc() for fa in self.fields_assignments]}

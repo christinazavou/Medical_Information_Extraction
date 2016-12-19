@@ -162,7 +162,7 @@ class Algorithm(object):
         best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
         if best_hit_score:
             value = 'Yes' if field.in_values('Yes') else 'Ja'
-            field_assignment = FieldAssignment(field.id, value, best_hit_score, best_hit, comment)
+            field_assignment = FieldAssignment(field.id, value, assignment.patient, best_hit_score, best_hit, comment)
             assignment.fields_assignments.append(field_assignment)
             return
         value = ''
@@ -170,7 +170,7 @@ class Algorithm(object):
             value = 'No'
         if field.in_values('Nee'):
             value = 'Nee'
-        field_assignment = FieldAssignment(field.id, value, best_hit_score, best_hit, comment)
+        field_assignment = FieldAssignment(field.id, value, assignment.patient, best_hit_score, best_hit, comment)
         assignment.fields_assignments.append(field_assignment)
 
     def assign_last_choice(self, assignment, field):
@@ -228,21 +228,21 @@ class Algorithm(object):
                 last_choice.append(value)  # the ones w
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
-            field_assignment = FieldAssignment(field.id, values[idx], score, values_best_hits[idx], values_comments[idx])
+            field_assignment = FieldAssignment(field.id, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx])
             assignment.fields_assignments.append(field_assignment)
             return
         if last_choice and len(last_choice) == 1:
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
-            field_assignment = FieldAssignment(field.id, last_choice[0], value_score, value_best_hit, value_comment)
+            field_assignment = FieldAssignment(field.id, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment)
             assignment.fields_assignments.append(field_assignment)
             return
         elif last_choice:
             print "oops. more than one last choice."
         else:
-            # field_assignment = FieldAssignment(field.id, '', comment='nothing matched')
+            # field_assignment = FieldAssignment(field.id, '', assignment.patient, comment='nothing matched')
             # assignment.fields_assignments.append(field_assignment)
             idx = random.choice(range(len(values)))
-            field_assignment = FieldAssignment(field.id, values[idx], comment='nothing matched. random assignment')
+            field_assignment = FieldAssignment(field.id, values[idx], assignment.patient, comment='nothing matched. random assignment')
             assignment.fields_assignments.append(field_assignment)
 
     def save(self, f):

@@ -3,7 +3,7 @@ from DataSet import DataSet
 from settings import RunConfiguration
 import os
 from DatasetForm import DataSetForm
-from algorithm_result import AlgorithmResult
+from algorithm_result import AlgorithmResultVisualization
 from es_index import EsIndex
 from algorithm import Algorithm
 import sys
@@ -114,9 +114,10 @@ if __name__ == "__main__":
         algorithm = Algorithm('baseline', True, 0, ['description'], 0, True, True)
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
-            algorithm.save_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
+        algorithm.save_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
         x = algorithm.assignments
     else:
-        y, x = Algorithm.load_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
-    for assignment in x:
-        print assignment.patient.golden_truth
+        _, x = Algorithm.load_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
+
+    arv = AlgorithmResultVisualization(x)
+    arv.evaluate_accuracies()

@@ -4,6 +4,7 @@ import os
 from patient import Patient
 from utils import condition_satisfied
 import json
+from field_assignment import FieldAssignment
 
 
 class DataSetForm(Form):
@@ -64,3 +65,15 @@ class DataSetForm(Form):
         #         if not consistent:
         #             break
         # return consistent
+
+    @staticmethod
+    def evaluate(form_assignments):
+        fields_assignments = dict()
+        fields_accuracies = dict()
+        for assignment in form_assignments:
+            if assignment.field_name not in fields_assignments.keys():
+                fields_assignments[assignment.field_name] = []
+            fields_assignments[assignment.field_name].append((assignment.value, assignment.target))
+        for fieldname, fieldassignments in fields_assignments.items():
+            fields_accuracies[fieldname] = FieldAssignment.evaluate(fieldassignments)
+        return fields_accuracies
