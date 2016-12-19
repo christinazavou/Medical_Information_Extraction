@@ -134,6 +134,21 @@ def print_heat_map(heat_map, field_name, values, out_folder):
     plt.close()
 
 
+def plot_distribution(counts, field_name, values, out_folder):
+    if not os.path.isdir(out_folder):
+        os.mkdir(out_folder)
+    names_dict = values_names_dict(values)
+    plt.figure()
+    X = np.arange(len(counts))
+    plt.bar(X, counts, align='center', width=0.5)
+    plt.xticks(X, names_dict.values())
+    ymax = max(counts) + 1
+    plt.ylim(0, ymax)
+    plt.title(field_name)
+    plt.savefig(os.path.join(out_folder, field_name + '.png'))
+    plt.close()
+
+
 def values_names_dict(fields_values):
     # accepts list
     names_dict = {}

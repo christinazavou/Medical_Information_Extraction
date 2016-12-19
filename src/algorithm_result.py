@@ -44,3 +44,7 @@ class AlgorithmResultVisualization(object):
     def heat_maps(self, out_folder):
         for formname, formassignments in self.forms_assignments.items():
             DataSetForm.heat_map(formassignments, self.forms[formname].fields, out_folder)
+
+    def plot_real_distribution(self, out_folder1, out_folder2):
+        for formname, formassignments in self.forms_assignments.items():
+            DataSetForm.real_distribution(formassignments, self.forms[formname].fields, out_folder1, out_folder2)

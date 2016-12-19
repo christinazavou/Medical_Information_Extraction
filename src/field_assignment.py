@@ -1,7 +1,7 @@
 from __future__ import division
 import json
 import numpy as np
-from utils import print_heat_map
+from utils import print_heat_map, plot_distribution
 import copy
 
 
@@ -68,3 +68,18 @@ class FieldAssignment(object):
                 else:
                     confusion_matrices[field_value][1][1] += 1
         return confusion_matrices
+
+    @staticmethod
+    def real_distribution(field, field_assignments, out_folder1, out_folder2):
+        field_values = copy.deepcopy(field.get_values())
+        if not field.in_values(u''):
+            field_values.append(u'')
+        # field_predicted_counts = np.zeros(len(field_values))
+        field_real_counts = np.zeros(len(field_values))
+        for value, target in field_assignments:
+            # field_values_idx_value = field_values.index(value)
+            field_values_idx_target = field_values.index(target)
+            # field_predicted_counts[field_values_idx_value] += 1
+            field_real_counts[field_values_idx_target] += 1
+            # plot_distribution(field_predicted_counts, field.id, field_values, out_folder1)
+            plot_distribution(field_real_counts, field.id, field_values, out_folder2)

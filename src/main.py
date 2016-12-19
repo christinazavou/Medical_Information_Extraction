@@ -122,4 +122,5 @@ if __name__ == "__main__":
     arv = AlgorithmResultVisualization(x)
     # arv.evaluate_accuracies()
     # arv.heat_maps(os.path.join(settings['RESULTS_PATH'], 'heatmpas'))
-    arv.confusion_matrices(os.path.join(settings['RESULTS_PATH'], 'confusion_matrices.txt'))
+    # arv.confusion_matrices(os.path.join(settings['RESULTS_PATH'], 'confusion_matrices.txt'))
+    arv.plot_real_distribution(os.path.join(settings['RESULTS_PATH'], 'predictions'), os.path.join(settings['RESULTS_PATH'], 'real'))

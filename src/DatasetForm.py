@@ -96,3 +96,9 @@ class DataSetForm(Form):
         fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
         for form_field in form_fields:
             FieldAssignment.heat_map(form_field, fields_assignments[form_field.id], out_folder)
+
+    @staticmethod
+    def real_distribution(form_assignments, form_fields, out_folder1, out_folder2):
+        fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
+        for form_field in form_fields:
+            FieldAssignment.real_distribution(form_field, fields_assignments[form_field.id], out_folder1, out_folder2)
