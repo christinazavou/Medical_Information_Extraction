@@ -67,31 +67,30 @@ class DataSetForm(Form):
         # return consistent
 
     @staticmethod
-    def evaluate(form_assignments):
-        fields_assignments = dict()
-        fields_accuracies = dict()
-        for assignment in form_assignments:
-            if assignment.field_name not in fields_assignments.keys():
-                fields_assignments[assignment.field_name] = []
-            fields_assignments[assignment.field_name].append((assignment.value, assignment.target))
-        for fieldname, fieldassignments in fields_assignments.items():
-            fields_accuracies[fieldname] = FieldAssignment.evaluate(fieldassignments)
-        return fields_accuracies
-
-    @staticmethod
     def get_fields_assignments(form_assignments):
         fields_assignments = dict()
         for assignment in form_assignments:
             if assignment.field_name not in fields_assignments.keys():
                 fields_assignments[assignment.field_name] = []
             fields_assignments[assignment.field_name].append((assignment.value, assignment.target))
+        return fields_assignments
+
+    @staticmethod
+    def evaluate(form_assignments):
+        fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
+        fields_accuracies = dict()
+        for fieldname, fieldassignments in fields_assignments.items():
+            fields_accuracies[fieldname] = FieldAssignment.evaluate(fieldassignments)
+        return fields_accuracies
+
+    # @staticmethod
+    # def confusion_matrices(form_assignments, form_fields, out_file):
+    #     fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
+    #     for form_field in form_fields:
+    #         FieldAssignment.confusion_matrices(form_field, fields_assignments[form_field.id], out_file)
 
     @staticmethod
     def heat_map(form_assignments, form_fields, out_folder):
-        fields_assignments = dict()
-        for assignment in form_assignments:
-            if assignment.field_name not in fields_assignments.keys():
-                fields_assignments[assignment.field_name] = []
-            fields_assignments[assignment.field_name].append((assignment.value, assignment.target))
+        fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
         for form_field in form_fields:
             FieldAssignment.heat_map(form_field, fields_assignments[form_field.id], out_folder)

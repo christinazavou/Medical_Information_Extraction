@@ -28,8 +28,7 @@ class AlgorithmResultVisualization(object):
             forms_accuracies[formname] = DataSetForm.evaluate(formassignments)
         print "forms_accuracies: {}".format(json.dumps(forms_accuracies))
 
-    # def evaluate_recall_precision(self):
-    #     forms_precisions = dict()
+    # def confusion_matrices(self):
     #     for formname, formsassignments in self.forms_assignments.items():
 
     def heat_maps(self, out_folder):

@@ -47,3 +47,15 @@ class FieldAssignment(object):
             field_values_idx_target = field_values.index(target)
             heat_map[field_values_idx_value][field_values_idx_target] += 1
         print_heat_map(heat_map, field.id, field_values, out_folder)
+
+    # @staticmethod
+    # def confusion_matrices(field, field_assignments):
+    #     field_values = copy.deepcopy(field.get_values())
+    #     if not field.in_values(u''):
+    #         field_values.append(u'')
+    #
+    #     for field_value in field_values:
+    #         for value, target in field_assignments:
+    #             field_values_idx_value = field_values.index(value)
+    #             field_values_idx_target = field_values.index(target)
+    #             heat_map[field_values_idx_value][field_values_idx_target] += 1
