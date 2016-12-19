@@ -4,6 +4,10 @@ import csv
 from collections import Counter
 import types
 import copy
+import os
+from pandas import DataFrame
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 # def read_dossier(dossier_folder, accepted_file_names):
@@ -110,5 +114,30 @@ def pre_process_report(report_dict):
     report_dict[u'description'] = remove_tokens(remove_codes(report_dict[u'description']))
     return report_dict
 
-if __name__ == "__main__":
-    print type(23)
+
+def print_heat_map(heat_map, field_name, values, out_folder):
+    if not os.path.isdir(out_folder):
+        os.mkdir(out_folder)
+    names_dict = values_names_dict(values)
+    x = names_dict.values()
+    y = x
+    df = DataFrame(heat_map, index=x, columns=y)
+    plt.figure()
+    plt.pcolor(df)
+    plt.colorbar()
+    plt.yticks(np.arange(0.5, len(df.index), 1), df.index)
+    plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns)
+    plt.title(field_name)
+    plt.xlabel('Targets')
+    plt.ylabel('Predictions')
+    plt.savefig(os.path.join(out_folder, field_name + '.png'))
+    plt.close()
+
+
+def values_names_dict(fields_values):
+    # accepts list
+    names_dict = {}
+    possible_values = copy.deepcopy(fields_values)
+    for value in possible_values:
+        names_dict[value] = value[0:5] if len(value) > 5 else value
+    return names_dict

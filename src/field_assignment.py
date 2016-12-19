@@ -1,5 +1,8 @@
 from __future__ import division
 import json
+import numpy as np
+from utils import print_heat_map
+import copy
 
 
 class FieldAssignment(object):
@@ -32,3 +35,15 @@ class FieldAssignment(object):
                 accuracy += 1
         accuracy /= len(field_assignments)
         return accuracy
+
+    @staticmethod
+    def heat_map(field, field_assignments, out_folder):
+        field_values = copy.deepcopy(field.get_values())
+        if not field.in_values(u''):
+            field_values.append(u'')
+        heat_map = np.zeros((len(field_values), len(field_values)))
+        for value, target in field_assignments:
+            field_values_idx_value = field_values.index(value)
+            field_values_idx_target = field_values.index(target)
+            heat_map[field_values_idx_value][field_values_idx_target] += 1
+        print_heat_map(heat_map, field.id, field_values, out_folder)

@@ -121,3 +121,4 @@ if __name__ == "__main__":
 
     arv = AlgorithmResultVisualization(x)
     arv.evaluate_accuracies()
+    arv.heat_maps(os.path.join(settings['RESULTS_PATH'], 'heatmpas'))
