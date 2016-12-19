@@ -40,24 +40,20 @@ def pick_score_and_index(scores, verbose=False):
 class Algorithm(object):
 
     def __init__(self, name, patient_relevant=False, min_score=0, search_fields=None,
-                 use_description1ofk=0, description_as_phrase=None, value_as_phrase=None, slop=10, f=None):
-        if f:
-            copy_instance = pickle.load(open(f, 'rb'))
-            print "OK"
-        else:
-            self.name = name
-            self.con = None
-            self.index = None
-            self.assignments = list()
-            self.patient_relevance_test = PatientRelevance() if patient_relevant else None
-            self.min_score = min_score
-            self.search_fields = 'description' if not search_fields else search_fields
-            self.use_description1ofk = use_description1ofk if use_description1ofk else 0
-            self.description_as_phrase = description_as_phrase if description_as_phrase else False
-            self.value_as_phrase = value_as_phrase if value_as_phrase else False
-            self.parent_type = 'patient'
-            self.search_type = 'report'
-            self.slop = slop
+                 use_description1ofk=0, description_as_phrase=None, value_as_phrase=None, slop=10):
+        self.name = name
+        self.con = None
+        self.index = None
+        self.assignments = list()
+        self.patient_relevance_test = PatientRelevance() if patient_relevant else None
+        self.min_score = min_score
+        self.search_fields = 'description' if not search_fields else search_fields
+        self.use_description1ofk = use_description1ofk if use_description1ofk else 0
+        self.description_as_phrase = description_as_phrase if description_as_phrase else False
+        self.value_as_phrase = value_as_phrase if value_as_phrase else False
+        self.parent_type = 'patient'
+        self.search_type = 'report'
+        self.slop = slop
 
     # todo: if dutch_tf_description then highlights consist of slightly different words..how to identify ...
 
@@ -72,6 +68,12 @@ class Algorithm(object):
     def save_assignments(self, f):
         with open(f, 'w') as af:
             json.dump([a.to_voc() for a in self.assignments], af, indent=4)
+        x = self.assignments
+        pickle.dump(x, open(f.replace('.json', '_results.p'), 'wb'))
+
+    @staticmethod
+    def load_assignments(f):
+        return json.load(open(f, 'r')), pickle.load(open(f.replace('.json', '_results.p'), 'rb'))
 
     def score_and_evidence(self, search_results):
         """Returns score, hit, word_distribution"""

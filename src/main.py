@@ -116,8 +116,7 @@ if __name__ == "__main__":
             algorithm.assign(form, es_index)
             algorithm.save_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
         x = algorithm.assignments
-        pickle.dump(x, open('algooo.p','wb'))
     else:
-        x = pickle.load(open('algooo.p','rb'))
+        y, x = Algorithm.load_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
     for assignment in x:
-        print assignment.patient.id
+        print assignment.patient.golden_truth
