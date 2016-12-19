@@ -1,5 +1,6 @@
 from DatasetForm import DataSetForm
 import json
+import numpy as np
 
 
 class AlgorithmResultVisualization(object):
@@ -28,8 +29,17 @@ class AlgorithmResultVisualization(object):
             forms_accuracies[formname] = DataSetForm.evaluate(formassignments)
         print "forms_accuracies: {}".format(json.dumps(forms_accuracies))
 
-    # def confusion_matrices(self):
-    #     for formname, formsassignments in self.forms_assignments.items():
+    def confusion_matrices(self, out_file):
+        confusion_matrices = dict()
+        for formname, formsassignments in self.forms_assignments.items():
+            confusion_matrices[formname] = DataSetForm.confusion_matrices(formsassignments, self.forms[formname].fields)
+        with open(out_file, 'w') as f:
+            for formname, formconfusionmatrix in confusion_matrices.items():
+                for fieldname, fieldconfusionmatrix in formconfusionmatrix.items():
+                    for valuename, valueconfusionmatrix in fieldconfusionmatrix.items():
+                        f.write("form: {} field: {} value: {}\n".format(formname, fieldname, valuename))
+                        np.savetxt(f, confusion_matrices[formname][fieldname][valuename].astype(int), fmt='%i')
+                        f.write('\n')
 
     def heat_maps(self, out_folder):
         for formname, formassignments in self.forms_assignments.items():

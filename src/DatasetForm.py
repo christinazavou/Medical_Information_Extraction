@@ -83,11 +83,13 @@ class DataSetForm(Form):
             fields_accuracies[fieldname] = FieldAssignment.evaluate(fieldassignments)
         return fields_accuracies
 
-    # @staticmethod
-    # def confusion_matrices(form_assignments, form_fields, out_file):
-    #     fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
-    #     for form_field in form_fields:
-    #         FieldAssignment.confusion_matrices(form_field, fields_assignments[form_field.id], out_file)
+    @staticmethod
+    def confusion_matrices(form_assignments, form_fields):
+        fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
+        confusion_matrices = dict()
+        for form_field in form_fields:
+            confusion_matrices[form_field.id] = FieldAssignment.confusion_matrices(form_field, fields_assignments[form_field.id])
+        return confusion_matrices
 
     @staticmethod
     def heat_map(form_assignments, form_fields, out_folder):

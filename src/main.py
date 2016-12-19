@@ -120,5 +120,6 @@ if __name__ == "__main__":
         _, x = Algorithm.load_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
 
     arv = AlgorithmResultVisualization(x)
-    arv.evaluate_accuracies()
-    arv.heat_maps(os.path.join(settings['RESULTS_PATH'], 'heatmpas'))
+    # arv.evaluate_accuracies()
+    # arv.heat_maps(os.path.join(settings['RESULTS_PATH'], 'heatmpas'))
+    arv.confusion_matrices(os.path.join(settings['RESULTS_PATH'], 'confusion_matrices.txt'))
