@@ -79,9 +79,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\Documents\\'):
-            settings = RunConfiguration(24, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
+            settings = RunConfiguration(28, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
         else:
-            settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
+            settings = RunConfiguration(28, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     print "-------"
 
     if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
-        algorithm = Algorithm('baseline', False, 0, ['description'], 0, True, True)
+        algorithm = Algorithm('baseline', False, 0, ['description'], 1, True, True, 2)
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))

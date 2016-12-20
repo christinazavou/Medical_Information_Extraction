@@ -24,13 +24,14 @@ evaluate_algorithm: true
 evaluate_file: ""
 patients_pct: 1
 
-patient_relevant: true
+patient_relevant: false
 default_field: "description.dutch_tf_description"
 boost_fields: ["description.tf_description"]
+slop: 5
 min_score: 0
 description_as_phrase: True
 value_as_phrase: True
-use_description_1ofk: 0 # if 0 no use of description in multi.., if 1 then just use, if 2 use 'value description'
+use_description_1ofk: 2 # if 0 no use of description in multi.., if 1 then just use, if 2 use 'value description'
 
 unknowns: "exclude"
 forms: ["colorectaal"]
