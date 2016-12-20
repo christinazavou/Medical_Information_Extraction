@@ -50,5 +50,10 @@ class AlgorithmResultVisualization(object):
             DataSetForm.plot_distribution(formassignments, self.forms[formname].fields, out_folder1, out_folder2)
 
     def word_distribution(self, out_file):
+        wd_counts = {}
         for formname, formassignments in self.forms_assignments.items():
-            DataSetForm.word_distribution(formassignments, self.forms[formname].fields)
+            wd_counts[formname] = DataSetForm.word_distribution(formassignments, self.forms[formname].fields)
+        with open(out_file, 'w') as f:
+            for formname in wd_counts:
+                for fieldname in wd_counts[formname]:
+                    f.write('form: {} field: {} counts:\n{}\n'.format(formname, fieldname, wd_counts[formname][fieldname]))

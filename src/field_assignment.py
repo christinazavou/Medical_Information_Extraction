@@ -3,6 +3,8 @@ import json
 import numpy as np
 from utils import print_heat_map, plot_distribution
 import copy
+import ast
+from collections import Counter
 
 
 class FieldAssignment(object):
@@ -85,15 +87,12 @@ class FieldAssignment(object):
             plot_distribution(field_real_counts, field.id, field_values, out_folder2)
 
     @staticmethod
-    def word_distribution(field, field_assignments):
-        words = []
+    def word_distribution(field_assignments):
+        wd_counter = Counter()
         for _, _, comment in field_assignments:
             if 'word distribution' in comment:
                 _, wd = comment.split('. word distribution = ')
-                x = wd.replace('Counter(', '').replace(')', '')
-                print x
-                if x != 'None':
-                    y = json.loads(x)
-                    print y
-                    print type(y)
-
+                if wd != 'None':
+                    wd_dict = ast.literal_eval(wd.replace('Counter(', '').replace(')', ''))
+                    wd_counter += Counter(wd_dict)
+        return wd_counter

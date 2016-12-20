@@ -105,6 +105,8 @@ class DataSetForm(Form):
 
     @staticmethod
     def word_distribution(form_assignments, form_fields):
+        wd_counts = {}
         fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
         for form_field in form_fields:
-            FieldAssignment.word_distribution(form_field, fields_assignments[form_field.id])
+            wd_counts[form_field.id] = FieldAssignment.word_distribution(fields_assignments[form_field.id])
+        return wd_counts
