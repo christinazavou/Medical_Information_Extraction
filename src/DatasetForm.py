@@ -72,7 +72,7 @@ class DataSetForm(Form):
         for assignment in form_assignments:
             if assignment.field_name not in fields_assignments.keys():
                 fields_assignments[assignment.field_name] = []
-            fields_assignments[assignment.field_name].append((assignment.value, assignment.target))
+            fields_assignments[assignment.field_name].append((assignment.value, assignment.target, assignment.comment))
         return fields_assignments
 
     @staticmethod
@@ -98,7 +98,13 @@ class DataSetForm(Form):
             FieldAssignment.heat_map(form_field, fields_assignments[form_field.id], out_folder)
 
     @staticmethod
-    def real_distribution(form_assignments, form_fields, out_folder1, out_folder2):
+    def plot_distribution(form_assignments, form_fields, out_folder1, out_folder2):
         fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
         for form_field in form_fields:
-            FieldAssignment.real_distribution(form_field, fields_assignments[form_field.id], out_folder1, out_folder2)
+            FieldAssignment.plot_distribution(form_field, fields_assignments[form_field.id], out_folder1, out_folder2)
+
+    @staticmethod
+    def word_distribution(form_assignments, form_fields):
+        fields_assignments = DataSetForm.get_fields_assignments(form_assignments)
+        for form_field in form_fields:
+            FieldAssignment.word_distribution(form_field, fields_assignments[form_field.id])

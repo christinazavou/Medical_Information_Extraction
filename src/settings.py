@@ -22,8 +22,8 @@ class RunConfiguration(object):
         configurations_file = os.path.join(RUN_CONFIG_PATH, 'conf{}.yml'.format(self.NUM))
         with open(configurations_file, 'r') as cf:
             configurations_dict = yaml.load(cf)
-        self.DATA_PATH = data_path  # configurations_dict['DATA_PATH']
-        self.RESULTS_PATH = results_path  # configurations_dict['RESULTS_PATH']
+        self.DATA_PATH = data_path
+        self.RESULTS_PATH = os.path.join(results_path, 'conf'+self.NUM)
         if not os.path.isdir(self.RESULTS_PATH):
             os.mkdir(self.RESULTS_PATH)
         for key, value in configurations_dict.items():

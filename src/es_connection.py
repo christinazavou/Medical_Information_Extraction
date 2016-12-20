@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from elasticsearch import Elasticsearch
-from elasticsearch import TransportError, SSLError
+from elasticsearch import TransportError, ConnectionError
 import time
 import json
 import copy
@@ -8,6 +8,8 @@ import random
 import elasticsearch
 import pandas as pd
 from elasticsearch.helpers import parallel_bulk, bulk, streaming_bulk
+import subprocess
+
 
 FREQ = 1
 
@@ -19,16 +21,25 @@ class EsConnection(object):
             host = {"host": "localhost", "port": 9200}
         try:
             self.con = Elasticsearch(hosts=[host])
-            self.check_cluster()
-        except SSLError:
-            print "Improperly configured Exception:\n"
+        except ConnectionError:
+            raise Exception(ConnectionError)
+            # print "TRY"
+            # if os.path.isdir('C:\\Users\\Christina\\Desktop'):
+            #     subprocess.Popen('runelastic.bat', creationflags=subprocess.CREATE_NEW_CONSOLE)
+            #     time.sleep(50)
+            #     print " ElasticSearch has started "
+            #     self.con = Elasticsearch(hosts=[host])
+            #     self.check_cluster()
         except:
             raise Exception("some exception occurred at connection establishment")
 
     def check_cluster(self):
         res = self.con.cluster.health()
-        if res['status'] == "red":
+        while res['status'] == "red":
             print("health status is %s " % res['status'])
+            time.sleep(5)
+            res = self.con.cluster.health()
+        print('health status is %s ' % res['status'])
 
     def create_index(self, index, shards=5, replicas=1, body=None):
         if self.con.indices.exists(index):
@@ -237,13 +248,5 @@ import os
 import sys
 
 if __name__ == "__main__":
-    f = "C:\Users\Christina\Documents\Ads_Ra_0\Data\colorectaal\patients_selection_colorectaal\\ID\\report.csv"
-    es = EsConnection()
-    data = DataSet(os.path.join('C:\\Users\\Christina\\PycharmProjects\\Medical_Information_Extraction\\results', 'dataset.p'))
-
-    pid = sys.argv[1]
-
-    for form in data.dataset_forms:
-        for patient in form.patients:
-            if patient.id == pid:
-                es.put_reports("mie_new", patient.id, patient.num_of_reports, f.replace('ID', patient.id))
+    ee = EsConnection()
+    print ee.con.cluster.health()

@@ -30,7 +30,7 @@ class FieldAssignment(object):
     @staticmethod
     def evaluate(field_assignments):
         accuracy = 0
-        for value, target in field_assignments:
+        for value, target, _ in field_assignments:
             if value == target:
                 accuracy += 1
         accuracy /= len(field_assignments)
@@ -42,7 +42,7 @@ class FieldAssignment(object):
         if not field.in_values(u''):
             field_values.append(u'')
         heat_map = np.zeros((len(field_values), len(field_values)))
-        for value, target in field_assignments:
+        for value, target, _ in field_assignments:
             field_values_idx_value = field_values.index(value)
             field_values_idx_target = field_values.index(target)
             heat_map[field_values_idx_value][field_values_idx_target] += 1
@@ -56,7 +56,7 @@ class FieldAssignment(object):
         confusion_matrices = {}
         for field_value in field_values:
             confusion_matrices[field_value] = np.zeros((2, 2))
-        for value, target in field_assignments:
+        for value, target, _ in field_assignments:
             for field_value in field_values:
                 if field_value == target:
                     if field_value == value:
@@ -70,16 +70,30 @@ class FieldAssignment(object):
         return confusion_matrices
 
     @staticmethod
-    def real_distribution(field, field_assignments, out_folder1, out_folder2):
+    def plot_distribution(field, field_assignments, out_folder1, out_folder2):
         field_values = copy.deepcopy(field.get_values())
         if not field.in_values(u''):
             field_values.append(u'')
-        # field_predicted_counts = np.zeros(len(field_values))
+        field_predicted_counts = np.zeros(len(field_values))
         field_real_counts = np.zeros(len(field_values))
-        for value, target in field_assignments:
-            # field_values_idx_value = field_values.index(value)
+        for value, target, _ in field_assignments:
+            field_values_idx_value = field_values.index(value)
             field_values_idx_target = field_values.index(target)
-            # field_predicted_counts[field_values_idx_value] += 1
+            field_predicted_counts[field_values_idx_value] += 1
             field_real_counts[field_values_idx_target] += 1
-            # plot_distribution(field_predicted_counts, field.id, field_values, out_folder1)
+            plot_distribution(field_predicted_counts, field.id, field_values, out_folder1)
             plot_distribution(field_real_counts, field.id, field_values, out_folder2)
+
+    @staticmethod
+    def word_distribution(field, field_assignments):
+        words = []
+        for _, _, comment in field_assignments:
+            if 'word distribution' in comment:
+                _, wd = comment.split('. word distribution = ')
+                x = wd.replace('Counter(', '').replace(')', '')
+                print x
+                if x != 'None':
+                    y = json.loads(x)
+                    print y
+                    print type(y)
+

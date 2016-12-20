@@ -45,6 +45,10 @@ class AlgorithmResultVisualization(object):
         for formname, formassignments in self.forms_assignments.items():
             DataSetForm.heat_map(formassignments, self.forms[formname].fields, out_folder)
 
-    def plot_real_distribution(self, out_folder1, out_folder2):
+    def plot_distribution(self, out_folder1, out_folder2):
         for formname, formassignments in self.forms_assignments.items():
-            DataSetForm.real_distribution(formassignments, self.forms[formname].fields, out_folder1, out_folder2)
+            DataSetForm.plot_distribution(formassignments, self.forms[formname].fields, out_folder1, out_folder2)
+
+    def word_distribution(self, out_file):
+        for formname, formassignments in self.forms_assignments.items():
+            DataSetForm.word_distribution(formassignments, self.forms[formname].fields)

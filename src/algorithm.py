@@ -89,7 +89,7 @@ class Algorithm(object):
             for hit in hits:
                 highlights = hit['highlight'] if 'highlight' in hit.keys() else []
                 if highlights:
-                    comment += " highlights found" if 'highlights' not in comment else ''
+                    comment += " highlights found " if 'highlights' not in comment else ''
                     words = []
                     for field_searched, highlight in highlights.items():
                         for sentence in highlight:
