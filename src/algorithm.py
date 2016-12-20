@@ -206,13 +206,18 @@ class Algorithm(object):
                 db = self.possibilities_query(field.description)
                 qb = bool_body(must_body=must_body, should_body=db, min_should_match=1)
         else:
-            qdv = description_value_combo(field.description, field.get_value_possible_values(value))
+            qdv = self.possibilities_query(description_value_combo(field.description, field.get_value_possible_values(value)))
             qb = bool_body(must_body=must_body, should_body=qdv, min_should_match=1)  # or add to qdv must
 
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
         if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
-        search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
+        try:
+            search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
+        except:
+            print "cause exception"
+            print json.dumps(the_current_body)
+            exit()
         return self.score_and_evidence(search_results)
 
     def pick_value_decision(self, assignment, field):
