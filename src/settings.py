@@ -23,14 +23,18 @@ class RunConfiguration(object):
         with open(configurations_file, 'r') as cf:
             configurations_dict = yaml.load(cf)
         self.DATA_PATH = data_path
-        self.RESULTS_PATH = os.path.join(results_path, 'conf'+self.NUM)
+        self.RESULTS_PATH = results_path
         if not os.path.isdir(self.RESULTS_PATH):
             os.mkdir(self.RESULTS_PATH)
+        self.SPECIFIC_RESULTS_PATH = os.path.join(results_path, 'conf'+self.NUM)
+        if not os.path.isdir(self.SPECIFIC_RESULTS_PATH):
+            os.mkdir(self.SPECIFIC_RESULTS_PATH)
         for key, value in configurations_dict.items():
             self.settings[key] = self.translate_path(value)
         self.settings['CONFIGURATIONS_PATH'] = CONFIGURATIONS_PATH
         self.settings['DATA_PATH'] = self.DATA_PATH
         self.settings['RESULTS_PATH'] = self.RESULTS_PATH
+        self.settings['SPECIFIC_RESULTS_PATH'] = self.SPECIFIC_RESULTS_PATH
 
     def translate_path(self, path):
         if type(path) != str:

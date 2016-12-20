@@ -115,26 +115,26 @@ if __name__ == "__main__":
     print data.dataset_forms[0].patients[0].golden_truth
     print "-------"
 
-    if not os.path.isfile(os.path.join(settings['RESULTS_PATH'], 'base_assign.json')):
+    if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
         algorithm = Algorithm('baseline', True, 0, ['description'], 0, True, True)
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
-        algorithm.save_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
+        algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
         x = algorithm.assignments
         acc = FieldAssignment.accuracies
         hm = FieldAssignment.heat_maps
         ev = FieldAssignment.extended_values
         cm = FieldAssignment.confusion_matrices
-        pickle.dump(acc, open(os.path.join(settings['RESULTS_PATH'], 'acc.p'), 'wb'))
-        pickle.dump(hm, open(os.path.join(settings['RESULTS_PATH'], 'hm.p'), 'wb'))
-        pickle.dump(ev, open(os.path.join(settings['RESULTS_PATH'], 'ev.p'), 'wb'))
-        pickle.dump(cm, open(os.path.join(settings['RESULTS_PATH'], 'cm.p'), 'wb'))
+        pickle.dump(acc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'), 'wb'))
+        pickle.dump(hm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'wb'))
+        pickle.dump(ev, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'wb'))
+        pickle.dump(cm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'wb'))
     else:
-        _, x = Algorithm.load_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
-        acc = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'acc.p'),'rb'))
-        hm = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'hm.p'), 'rb'))
-        ev = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'ev.p'), 'rb'))
-        cm = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'cm.p'), 'rb'))
+        _, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
+        acc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'),'rb'))
+        hm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'rb'))
+        ev = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'rb'))
+        cm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'rb'))
 
     arv = AlgorithmResultVisualization(x, acc, hm, ev, cm)
     # arv.evaluate_accuracies()
