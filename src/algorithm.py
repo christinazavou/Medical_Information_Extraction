@@ -166,7 +166,7 @@ class Algorithm(object):
         if best_hit_score:
             value = 'Yes' if field.in_values('Yes') else 'Ja'
             field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
-            assignment.fields_assignments.append(field_assignment)
+            assignment.add_field_assignment(field_assignment)
             return
         value = ''
         if field.in_values('No'):
@@ -174,7 +174,7 @@ class Algorithm(object):
         if field.in_values('Nee'):
             value = 'Nee'
         field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
-        assignment.fields_assignments.append(field_assignment)
+        assignment.add_field_assignment(field_assignment)
 
     def assign_last_choice(self, assignment, field):
         """To assign anders check if description can be found and return the score and evidence of such a query"""
@@ -237,21 +237,21 @@ class Algorithm(object):
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx])
-            assignment.fields_assignments.append(field_assignment)
+            assignment.add_field_assignment(field_assignment)
             return
         if last_choice and len(last_choice) == 1:
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
             field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment)
-            assignment.fields_assignments.append(field_assignment)
+            assignment.add_field_assignment(field_assignment)
             return
         elif last_choice:
             print "oops. more than one last choice."
         else:
             # field_assignment = FieldAssignment(field.id, '', assignment.patient, comment='nothing matched')
-            # assignment.fields_assignments.append(field_assignment)
+            # assignment.add_field_assignment(field_assignment)
             idx = random.choice(range(len(values)))
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, comment='nothing matched. random assignment')
-            assignment.fields_assignments.append(field_assignment)
+            assignment.add_field_assignment(field_assignment)
 
     def save(self, f):
         pickle.dump(self, open(f, 'wb'))

@@ -125,20 +125,23 @@ if __name__ == "__main__":
         hm = FieldAssignment.heat_maps
         ev = FieldAssignment.extended_values
         cm = FieldAssignment.confusion_matrices
+        pfpfa = PatientFormAssignment.per_form_per_field_assignments
         pickle.dump(acc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'), 'wb'))
         pickle.dump(hm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'wb'))
         pickle.dump(ev, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'wb'))
         pickle.dump(cm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'wb'))
+        pickle.dump(pfpfa, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'wb'))
     else:
         _, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
         acc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'),'rb'))
         hm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'rb'))
         ev = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'rb'))
         cm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'rb'))
+        pfpfa = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'rb'))
 
-    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm)
-    # arv.evaluate_accuracies()
-    # arv.heat_maps(os.path.join(settings['RESULTS_PATH'], 'heatmpas'))
-    # arv.confusion_matrices(os.path.join(settings['RESULTS_PATH'], 'confusion_matrices.txt'))
+    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm, pfpfa)
+    arv.evaluate_accuracies()
+    arv.heat_maps(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heatmpas'))
+    arv.confusion_matrices(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt'))
     # arv.plot_distribution(os.path.join(settings['RESULTS_PATH'], 'predictions'), os.path.join(settings['RESULTS_PATH'], 'real'))
     # arv.word_distribution(os.path.join(settings['RESULTS_PATH'], 'word_distribution'))

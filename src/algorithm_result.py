@@ -9,25 +9,14 @@ from utils import print_heat_map
 
 class AlgorithmResultVisualization(object):
 
-    def __init__(self, assignments, fields_accuracies, fields_heat_maps, fields_extended_values, fields_confusion_matrices):
+    def __init__(self, assignments, fields_accuracies, fields_heat_maps, fields_extended_values,
+                 fields_confusion_matrices, per_form_per_field_assignments):
         self.assignments = assignments
-        self.per_form_per_field_assignments = dict()
-        self.set_per_form_per_field_assignments()
-
+        self.per_form_per_field_assignments = per_form_per_field_assignments
         self.fields_accuracies = fields_accuracies
         self.fields_heat_maps = fields_heat_maps
         self.fields_extended_values = fields_extended_values
         self.fields_confusion_matrices = fields_confusion_matrices
-
-    def set_per_form_per_field_assignments(self):
-        for assignment in self.assignments:
-            if assignment.id not in self.per_form_per_field_assignments.keys():
-                self.per_form_per_field_assignments[assignment.id] = dict()
-            for field_assignment in assignment.fields_assignments:
-                if field_assignment.id not in self.per_form_per_field_assignments[assignment.id].keys():
-                    self.per_form_per_field_assignments[assignment.id][field_assignment.id] = [field_assignment]
-                else:
-                    self.per_form_per_field_assignments[assignment.id][field_assignment.id] += [field_assignment]
 
     def evaluate_accuracies(self):
         per_form_per_field_accuracies = dict()
