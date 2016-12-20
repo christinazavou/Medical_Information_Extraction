@@ -99,7 +99,7 @@ class FieldAssignment(Field):
     def evaluate_word_distribution(self):
         if 'word distribution' in self.comment:
             _, wd = self.comment.split('. word distribution = ')
-            if wd != 'None':
+            if wd != 'None' and wd != 'Counter()':
                 try:
                     wd_dict = ast.literal_eval(wd.replace('Counter(', '').replace(')', ''))
                     FieldAssignment.word_distribution[self.id] += Counter(wd_dict)
