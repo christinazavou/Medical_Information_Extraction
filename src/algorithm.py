@@ -9,9 +9,10 @@ from utils import find_highlighted_words, find_word_distribution, condition_sati
 from patient_relevant_utils import PatientRelevance
 import pickle
 import copy
+from form import Form
 
 
-print_freq = 0.005
+print_freq = 0.0005
 fragments = 10
 
 
@@ -61,7 +62,9 @@ class Algorithm(object):
         self.con = es_index.es.con  # directly to ElasticSearch connection establishment API class
         self.index = es_index.id
         for patient in dataset_form.patients:
-            current_assignment = PatientFormAssignment(patient, dataset_form)
+            current_form = Form(dataset_form.id, dataset_form.csv_file, dataset_form.config_file)
+            current_form.fields = dataset_form.fields
+            current_assignment = PatientFormAssignment(patient, current_form)
             self.make_patient_form_assignment(current_assignment)
             self.assignments.append(current_assignment)
 
@@ -136,7 +139,7 @@ class Algorithm(object):
         return term_query("patient", parent_id)
 
     def make_patient_form_assignment(self, assignment):
-        for field in assignment.form.fields:
+        for field in assignment.fields:
             if condition_satisfied(assignment.patient.golden_truth, field.condition):
                 if field.is_binary():
                     self.assign_binary(assignment, field)
@@ -162,7 +165,7 @@ class Algorithm(object):
         best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
         if best_hit_score:
             value = 'Yes' if field.in_values('Yes') else 'Ja'
-            field_assignment = FieldAssignment(field.id, value, assignment.patient, best_hit_score, best_hit, comment)
+            field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
             assignment.fields_assignments.append(field_assignment)
             return
         value = ''
@@ -170,7 +173,7 @@ class Algorithm(object):
             value = 'No'
         if field.in_values('Nee'):
             value = 'Nee'
-        field_assignment = FieldAssignment(field.id, value, assignment.patient, best_hit_score, best_hit, comment)
+        field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
         assignment.fields_assignments.append(field_assignment)
 
     def assign_last_choice(self, assignment, field):
@@ -233,12 +236,12 @@ class Algorithm(object):
                 last_choice.append(value)  # the ones w
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
-            field_assignment = FieldAssignment(field.id, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx])
+            field_assignment = FieldAssignment(field, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx])
             assignment.fields_assignments.append(field_assignment)
             return
         if last_choice and len(last_choice) == 1:
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
-            field_assignment = FieldAssignment(field.id, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment)
+            field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment)
             assignment.fields_assignments.append(field_assignment)
             return
         elif last_choice:
@@ -247,7 +250,7 @@ class Algorithm(object):
             # field_assignment = FieldAssignment(field.id, '', assignment.patient, comment='nothing matched')
             # assignment.fields_assignments.append(field_assignment)
             idx = random.choice(range(len(values)))
-            field_assignment = FieldAssignment(field.id, values[idx], assignment.patient, comment='nothing matched. random assignment')
+            field_assignment = FieldAssignment(field, values[idx], assignment.patient, comment='nothing matched. random assignment')
             assignment.fields_assignments.append(field_assignment)
 
     def save(self, f):

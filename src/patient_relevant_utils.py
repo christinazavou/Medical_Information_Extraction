@@ -3,6 +3,7 @@
 import pickle
 import os
 from ctcue import predict
+from utils import split_into_sentences
 
 
 class PatientRelevance:
@@ -32,5 +33,10 @@ class PatientRelevance:
     def check_report_relevance(self, report, words):
         for word in words:
             report = report.replace(word, "<DIS>")
-        related, score = self.patient_related(report)
+        related, score = self.patient_related(split_into_sentences(report))
         return related, score
+
+if __name__ == "__main__":
+    report = ", Zwolle, 2 maart 2012 Ref.: HH Betreft: Dhr. ( [PATIENTID] ) ] Amice collega, Bezoekdatum: 28 februari 2012. Voorgeschiedenis: Basocellulair carcinoom neuspunt links behandeld met excisie en aanvullende radiotherapie (2008). CVI bij ferriprieve aneamie en dependency oedeem (2010). Status na retinitis pigmentosa, cataract, rectaal bloedverlies bij waarschijnlijk haemorrhoiden. Thans bij controle zoals voorheen wat ingetrokken litteken linker neusvleugel, voorts huid geen afwijkingen van betekenis. Revisie: 1 jaar. Met vriendelijke groet, G.R.R. Kuiters, dermatoloog De toegangstijd voor Dermatologisch Centrum Isala bedraagt voor nieuwe patiënten 6 weken."
+    # r = PatientRelevance()
+    # r.check_report_relevance(report, ['rectaal', 'bloedverlies'])

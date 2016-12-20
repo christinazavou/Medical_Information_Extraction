@@ -11,6 +11,8 @@ import random
 import time
 import pandas as pd
 import pickle
+from patient_form_assignment import PatientFormAssignment
+from field_assignment import FieldAssignment
 
 
 FREQ = 1
@@ -76,7 +78,10 @@ if __name__ == "__main__":
     # todo: put reports in csv files with date sort... so that smaller ids give older reports !
 
     if len(sys.argv) < 4:
-        settings = RunConfiguration(23, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
+        if os.path.isdir('C:\\Users\\Christina\\Documents\\'):
+            settings = RunConfiguration(23, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
+        else:
+            settings = RunConfiguration(23, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 
@@ -116,12 +121,24 @@ if __name__ == "__main__":
             algorithm.assign(form, es_index)
         algorithm.save_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
         x = algorithm.assignments
+        acc = FieldAssignment.accuracies
+        hm = FieldAssignment.heat_maps
+        ev = FieldAssignment.extended_values
+        cm = FieldAssignment.confusion_matrices
+        pickle.dump(acc, open(os.path.join(settings['RESULTS_PATH'], 'acc.p'), 'wb'))
+        pickle.dump(hm, open(os.path.join(settings['RESULTS_PATH'], 'hm.p'), 'wb'))
+        pickle.dump(ev, open(os.path.join(settings['RESULTS_PATH'], 'ev.p'), 'wb'))
+        pickle.dump(cm, open(os.path.join(settings['RESULTS_PATH'], 'cm.p'), 'wb'))
     else:
         _, x = Algorithm.load_assignments(os.path.join(settings['RESULTS_PATH'], 'base_assign.json'))
+        acc = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'acc.p'),'rb'))
+        hm = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'hm.p'), 'rb'))
+        ev = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'ev.p'), 'rb'))
+        cm = pickle.load(open(os.path.join(settings['RESULTS_PATH'], 'cm.p'), 'rb'))
 
-    arv = AlgorithmResultVisualization(x)
+    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm)
     # arv.evaluate_accuracies()
     # arv.heat_maps(os.path.join(settings['RESULTS_PATH'], 'heatmpas'))
     # arv.confusion_matrices(os.path.join(settings['RESULTS_PATH'], 'confusion_matrices.txt'))
     # arv.plot_distribution(os.path.join(settings['RESULTS_PATH'], 'predictions'), os.path.join(settings['RESULTS_PATH'], 'real'))
-    arv.word_distribution(os.path.join(settings['RESULTS_PATH'], 'word_distribution'))
+    # arv.word_distribution(os.path.join(settings['RESULTS_PATH'], 'word_distribution'))

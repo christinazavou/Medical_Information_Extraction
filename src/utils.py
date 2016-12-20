@@ -8,6 +8,7 @@ import os
 from pandas import DataFrame
 import matplotlib.pyplot as plt
 import numpy as np
+from nltk import tokenize
 
 
 # def read_dossier(dossier_folder, accepted_file_names):
@@ -156,3 +157,8 @@ def values_names_dict(fields_values):
     for value in possible_values:
         names_dict[value] = value[0:5] if len(value) > 5 else value
     return names_dict
+
+
+def split_into_sentences(source_text):
+    list_of_sentences = tokenize.sent_tokenize(source_text)
+    return list_of_sentences
