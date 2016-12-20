@@ -1,0 +1,56 @@
+#CONFIGURATIONS_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\Configurations'
+#DATA_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\Data'
+#RESULTS_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\resutls'
+
+json_form_file: "CONFIGURATIONS_PATH\\important_fields\\important_fields_DECEASE.json"
+csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
+form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
+
+majority_folder: "RESULTS_PATH\\majority\\"
+distributions_folder: "RESULTS_PATH\\distributions_NUM\\"
+heat_maps_folder: "RESULTS_PATH\\heat_maps_NUM\\"
+majority_file: "RESULTS_PATH\\majority.json"
+
+index_body_file: "CONFIGURATIONS_PATH\\two_tf_two_tfidf_index_children_v5.json"
+patient_map_file: "CONFIGURATIONS_PATH\\mapping.json"
+
+# ---------------------------------------------------------------------------------------------------------------------#
+
+read_and_store_dossiers: false
+find_conditioned_majority: false
+algorithm: "baseline"
+run_algorithm: true
+evaluate_algorithm: true
+evaluate_file: ""
+patients_pct: 1
+
+patient_relevant: false
+default_field: "description.dutch_tf_description"
+boost_fields: ["description.tf_description"]
+min_score: 0
+description_as_phrase: True
+value_as_phrase: True
+use_description_1ofk: 2 # if 0 no use of description in multi.., if 1 then just use, if 2 use 'value description'
+
+unknowns: "exclude"
+forms: ["colorectaal"]
+assign_all: False
+colorectaal: [
+              'LOCPRIM',
+              'klachten_klacht1','klachten_klacht2', 'klachten_klacht4',
+              'SCORECT', #'RESTAG_CT',
+              'PROCOK', #'TYPPROCOK',
+              'mdo_chir',
+              #'geenresectie_irres','geenresec_palltherYN',
+              #'pallther_chemo','pallther_RT','pallther_chemoRT',
+              #'SCOPNUMB'
+              ]
+
+# ---------------------------------------------------------------------------------------------------------------------#
+
+connection: {"host": "localhost", "port": 9200}
+index_name: "mie_new"
+type_name_p: "patient"
+type_name_f: "form"
+type_name_s: "report_description_sentence"
+type_name_p: "patient_report"
