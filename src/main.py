@@ -125,12 +125,18 @@ if __name__ == "__main__":
         hm = FieldAssignment.heat_maps
         ev = FieldAssignment.extended_values
         cm = FieldAssignment.confusion_matrices
+        pc = FieldAssignment.counts
+        rc = FieldAssignment.real_counts
+        wd = FieldAssignment.word_distribution
         pfpfa = PatientFormAssignment.per_form_per_field_assignments
         pickle.dump(acc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'), 'wb'))
         pickle.dump(hm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'wb'))
         pickle.dump(ev, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'wb'))
         pickle.dump(cm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'wb'))
         pickle.dump(pfpfa, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'wb'))
+        pickle.dump(pc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'wb'))
+        pickle.dump(rc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'wb'))
+        pickle.dump(wd, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'wb'))
     else:
         _, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
         acc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'),'rb'))
@@ -138,10 +144,13 @@ if __name__ == "__main__":
         ev = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'rb'))
         cm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'rb'))
         pfpfa = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'rb'))
+        pc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'rb'))
+        rc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'rb'))
+        wd = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'rb'))
 
-    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm, pfpfa)
+    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm, pc, rc, pfpfa, wd)
     arv.evaluate_accuracies()
     arv.heat_maps(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heatmpas'))
     arv.confusion_matrices(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt'))
-    # arv.plot_distribution(os.path.join(settings['RESULTS_PATH'], 'predictions'), os.path.join(settings['RESULTS_PATH'], 'real'))
-    # arv.word_distribution(os.path.join(settings['RESULTS_PATH'], 'word_distribution'))
+    arv.plot_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'predictions'), os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real'))
+    arv.word_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'word_distribution.txt'))

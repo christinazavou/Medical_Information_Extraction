@@ -15,6 +15,9 @@ class FieldAssignment(Field):
     heat_maps = dict()
     confusion_matrices = dict()
     extended_values = dict()
+    counts = dict()  # predicted
+    real_counts = dict()  # todo: remove it from here
+    word_distribution = dict()  # found
 
     def __init__(self, field, value, patient, score=None, hit=None, comment=None):
         super(FieldAssignment, self).__init__(field.id)
@@ -42,10 +45,15 @@ class FieldAssignment(Field):
             FieldAssignment.confusion_matrices[self.id] = dict()
             for field_value in FieldAssignment.extended_values[self.id]:
                 FieldAssignment.confusion_matrices[self.id][field_value] = np.zeros((2, 2))
+            FieldAssignment.counts[self.id] = np.zeros(len(FieldAssignment.extended_values[self.id]))
+            FieldAssignment.real_counts[self.id] = np.zeros(len(FieldAssignment.extended_values[self.id]))
+            FieldAssignment.word_distribution[self.id] = Counter()
 
         self.evaluate_accuracy()
         self.evaluate_confusion_matrices()
         self.evaluate_heat_map()
+        self.evaluate_distribution()
+        self.evaluate_word_distribution()
 
     def to_voc(self):
         voc = {self.id: {
@@ -82,28 +90,18 @@ class FieldAssignment(Field):
         FieldAssignment.heat_maps[self.id][field_values_idx_value][field_values_idx_target] += 1
         # print "heat map became\n{}".format(FieldAssignment.heat_maps[self.id].flatten())
 
-    # @staticmethod
-    # def plot_distribution(field, field_assignments, out_folder1, out_folder2):
-    #     field_values = copy.deepcopy(field.get_values())
-    #     if not field.in_values(u''):
-    #         field_values.append(u'')
-    #     field_predicted_counts = np.zeros(len(field_values))
-    #     field_real_counts = np.zeros(len(field_values))
-    #     for value, target, _ in field_assignments:
-    #         field_values_idx_value = field_values.index(value)
-    #         field_values_idx_target = field_values.index(target)
-    #         field_predicted_counts[field_values_idx_value] += 1
-    #         field_real_counts[field_values_idx_target] += 1
-    #         plot_distribution(field_predicted_counts, field.id, field_values, out_folder1)
-    #         plot_distribution(field_real_counts, field.id, field_values, out_folder2)
-    #
-    # @staticmethod
-    # def word_distribution(field_assignments):
-    #     wd_counter = Counter()
-    #     for _, _, comment in field_assignments:
-    #         if 'word distribution' in comment:
-    #             _, wd = comment.split('. word distribution = ')
-    #             if wd != 'None':
-    #                 wd_dict = ast.literal_eval(wd.replace('Counter(', '').replace(')', ''))
-    #                 wd_counter += Counter(wd_dict)
-    #     return wd_counter
+    def evaluate_distribution(self):
+        field_values_idx_value = FieldAssignment.extended_values[self.id].index(self.value)
+        field_values_idx_target = FieldAssignment.extended_values[self.id].index(self.target)
+        FieldAssignment.counts[self.id][field_values_idx_value] += 1
+        FieldAssignment.real_counts[self.id][field_values_idx_target] += 1
+
+    def evaluate_word_distribution(self):
+        if 'word distribution' in self.comment:
+            _, wd = self.comment.split('. word distribution = ')
+            if wd != 'None':
+                try:
+                    wd_dict = ast.literal_eval(wd.replace('Counter(', '').replace(')', ''))
+                    FieldAssignment.word_distribution[self.id] += Counter(wd_dict)
+                except:
+                    print "error when wd={}".format(wd)
