@@ -56,34 +56,17 @@ class EsIndex(object):
         if doc_type not in self.docs.keys():
             self.docs[doc_type] = list()
 
-    # def put_doc(self, doc_type, doc_id=None, parent_type=None, parent_id=None, data=None):
-    #     data = {} if not data else data
-    #     if doc_type not in self.docs.keys():
-    #         self.put_doc_type(doc_type)
-    #     if doc_id and not parent_type and not parent_id:
-    #         if doc_id not in self.docs[doc_type]:
-    #             self.docs[doc_type].append(doc_id)
-    #             self.es.con.index(self.id, doc_type, data, doc_id, refresh=True)
-    #         else:
-    #             self.es.update_doc(self.id, doc_type, doc_id, "doc", update_dict=data)
-    #     elif parent_type and parent_id and data:
-    #         for d in range(len(data)):
-    #             #     report = pre_process_report(data[d])
-    #             self.docs[doc_type].append((d, parent_id))
-    #             if random.uniform(0, 1) < FREQ:
-    #                 print "report: {}".format(data[d])
-    #             self.es.con.index(self.id, doc_type, data[d], d, parent=parent_id, refresh=True)
-    #     else:
-    #         print "wrong arguments in put_doc()"
     def put_doc(self, doc_type, doc_id, data=None):
         data = {} if not data else data
         if doc_type not in self.docs.keys():
             self.put_doc_type(doc_type)
-        if isinstance(data, dict):
+        if isinstance(data, dict):  # case: patient document
             if doc_id not in self.docs[doc_type]:
                 self.docs[doc_type].append(doc_id)
-            self.es.con.index(self.id, doc_type, data, doc_id, refresh=True)
-        elif data:
+                self.es.con.index(self.id, doc_type, data, doc_id, refresh=True)
+            else:
+                self.es.update_doc(self.id, doc_type, doc_id, "doc", update_dict=data)  # case: patient adds a GoldTruth
+        elif data:  # case: report document
             self.es.bulk_reports(self.id, parse_reports(data, doc_id))
             for r in parse_reports(data, doc_id):
                 self.docs[doc_type].append(r['_id'])

@@ -30,7 +30,7 @@ class Patient(object):
 
     def read_golden_truth(self, dataframe, form):  # already checked who are consistent
         for field in form.fields:
-            self.golden_truth[field.id] = self.get_from_dataframe(dataframe, field.id)
+            self.golden_truth[field.name()] = self.get_from_dataframe(dataframe, field.name())
         return self.golden_truth
 
     def to_json(self):
