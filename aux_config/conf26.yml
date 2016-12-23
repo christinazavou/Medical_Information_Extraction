@@ -25,8 +25,7 @@ evaluate_file: ""
 patients_pct: 1
 
 patient_relevant: false
-default_field: "description.dutch_tf_description"
-boost_fields: ["description.tf_description"]
+search_fields: ["description.dutch_tf_description","description.tf_description"]
 slop: 5
 min_score: 0
 description_as_phrase: True
