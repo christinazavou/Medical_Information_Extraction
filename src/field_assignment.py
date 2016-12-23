@@ -6,6 +6,7 @@ import copy
 import ast
 from collections import Counter
 from field import Field
+import pickle
 
 
 class FieldAssignment(Field):
@@ -19,7 +20,7 @@ class FieldAssignment(Field):
     real_counts = dict()  # todo: remove it from here
     word_distribution = dict()  # found
 
-    def __init__(self, field, value, patient, score=None, hit=None, comment=None):
+    def __init__(self, field, value, patient, score=None, hit=None, comment=None, all_comments = None):
         super(FieldAssignment, self).__init__(field.id)
 
         if not self.id in FieldAssignment.nums.keys():
@@ -35,6 +36,7 @@ class FieldAssignment(Field):
         self.hit = hit
         self.comment = comment
         self.target = patient.golden_truth[self.id]
+        self.all_comments = all_comments
 
         if FieldAssignment.nums[self.id] == 1:
             FieldAssignment.accuracies[self.id] = 0.0
@@ -57,7 +59,7 @@ class FieldAssignment(Field):
 
     def to_voc(self):
         voc = {self.id: {
-            'value': self.value, 'score': self.score, 'hit': self.hit, 'comment': self.comment, 'target': self.target
+            'value': self.value, 'score': self.score, 'hit': self.hit, 'comment': self.comment, 'target': self.target, 'all_comments': self.all_comments
         }}
         return voc
 

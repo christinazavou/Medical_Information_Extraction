@@ -45,16 +45,6 @@ def init_dataset_patients(forms):
 def index_dataset_patients(forms):
     for form in forms:  # todo: is only for one report !! if already patient is indexed should not be indexed again !
         form_dataframe = form.get_dataframe()
-        # for patient in form.patients:
-        #     print "patient {} ...".format(patient.id)
-        #     golden_truth = {form.id: patient.read_golden_truth(form_dataframe, form)}
-        #     es_index.put_doc('patient', patient.id)
-        #     es_index.put_doc('patient', patient.id, data=golden_truth)
-        # es_index.es.refresh("mie_new")
-        # for patient in form.patients:
-        #     print "patient {} ...".format(patient.id)
-        #     patient_reports = patient.read_report_csv()  # list of dicts i.e. reports
-        #     es_index.put_doc('report', parent_type='patient', parent_id=patient.id,data=patient_reports)
         for patient in form.patients:
             print "patient {} ...".format(patient.id)
             golden_truth = {form.id: patient.read_golden_truth(form_dataframe, form)}
@@ -63,25 +53,14 @@ def index_dataset_patients(forms):
             es_index.put_doc('report', patient.id, patient_reports)  # index reports docs
 
 
-# def ensure_reports(forms):
-#     time.sleep(5)
-#     es_index.es.refresh("mie_new")
-#     time.sleep(5)
-#     for form in forms:
-#         for patient in form.patients:
-#             reports_file = os.path.join(settings['form_dossiers_path'].replace('DECEASE', form.id), patient.id, 'report.csv')
-#             df = pd.read_csv(reports_file, encoding='utf-8').fillna(u'')
-#             es_index.es.put_reports("mie_new", patient.id, len(df), reports_file)
-
-
 if __name__ == "__main__":
     # todo: put reports in csv files with date sort... so that smaller ids give older reports !
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\Documents\\'):
-            settings = RunConfiguration(28, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
+            settings = RunConfiguration(24, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
         else:
-            settings = RunConfiguration(28, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
+            settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 
@@ -102,55 +81,40 @@ if __name__ == "__main__":
         es_index = EsIndex(settings['index_name'])
         es_index.index(settings['index_body_file'])
         index_dataset_patients(data.dataset_forms)
-        # ensure_reports(data.dataset_forms)
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
         data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
 
     print "-------"
-    print len(data.dataset_forms)
-    print es_index.id
     print len(data.dataset_forms[0].patients)
     print [str(f) for f in data.dataset_forms[0].fields]
     print es_index.docs
-    print data.dataset_forms[0].patients[0].golden_truth
     print "-------"
 
     if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
-        algorithm = Algorithm('baseline', False, 0, ['description'], 1, True, True, 2)
+        algorithm = Algorithm(
+            settings['patient_relevant'], settings['min_score'], settings['search_fields'],
+            settings['use_description_1ofk'], settings['description_as_phrase'], settings['value_as_phrase'],
+            settings['slop'])
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-        x = algorithm.assignments
-        acc = FieldAssignment.accuracies
-        hm = FieldAssignment.heat_maps
-        ev = FieldAssignment.extended_values
-        cm = FieldAssignment.confusion_matrices
-        pc = FieldAssignment.counts
-        rc = FieldAssignment.real_counts
-        wd = FieldAssignment.word_distribution
-        pfpfa = PatientFormAssignment.per_form_per_field_assignments
-        pickle.dump(acc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'), 'wb'))
-        pickle.dump(hm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'wb'))
-        pickle.dump(ev, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'wb'))
-        pickle.dump(cm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'wb'))
-        pickle.dump(pfpfa, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'wb'))
-        pickle.dump(pc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'wb'))
-        pickle.dump(rc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'wb'))
-        pickle.dump(wd, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'wb'))
+        (accuracies, heat_maps, extended_values, confusion_matrices, counts, real_counts, pfpfa, word_distribution) = \
+            algorithm.save_results(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'results.p'))
     else:
-        _, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-        acc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'),'rb'))
-        hm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'rb'))
-        ev = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'rb'))
-        cm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'rb'))
-        pfpfa = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'rb'))
-        pc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'rb'))
-        rc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'rb'))
-        wd = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'rb'))
+        algorithm =Algorithm(
+            settings['patient_relevant'], settings['min_score'], settings['search_fields'],
+            settings['use_description_1ofk'], settings['description_as_phrase'], settings['value_as_phrase'],
+            settings['slop'])
+        (counts, real_counts, accuracies, extended_values, confusion_matrices, heat_maps, word_distribution, pfpfa) = \
+            algorithm.load_results(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.p'))
 
-    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm, pc, rc, pfpfa, wd)
-    arv.evaluate_accuracies()
+    arv = AlgorithmResultVisualization(
+        accuracies, heat_maps, extended_values, confusion_matrices, counts, real_counts, pfpfa, word_distribution
+    )
+    arv.evaluate_accuracies(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'accuracies.json'))
     arv.heat_maps(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heatmpas'))
     arv.confusion_matrices(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt'))
-    arv.plot_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'predictions'), os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real'))
+    arv.plot_distribution(os.path.join(
+        settings['SPECIFIC_RESULTS_PATH'], 'predictions'), os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real')
+    )
     arv.word_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'word_distribution.txt'))

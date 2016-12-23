@@ -40,9 +40,8 @@ def pick_score_and_index(scores, verbose=False):
 
 class Algorithm(object):
 
-    def __init__(self, name, patient_relevant=False, min_score=0, search_fields=None,
+    def __init__(self, patient_relevant=False, min_score=0, search_fields=None,
                  use_description1ofk=0, description_as_phrase=None, value_as_phrase=None, slop=10):
-        self.name = name
         self.con = None
         self.index = None
         self.assignments = list()
@@ -77,6 +76,24 @@ class Algorithm(object):
     @staticmethod
     def load_assignments(f):
         return json.load(open(f, 'r')), pickle.load(open(f.replace('.json', '_results.p'), 'rb'))
+
+    @staticmethod
+    def save_results(f):
+        results = (FieldAssignment.counts,
+                   FieldAssignment.real_counts,
+                   FieldAssignment.accuracies,
+                   FieldAssignment.extended_values,
+                   FieldAssignment.confusion_matrices,
+                   FieldAssignment.heat_maps,
+                   FieldAssignment.word_distribution,
+                   PatientFormAssignment.per_form_per_field_assignments)
+        pickle.dump(results, open(f, 'wb'))
+        return results
+
+    @staticmethod
+    def load_results(f):
+        results = pickle.load(open(f, 'rb'))
+        print results
 
     def score_and_evidence(self, search_results):
         """Returns score, hit, word_distribution"""
@@ -228,20 +245,22 @@ class Algorithm(object):
         values_scores = [None for value in values]
         values_best_hits = [None for value in values]
         values_comments = [None for value in values]
+        all_comments = {}
         last_choice = list()
         for i, value in enumerate(values):
             if field.get_value_possible_values(value):
                 values_scores[i], values_best_hits[i], values_comments[i] = self.get_value_score(assignment, field, value)
+                all_comments[value] = values_comments[i]
             else:
                 last_choice.append(value)  # the ones w
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
-            field_assignment = FieldAssignment(field, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx])
+            field_assignment = FieldAssignment(field, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx], all_comments)
             assignment.add_field_assignment(field_assignment)
             return
         if last_choice and len(last_choice) == 1:
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
-            field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment)
+            field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment, all_comments)
             assignment.add_field_assignment(field_assignment)
             return
         elif last_choice:
@@ -250,7 +269,7 @@ class Algorithm(object):
             # field_assignment = FieldAssignment(field.id, '', assignment.patient, comment='nothing matched')
             # assignment.add_field_assignment(field_assignment)
             idx = random.choice(range(len(values)))
-            field_assignment = FieldAssignment(field, values[idx], assignment.patient, comment='nothing matched. random assignment')
+            field_assignment = FieldAssignment(field, values[idx], assignment.patient, comment='nothing matched. random assignment', all_comments=all_comments)
             assignment.add_field_assignment(field_assignment)
 
     def save(self, f):
