@@ -23,10 +23,10 @@ run_algorithm: true
 evaluate_algorithm: true
 evaluate_file: ""
 patients_pct: 1
+slop: 5
 
 patient_relevant: false
-default_field: "description.dutch_tf_description"
-boost_fields: ["description.tf_description"]
+search_fields: ["description.dutch_tf_description","description.tf_description"]
 min_score: 0
 description_as_phrase: True
 value_as_phrase: True

@@ -1,10 +1,51 @@
 # -*- coding: utf-8 -*-
-from form import Form
+import json
+import pandas as pd
+from fields import Field, AssignedBinaryValueField, AssignedMultiValueField, AssignedOpenQuestionField
 import os
 from patient import Patient
 from utils import condition_satisfied
-import json
-from field_assignment import FieldAssignment
+
+
+def form_field_combo(form, field):
+    return "{} {}".format(form, field)
+
+
+class Form(object):
+
+    def __init__(self, name, csv_file, config_file):
+        self.id = name
+        self.csv_file = csv_file
+        self.config_file = config_file
+        self.fields = []
+
+    def put_fields(self):
+        with open(self.config_file, 'r') as f:
+            data = json.load(f, encoding='utf-8')
+        for key, value in data.items():
+            new_field = Field(form_field_combo(self.id, key))
+            new_field.put_values(value)
+            self.fields.append(new_field)
+
+    def get_dataframe(self):
+        fields_list = [u'PatientNr']
+        fields_list += [field.name() for field in self.fields]
+        fields_list = [str(field) for field in fields_list]
+        fields_types = dict()
+        for field in fields_list:
+            fields_types[field] = str
+        dataframe = pd.read_csv(self.csv_file, usecols=fields_list, dtype=fields_types, encoding='utf-8').fillna(u'')
+        return dataframe
+
+    def to_voc(self):
+        return {u'id': self.id, u'fields': [f.to_voc() for f in self.fields]}
+
+    def to_json(self):
+        """Converts the class into JSON."""
+        return json.dumps(self.to_voc())
+
+    def __str__(self):
+        return self.to_json()
 
 
 class DataSetForm(Form):
@@ -65,3 +106,27 @@ class DataSetForm(Form):
         #         if not consistent:
         #             break
         # return consistent
+
+
+class AssignedDatasetForm(DataSetForm):
+
+    def __init__(self, form):
+        super(AssignedDatasetForm, self).__init__(form.id, form.csv_file, form.config_file, form.form_patients_folder)
+        self.patients = form.patients
+        for patient in self.patients:
+            for field in form.fields:
+                if field.is_binary():
+                    self.fields.append(AssignedBinaryValueField(field, patient))
+                elif field.is_open_question():
+                    self.fields.append(AssignedMultiValueField(field, patient))
+                else:
+                    self.fields.append(AssignedOpenQuestionField(field, patient))
+
+    def assign(self):
+        for patient in self.patients:
+            for field in self.fields:
+                field.assign()
+
+    def to_voc(self):
+        return {self.id: [field.to_voc() for field in self.fields]}
+
