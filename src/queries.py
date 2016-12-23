@@ -187,5 +187,3 @@ def description_value_combo(possible_descriptions, possible_values):
         for description in possible_descriptions:
             phrases.append("{} {}".format(value, description))
     return phrases
-
-

@@ -6,7 +6,6 @@ import copy
 import ast
 from collections import Counter
 from field import Field
-import pickle
 
 
 class FieldAssignment(Field):
@@ -20,7 +19,7 @@ class FieldAssignment(Field):
     real_counts = dict()  # todo: remove it from here
     word_distribution = dict()  # found
 
-    def __init__(self, field, value, patient, score=None, hit=None, comment=None, all_comments = None):
+    def __init__(self, field, value, patient, score=None, hit=None, comment=None, all_comments=None):
         super(FieldAssignment, self).__init__(field.id)
 
         if not self.id in FieldAssignment.nums.keys():

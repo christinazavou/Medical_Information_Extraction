@@ -81,40 +81,58 @@ if __name__ == "__main__":
         es_index = EsIndex(settings['index_name'])
         es_index.index(settings['index_body_file'])
         index_dataset_patients(data.dataset_forms)
+        # ensure_reports(data.dataset_forms)
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
         data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
 
     print "-------"
+    print len(data.dataset_forms)
+    print es_index.id
     print len(data.dataset_forms[0].patients)
     print [str(f) for f in data.dataset_forms[0].fields]
     print es_index.docs
+    print data.dataset_forms[0].patients[0].golden_truth
     print "-------"
 
     if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
         algorithm = Algorithm(
-            settings['patient_relevant'], settings['min_score'], settings['search_fields'],
+            'baseline', settings['patient_relevant'], settings['min_score'], settings['search_fields'],
             settings['use_description_1ofk'], settings['description_as_phrase'], settings['value_as_phrase'],
             settings['slop'])
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-        (accuracies, heat_maps, extended_values, confusion_matrices, counts, real_counts, pfpfa, word_distribution) = \
-            algorithm.save_results(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'results.p'))
+        x = algorithm.assignments
+        acc = FieldAssignment.accuracies
+        hm = FieldAssignment.heat_maps
+        ev = FieldAssignment.extended_values
+        cm = FieldAssignment.confusion_matrices
+        pc = FieldAssignment.counts
+        rc = FieldAssignment.real_counts
+        wd = FieldAssignment.word_distribution
+        pfpfa = PatientFormAssignment.per_form_per_field_assignments
+        pickle.dump(acc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'), 'wb'))
+        pickle.dump(hm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'wb'))
+        pickle.dump(ev, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'wb'))
+        pickle.dump(cm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'wb'))
+        pickle.dump(pfpfa, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'wb'))
+        pickle.dump(pc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'wb'))
+        pickle.dump(rc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'wb'))
+        pickle.dump(wd, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'wb'))
     else:
-        algorithm =Algorithm(
-            settings['patient_relevant'], settings['min_score'], settings['search_fields'],
-            settings['use_description_1ofk'], settings['description_as_phrase'], settings['value_as_phrase'],
-            settings['slop'])
-        (counts, real_counts, accuracies, extended_values, confusion_matrices, heat_maps, word_distribution, pfpfa) = \
-            algorithm.load_results(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.p'))
+        _, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
+        acc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'),'rb'))
+        hm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'rb'))
+        ev = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'rb'))
+        cm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'rb'))
+        pfpfa = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'rb'))
+        pc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'rb'))
+        rc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'rb'))
+        wd = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'rb'))
 
-    arv = AlgorithmResultVisualization(
-        accuracies, heat_maps, extended_values, confusion_matrices, counts, real_counts, pfpfa, word_distribution
-    )
-    arv.evaluate_accuracies(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'accuracies.json'))
+    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm, pc, rc, pfpfa, wd)
+    arv.evaluate_accuracies()
     arv.heat_maps(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heatmpas'))
     arv.confusion_matrices(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt'))
-    arv.plot_distribution(os.path.join(
-        settings['SPECIFIC_RESULTS_PATH'], 'predictions'), os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real')
-    )
+    arv.plot_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'predictions'), os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real'))
     arv.word_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'word_distribution.txt'))

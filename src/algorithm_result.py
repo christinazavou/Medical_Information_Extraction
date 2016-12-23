@@ -1,5 +1,5 @@
 from __future__ import division
-from forms import DataSetForm
+from DatasetForm import DataSetForm
 import json
 import numpy as np
 from patient_form_assignment import PatientFormAssignment
@@ -9,8 +9,9 @@ from utils import print_heat_map, plot_distribution
 
 class AlgorithmResultVisualization(object):
 
-    def __init__(self, fields_accuracies, fields_heat_maps, fields_extended_values,
+    def __init__(self, assignments, fields_accuracies, fields_heat_maps, fields_extended_values,
                  fields_confusion_matrices, counts, real_counts, per_form_per_field_assignments, word_distributions):
+        self.assignments = assignments
         self.per_form_per_field_assignments = per_form_per_field_assignments
         self.fields_accuracies = fields_accuracies
         self.fields_heat_maps = fields_heat_maps
@@ -20,14 +21,13 @@ class AlgorithmResultVisualization(object):
         self.word_distributions = word_distributions
         self.fields_confusion_matrices = fields_confusion_matrices
 
-    def evaluate_accuracies(self, out_file):
+    def evaluate_accuracies(self):
         per_form_per_field_accuracies = dict()
         for formname in self.per_form_per_field_assignments.keys():
             per_form_per_field_accuracies[formname] = {}
             for fieldname, fieldassignments in self.per_form_per_field_assignments[formname].items():
                 per_form_per_field_accuracies[formname][fieldname] = self.fields_accuracies[fieldname] / len(fieldassignments)
-        with open(out_file, 'w') as f:
-            json.dump(per_form_per_field_accuracies, f, indent=4)
+        print "forms_accuracies: {}".format(json.dumps(per_form_per_field_accuracies))
 
     def confusion_matrices(self, out_file):
         with open(out_file, 'w') as f:

@@ -2,14 +2,13 @@
 import re
 import csv
 from collections import Counter
+import types
 import copy
 import os
 from pandas import DataFrame
 import matplotlib.pyplot as plt
 import numpy as np
 from nltk import tokenize
-import random
-import json
 
 
 # def read_dossier(dossier_folder, accepted_file_names):
@@ -163,30 +162,3 @@ def values_names_dict(fields_values):
 def split_into_sentences(source_text):
     list_of_sentences = tokenize.sent_tokenize(source_text)
     return list_of_sentences
-
-
-def pick_score_and_index(scores, verbose=False):
-    """return the highest of the scores and its index"""
-    if not scores:
-        return 0, None
-    if scores.count(None) == len(scores):
-        return 0, None
-    sorted_scores = sorted(scores)
-    max_idx = len(sorted_scores) - 1
-    max_val = sorted_scores[max_idx]
-    if scores.count(max_val) > 1:
-        if verbose:
-            print "MORE THAN ONCE"
-        if scores.count(max_val) == len(scores):
-            if verbose:
-                print "TIES"
-        indices = [i for i, x in enumerate(scores) if x == max_val]
-        idx = random.choice(indices)
-    else:
-        idx = scores.index(max_val)
-    return max_val, idx
-
-
-def write_json_file(f, data):
-    with open(f, 'w') as f:
-        json.dump(data, f)
