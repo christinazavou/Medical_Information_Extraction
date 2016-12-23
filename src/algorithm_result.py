@@ -5,6 +5,7 @@ import numpy as np
 from patient_form_assignment import PatientFormAssignment
 import pickle
 from utils import print_heat_map, plot_distribution
+from utils import save_json
 
 
 class AlgorithmResultVisualization(object):
@@ -21,13 +22,13 @@ class AlgorithmResultVisualization(object):
         self.word_distributions = word_distributions
         self.fields_confusion_matrices = fields_confusion_matrices
 
-    def evaluate_accuracies(self):
+    def evaluate_accuracies(self, out_file):
         per_form_per_field_accuracies = dict()
         for formname in self.per_form_per_field_assignments.keys():
             per_form_per_field_accuracies[formname] = {}
             for fieldname, fieldassignments in self.per_form_per_field_assignments[formname].items():
                 per_form_per_field_accuracies[formname][fieldname] = self.fields_accuracies[fieldname] / len(fieldassignments)
-        print "forms_accuracies: {}".format(json.dumps(per_form_per_field_accuracies))
+        save_json(per_form_per_field_accuracies, out_file)
 
     def confusion_matrices(self, out_file):
         with open(out_file, 'w') as f:
@@ -43,11 +44,15 @@ class AlgorithmResultVisualization(object):
             for fieldname in self.per_form_per_field_assignments[formname].keys():
                 print_heat_map(self.fields_heat_maps[fieldname], fieldname, self.fields_extended_values[fieldname], out_folder)
 
-    def plot_distribution(self, out_folder1, out_folder2):
+    def plot_distribution(self, out_folder1, out_folder2, out_file1, out_file2):
         for formname in self.per_form_per_field_assignments.keys():
             for fieldname in self.per_form_per_field_assignments[formname].keys():
                 plot_distribution(self.counts[fieldname], fieldname, self.fields_extended_values[fieldname], out_folder1)
                 plot_distribution(self.real_counts[fieldname], fieldname, self.fields_extended_values[fieldname], out_folder2)
+        # with open(out_file1, 'w') as f:
+        #     f.write(self.counts)
+        # with open(out_file2, 'w') as f:
+        #     f.write(self.real_counts)
 
     def word_distribution(self, out_file):
         with open(out_file, 'w') as f:

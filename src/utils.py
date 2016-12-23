@@ -9,6 +9,7 @@ from pandas import DataFrame
 import matplotlib.pyplot as plt
 import numpy as np
 from nltk import tokenize
+import json
 
 
 # def read_dossier(dossier_folder, accepted_file_names):
@@ -162,3 +163,8 @@ def values_names_dict(fields_values):
 def split_into_sentences(source_text):
     list_of_sentences = tokenize.sent_tokenize(source_text)
     return list_of_sentences
+
+
+def save_json(data, out_file):
+    with open(out_file, 'w') as f:
+        json.dump(data, f, indent=4)

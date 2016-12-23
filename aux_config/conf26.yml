@@ -26,11 +26,11 @@ patients_pct: 1
 
 patient_relevant: false
 search_fields: ["description.dutch_tf_description","description.tf_description"]
-slop: 5
+slop: 3
 min_score: 0
 description_as_phrase: True
 value_as_phrase: True
-use_description_1ofk: 2 # if 0 no use of description in multi.., if 1 then just use, if 2 use 'value description'
+use_description_1ofk: 0 # if 0 no use of description in multi.., if 1 then just use, if 2 use 'value description'
 
 unknowns: "exclude"
 forms: ["colorectaal"]

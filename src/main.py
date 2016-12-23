@@ -13,6 +13,7 @@ import pandas as pd
 import pickle
 from patient_form_assignment import PatientFormAssignment
 from field_assignment import FieldAssignment
+from utils import save_json
 
 
 FREQ = 1
@@ -58,9 +59,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\Documents\\'):
-            settings = RunConfiguration(24, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
+            settings = RunConfiguration(26, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
         else:
-            settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
+            settings = RunConfiguration(26, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 
@@ -131,8 +132,14 @@ if __name__ == "__main__":
         wd = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'rb'))
 
     arv = AlgorithmResultVisualization(x, acc, hm, ev, cm, pc, rc, pfpfa, wd)
-    arv.evaluate_accuracies()
+    arv.evaluate_accuracies(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'accuracies.json'))
     arv.heat_maps(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heatmpas'))
     arv.confusion_matrices(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt'))
-    arv.plot_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'predictions'), os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real'))
+    arv.plot_distribution(
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'predictions'),
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real'),
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'counts.json'),
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real_counts.json')
+    )
     arv.word_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'word_distribution.txt'))
+

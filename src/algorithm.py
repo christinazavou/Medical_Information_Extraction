@@ -10,9 +10,10 @@ from patient_relevant_utils import PatientRelevance
 import pickle
 import copy
 from form import Form
+from collections import Counter
 
 
-print_freq = 0.0005
+print_freq = 0.0010
 fragments = 10
 
 
@@ -88,8 +89,8 @@ class Algorithm(object):
             comment += "hits found"
             relevant_reports_ids = [hit['_id'] for hit in hits]
             scores_reports_ids = [hit['_score'] for hit in hits]
-            word_distribution = None
-            for hit in hits:
+            word_distributions_ids = [Counter() for hit in hits]
+            for i, hit in enumerate(hits):
                 highlights = hit['highlight'] if 'highlight' in hit.keys() else []
                 if highlights:
                     comment += " highlights found " if 'highlights' not in comment else ''
@@ -98,7 +99,13 @@ class Algorithm(object):
                         for sentence in highlight:
                             words += find_highlighted_words(sentence)
                         break  # take only first found
-                    word_distribution = find_word_distribution(words)
+                    if random.random < 0.3:
+                        w = []
+                        for field_searched, highlight in highlights.items():
+                            for sentence in highlight:
+                                w += find_highlighted_words(sentence)
+                        print "words: ", words, '\nw: ', w
+                    word_distributions_ids[i] = find_word_distribution(words)
                     if self.patient_relevance_test:
                         report = hit['_source']['description']  # always take the description field to check ;)
                         is_relevant, _ = self.patient_relevance_test.check_report_relevance(report, words)
@@ -108,7 +115,7 @@ class Algorithm(object):
                             del scores_reports_ids[idx]
             if scores_reports_ids:
                 score, idx = pick_score_and_index(scores_reports_ids)
-                return score, relevant_reports_ids[idx], "{}. word distribution = {}".format(comment, word_distribution)
+                return score, relevant_reports_ids[idx], "{}. word distribution = {}".format(comment, word_distributions_ids[idx])
             else:
                 return None, None, comment+"no relevant reports"
         else:
@@ -118,6 +125,12 @@ class Algorithm(object):
         """Description is a list of possible descriptions to the field.
         Return a bool query that returns results if at least one of the possible descriptions is found"""
         should_body = list()
+        if possible_strings:
+            tmp = [len(st.split(' ')) for st in possible_strings]
+            if max(tmp) == 1:
+                should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(possible_strings)))
+                body = bool_body(should_body=should_body, min_should_match=1)
+                return body
         big, small = big_phrases_small_phrases(possible_strings)
         if self.description_as_phrase:
             for p in small:
@@ -159,9 +172,10 @@ class Algorithm(object):
         must_body.append(pb)
         qb = bool_body(must_body=must_body)
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+        search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
         if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
-        search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
+            print "search_results: {}".format(json.dumps(search_results))
         best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
         if best_hit_score:
             value = 'Yes' if field.in_values('Yes') else 'Ja'
@@ -187,9 +201,10 @@ class Algorithm(object):
             must_body.append(pb)
             qb = bool_body(must_body=must_body)
             the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+            search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
             if random.uniform(0, 1) < print_freq:
                 print "the_current_body: {}".format(json.dumps(the_current_body))
-            search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
+                print "search_results: {}".format(json.dumps(search_results))
             best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
             return best_hit_score, best_hit, comment
         else:
@@ -243,7 +258,7 @@ class Algorithm(object):
             return
         if last_choice and len(last_choice) == 1:
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
-            all_comments[values.index(last_choice[0])] = value_comment
+            all_comments[last_choice[0]] = value_comment
             field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment, all_comments)
             assignment.add_field_assignment(field_assignment)
             return

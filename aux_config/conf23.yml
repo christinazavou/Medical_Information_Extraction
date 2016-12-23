@@ -2,7 +2,7 @@
 #DATA_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\Data'
 #RESULTS_PATH: 'C:\\Users\\Christina\\PycharmProjects\\mie_unicode\\resutls'
 
-json_form_file: "CONFIGURATIONS_PATH\\important_fields\\important_fields_DECEASE.json"
+json_form_file: "CONFIGURATIONS_PATH\\important_fields\\imp_fields_DECEASE.json"
 csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
 form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
 
