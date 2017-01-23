@@ -13,7 +13,7 @@ from form import Form
 from collections import Counter
 
 
-print_freq = 0#.0010
+print_freq = 0.0010
 fragments = 10
 
 
@@ -84,7 +84,7 @@ class Algorithm(object):
         comment = ""
         hits = search_results['hits']['hits']
         if hits:
-            if random.random < print_freq:
+            if random.random<print_freq:
                 print "search_resutls: {}".format(search_results)
             comment += "hits found"
             relevant_reports_ids = [hit['_id'] for hit in hits]
@@ -99,8 +99,8 @@ class Algorithm(object):
                         for sentence in highlight:
                             words += find_highlighted_words(sentence)
                         break  # take only first found
-                    # if random.random < 0.3:
-                    #     print "words: ", words, '\nw: ', words
+                    if random.random < 0.3:
+                        print "words: ", words, '\nw: ', words
                     word_distributions_ids[i] = find_word_distribution(words)
                     if self.patient_relevance_test:
                         report = hit['_source']['description']  # always take the description field to check ;)
@@ -117,55 +117,27 @@ class Algorithm(object):
         else:
             return None, None, "no hits"
 
-    def possibilities_query_description(self, possible_strings):
+    def possibilities_query(self, possible_strings):
         """Description is a list of possible descriptions to the field.
         Return a bool query that returns results if at least one of the possible descriptions is found"""
         should_body = list()
         if possible_strings:
             tmp = [len(st.split(' ')) for st in possible_strings]
-            if max(tmp) == 1:  # In case that possible_strings is just some possible words (could be only one word too)
+            if max(tmp) == 1:  # In case that possible_strings is just some possible words
                 should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(possible_strings)))
                 body = bool_body(should_body=should_body, min_should_match=1)
                 return body
         big, small = big_phrases_small_phrases(possible_strings)
-        if self.description_as_phrase:  # AS PHRASE EITHER FOR DESCRIPTION OR VALUE  #todo:rename to asphrase
+        if self.description_as_phrase:  # todo: na to xrisimopoio an auto pou erxetai einai description
             for p in small:
-                if len(p.split(' ')) == 1:
-                    should_body.append(query_string(self.search_fields, p))
-                else:
-                    should_body.append(multi_match_query(p, self.search_fields, query_type="phrase", slop=self.slop))
+                should_body.append(multi_match_query(p, self.search_fields, query_type="phrase", slop=self.slop))
         else:
             should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
         for p in big:
             should_body.append(
                 multi_match_query(p, self.search_fields, query_type="best_fields", operator='OR', pct='40%'))
         body = bool_body(should_body=should_body, min_should_match=1)
-        return body
-
-    def possibilities_query_value(self, possible_strings):
-        """Description is a list of possible descriptions to the field.
-        Return a bool query that returns results if at least one of the possible descriptions is found"""
-        should_body = list()
-        if possible_strings:
-            tmp = [len(st.split(' ')) for st in possible_strings]
-            if max(tmp) == 1:  # In case that possible_strings is just some possible words (could be only one word too)
-                should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(possible_strings)))
-                body = bool_body(should_body=should_body, min_should_match=1)
-                return body
-        big, small = big_phrases_small_phrases(possible_strings)
-        if self.value_as_phrase:
-            for p in small:
-                if len(p.split(' ')) == 1:
-                    should_body.append(query_string(self.search_fields, p))
-                else:
-                    should_body.append(
-                        multi_match_query(p, self.search_fields, query_type="phrase", slop=self.slop))
-        else:
-            should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(small)))
-        for p in big:
-            should_body.append(
-                multi_match_query(p, self.search_fields, query_type="best_fields", operator='OR', pct='40%'))
-        body = bool_body(should_body=should_body, min_should_match=1)
+        print 'bd: ', json.dumps(body)
         return body
 
     def highlight_body(self):
@@ -190,7 +162,7 @@ class Algorithm(object):
 
     def assign_binary(self, assignment, field):  # assignment is a PatientFormAssignment
         must_body = list()
-        db = self.possibilities_query_description(field.description)
+        db = self.possibilities_query(field.description)
         must_body.append(db)
         hb = self.highlight_body()
         pb = self.has_parent_body(assignment.patient.id)
@@ -198,9 +170,9 @@ class Algorithm(object):
         qb = bool_body(must_body=must_body)
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
         search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
-        if random.uniform(0, 1) < print_freq: #or field.description == ["restagering CT THORAX ABDOMEN"]:
+        if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
-            print "SEARCH_RESULTS: {}".format(json.dumps(search_results))
+            print "search_results: {}".format(json.dumps(search_results))
         best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
         if best_hit_score:
             value = 'Yes' if field.in_values('Yes') else 'Ja'
@@ -219,7 +191,7 @@ class Algorithm(object):
         """To assign anders check if description can be found and return the score and evidence of such a query"""
         if field.description:
             must_body = list()
-            db = self.possibilities_query_description(field.description)
+            db = self.possibilities_query(field.description)
             must_body.append(db)
             hb = self.highlight_body()
             pb = self.has_parent_body(assignment.patient.id)
@@ -242,22 +214,21 @@ class Algorithm(object):
         pb = self.has_parent_body(assignment.patient.id)
         must_body.append(pb)
         if self.use_description1ofk == 0 or self.use_description1ofk == 1:
-            vb = self.possibilities_query_value(field.get_value_possible_values(value))
+            vb = self.possibilities_query(field.get_value_possible_values(value))
             must_body.append(vb)
             qb = bool_body(must_body=must_body)
             if self.use_description1ofk == 1:
-                db = self.possibilities_query_description(field.description)
+                db = self.possibilities_query(field.description)
                 qb = bool_body(must_body=must_body, should_body=db, min_should_match=1)
         else:
-            qdv = self.possibilities_query_value(description_value_combo(field.description, field.get_value_possible_values(value)))
+            qdv = self.possibilities_query(description_value_combo(field.description, field.get_value_possible_values(value)))
             qb = bool_body(must_body=must_body, should_body=qdv, min_should_match=1)  # or add to qdv must
 
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+        if random.uniform(0, 1) < print_freq:
+            print "the_current_body: {}".format(json.dumps(the_current_body))
         try:
             search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
-            if random.uniform(0, 1) < print_freq: #or assignment.patient.id == '52006': #'1446246':
-                print "the_current_body: {}".format(json.dumps(the_current_body))
-                print "search_results: {}".format(json.dumps(search_results))
         except:
             print "cause exception"
             print json.dumps(the_current_body)

@@ -80,13 +80,28 @@ def is_ascii(s):
 
 
 def find_highlighted_words(txt):
-    sentence = u' '.join(var_to_utf(txt).split(u' '))
-    words = []
-    m = [re.match(u"<em>.*</em>", word) for word in sentence.split()]
-    for mi in m:
-        if mi:
-            words.append(mi.group().replace(u'<em>', u'').replace(u'</em>', u''))
-    return words
+    i = 0
+    occurrences = []
+    while i < len(txt):
+        if txt[i:i + 4] == '<em>':
+            start = i + 4
+            while i < len(txt):
+                i += 1
+                if txt[i:i + 5] == '</em>':
+                    end = i
+                    occurrences.append(txt[start:end])
+                    break
+        i += 1
+    return occurrences
+
+
+def find_words(report_txt, words_searched):
+    occurrences = []
+    for word in words_searched:
+        counts = report_txt.count(word)
+        for i in range(counts):
+            occurrences.append(word)
+    print 'occurences: ', occurrences
 
 
 def find_word_distribution(words):
@@ -120,15 +135,15 @@ def pre_process_report(report_dict):
 def print_heat_map(heat_map, field_name, values, out_folder):
     if not os.path.isdir(out_folder):
         os.mkdir(out_folder)
-    names_dict = values_names_dict(values)
-    x = names_dict.values()
+    names_dict = values_names_list(values)
+    x = names_dict
     y = x
     df = DataFrame(heat_map, index=x, columns=y)
     plt.figure()
     plt.pcolor(df)
     plt.colorbar()
     plt.yticks(np.arange(0.5, len(df.index), 1), df.index)
-    plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns)
+    plt.xticks(np.arange(0.5, len(df.columns), 1), df.columns, rotation=70)
     plt.title(field_name)
     plt.xlabel('Targets')
     plt.ylabel('Predictions')
@@ -139,11 +154,11 @@ def print_heat_map(heat_map, field_name, values, out_folder):
 def plot_distribution(counts, field_name, values, out_folder):
     if not os.path.isdir(out_folder):
         os.mkdir(out_folder)
-    names_dict = values_names_dict(values)
+    names_dict = values_names_list(values)
     plt.figure()
     X = np.arange(len(counts))
     plt.bar(X, counts, align='center', width=0.5)
-    plt.xticks(X, names_dict.values())
+    plt.xticks(X, names_dict, rotation=70)
     ymax = max(counts) + 1
     plt.ylim(0, ymax)
     plt.title(field_name)
@@ -151,13 +166,16 @@ def plot_distribution(counts, field_name, values, out_folder):
     plt.close()
 
 
-def values_names_dict(fields_values):
-    # accepts list
-    names_dict = {}
-    possible_values = copy.deepcopy(fields_values)
-    for value in possible_values:
-        names_dict[value] = value[0:5] if len(value) > 5 else value
-    return names_dict
+def values_names_list(fields_values):
+    # accepts list and returns list in same order but cut names
+    names_list = list()
+    possible_values = copy.copy(fields_values)  # no objects in list so no deepcopy
+    for i, value in enumerate(possible_values):
+        if value == '':
+            names_list.insert(i, 'NaN')
+        else:
+            names_list.insert(i, value[0:10]) if len(value) > 10 else names_list.insert(i, value)
+    return names_list
 
 
 def split_into_sentences(source_text):

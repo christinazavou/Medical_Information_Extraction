@@ -27,6 +27,7 @@ try:
     with open(pickle_path, "rb") as pickle_file:
         contents = pickle_file.read().replace("\r\n", "\n")
         clf = pickle.loads(contents)
+
 except ImportError:
     print "Try manual dos2unix conversion of %s" % pickle_path
 

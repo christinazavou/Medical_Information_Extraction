@@ -3,17 +3,10 @@ from DataSet import DataSet
 from settings import RunConfiguration
 import os
 from DatasetForm import DataSetForm
-from algorithm_result import AlgorithmResultVisualization
 from es_index import EsIndex
 from algorithm import Algorithm
 import sys
-import random
-import time
-import pandas as pd
-import pickle
-from patient_form_assignment import PatientFormAssignment
-from field_assignment import FieldAssignment
-from utils import save_json
+from evaluation import Evaluation
 
 
 FREQ = 1
@@ -59,9 +52,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\Documents\\'):
-            settings = RunConfiguration(26, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
+            settings = RunConfiguration(25, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
         else:
-            settings = RunConfiguration(26, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
+            settings = RunConfiguration(25, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 
@@ -86,15 +79,6 @@ if __name__ == "__main__":
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
         data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
 
-    print "-------"
-    print len(data.dataset_forms)
-    print es_index.id
-    print len(data.dataset_forms[0].patients)
-    print [str(f) for f in data.dataset_forms[0].fields]
-    print es_index.docs
-    print data.dataset_forms[0].patients[0].golden_truth
-    print "-------"
-
     if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
         algorithm = Algorithm(
             'baseline', settings['patient_relevant'], settings['min_score'], settings['search_fields'],
@@ -103,43 +87,16 @@ if __name__ == "__main__":
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-        x = algorithm.assignments
-        acc = FieldAssignment.accuracies
-        hm = FieldAssignment.heat_maps
-        ev = FieldAssignment.extended_values
-        cm = FieldAssignment.confusion_matrices
-        pc = FieldAssignment.counts
-        rc = FieldAssignment.real_counts
-        wd = FieldAssignment.word_distribution
-        pfpfa = PatientFormAssignment.per_form_per_field_assignments
-        pickle.dump(acc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'), 'wb'))
-        pickle.dump(hm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'wb'))
-        pickle.dump(ev, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'wb'))
-        pickle.dump(cm, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'wb'))
-        pickle.dump(pfpfa, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'wb'))
-        pickle.dump(pc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'wb'))
-        pickle.dump(rc, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'wb'))
-        pickle.dump(wd, open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'wb'))
-    else:
-        _, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-        acc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'acc.p'),'rb'))
-        hm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'hm.p'), 'rb'))
-        ev = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ev.p'), 'rb'))
-        cm = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'cm.p'), 'rb'))
-        pfpfa = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pfpfa.p'), 'rb'))
-        pc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'pc.p'), 'rb'))
-        rc = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'rc.p'), 'rb'))
-        wd = pickle.load(open(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'wd.p'), 'rb'))
 
-    arv = AlgorithmResultVisualization(x, acc, hm, ev, cm, pc, rc, pfpfa, wd)
-    arv.evaluate_accuracies(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'accuracies.json'))
-    arv.heat_maps(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heatmpas'))
-    arv.confusion_matrices(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt'))
-    arv.plot_distribution(
+    x_js, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
+
+    ev = Evaluation()
+    ev.evaluate(x_js, data.dataset_forms)
+    ev.print_results(
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'accuracies.txt'),
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heat_maps'),
         os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'predictions'),
         os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real'),
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'counts.json'),
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real_counts.json')
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'word_distribution.txt'),
+        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt')
     )
-    arv.word_distribution(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'word_distribution.txt'))
-
