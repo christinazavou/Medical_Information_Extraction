@@ -17,7 +17,6 @@ print_freq = 0#.0010
 fragments = 10
 
 not_found = {}  # {32223: ('procok':t1), ('locprim': x), '444': ...}
-to_copy = {}
 
 
 def pick_score_and_index(scores, verbose=False):
@@ -75,14 +74,12 @@ class Algorithm(object):
     def print_not_found(self, dataset_form, f):
         to_print = {}
         for patient in dataset_form.patients:
-            # if patient.id in not_found.keys():
-            if patient.id in to_copy.keys():
+            if patient.id in not_found.keys():
                 if patient.id not in to_print:
                     to_print[patient.id] = {}
                     to_print[patient.id]['not_found'] = []
                     to_print[patient.id]['reports'] = patient.read_report_csv()
-                # to_print[patient.id]['not_found'].append(not_found[patient.id])
-                to_print[patient.id]['not_found'].append(to_copy[patient.id])
+                to_print[patient.id]['not_found'].append(not_found[patient.id])
         with open(f, 'w') as af:
             json.dump(to_print, af, encoding='utf-8', indent=2)
 
@@ -235,7 +232,6 @@ class Algorithm(object):
         if should_be_true:
             # get patient reports to read them
             not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
-            to_copy[assignment.patient.id] = assignment.patient.golden_truth
 
         field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
         assignment.add_field_assignment(field_assignment)
@@ -308,8 +304,7 @@ class Algorithm(object):
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
             if values[idx] != the_target and the_target != u'':
-                # not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
-                to_copy[assignment.patient.id] = assignment.patient.golden_truth
+                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx], all_comments)
             assignment.add_field_assignment(field_assignment)
             return
@@ -317,8 +312,7 @@ class Algorithm(object):
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
             all_comments[last_choice[0]] = value_comment
             if last_choice[0] != the_target and the_target != u'':
-                # not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
-                to_copy[assignment.patient.id] = assignment.patient.golden_truth
+                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
             field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment, all_comments)
             assignment.add_field_assignment(field_assignment)
             return
@@ -329,8 +323,7 @@ class Algorithm(object):
             # assignment.add_field_assignment(field_assignment)
             idx = random.choice(range(len(values)))
             if values[idx] != the_target and the_target != u'':
-                # not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
-                to_copy[assignment.patient.id] = assignment.patient.golden_truth
+                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, comment='nothing matched. random assignment', all_comments=all_comments)
             assignment.add_field_assignment(field_assignment)
 
