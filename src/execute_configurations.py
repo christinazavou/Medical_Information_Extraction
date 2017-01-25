@@ -5,8 +5,6 @@ import time
 
 print 'the first args: ', sys.argv
 
-RESULTS_IDX = 1
-
 if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
     dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
 elif os.path.isdir('C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data'):
@@ -18,7 +16,10 @@ else:
 if len(sys.argv) < 2:
     resultsPath = "..\\results"
 else:
-    resultsPath = sys.argv[RESULTS_IDX]
+    if len(sys.argv) == 3 and 'Christina' in sys.argv[1] and 'Zavou' in sys.argv[2]:  # my user name is problematic
+        resultsPath = os.path.join(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) == 2:  # for other users
+        resultsPath = sys.argv[1]
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
 main_file = os.path.join(this_dir, "main.py")
