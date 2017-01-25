@@ -87,6 +87,9 @@ if __name__ == "__main__":
             settings['slop'])
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
+
+            algorithm.print_not_found(form, os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'not_found.json'))
+
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
 
     x_js, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))

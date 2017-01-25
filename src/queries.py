@@ -141,6 +141,19 @@ def multi_match_query(query_text, query_fields, query_type, slop=None, operator=
     return body
 
 
+def find_reports_body(patient):
+    return {
+        "query":
+            {
+                "term": {
+                    "patient": {
+                        "value": patient
+                    }
+                }
+            }
+    }
+
+
 def disjunction_of_conjunctions(phrases, skip_length=5):
     if not phrases:
         return ""

@@ -2,7 +2,7 @@
 from patient_form_assignment import PatientFormAssignment
 from field_assignment import FieldAssignment
 from queries import search_body, highlight_query, multi_match_query, query_string, big_phrases_small_phrases, \
-    bool_body, disjunction_of_conjunctions, has_parent_query, term_query, description_value_combo
+    bool_body, disjunction_of_conjunctions, has_parent_query, term_query, description_value_combo, find_reports_body
 import random
 import json
 from utils import find_highlighted_words, find_word_distribution, condition_satisfied
@@ -15,6 +15,8 @@ from collections import Counter
 
 print_freq = 0#.0010
 fragments = 10
+
+not_found = {}  # {32223: ('procok':t1), ('locprim': x), '444': ...}
 
 
 def pick_score_and_index(scores, verbose=False):
@@ -69,6 +71,18 @@ class Algorithm(object):
             self.make_patient_form_assignment(current_assignment)
             self.assignments.append(current_assignment)
 
+    def print_not_found(self, dataset_form, f):
+        to_print = {}
+        for patient in dataset_form.patients:
+            if patient.id in not_found.keys():
+                if patient.id not in to_print:
+                    to_print[patient.id] = {}
+                    to_print[patient.id]['not_found'] = []
+                    to_print[patient.id]['reports'] = patient.read_report_csv()
+                to_print[patient.id]['not_found'].append(not_found[patient.id])
+        with open(f, 'w') as af:
+            json.dump(to_print, af, encoding='utf-8', indent=2)
+
     def save_assignments(self, f):
         with open(f, 'w') as af:
             json.dump([a.to_voc() for a in self.assignments], af, indent=4)
@@ -115,8 +129,6 @@ class Algorithm(object):
                 return None, None, comment+"no relevant reports. words found: {}".format(word_distributions_ids)
         else:
             return None, None, "no hits"
-
-    # def why_not_found(self, patient, ):
 
     def possibilities_query_description(self, possible_strings):
         """Description is a list of possible descriptions to the field.
@@ -190,6 +202,9 @@ class Algorithm(object):
                 pass  # don't consider such cases
 
     def assign_binary(self, assignment, field):  # assignment is a PatientFormAssignment
+
+        should_be_true = True if assignment.patient.golden_truth[field.id] != u'' else False
+
         must_body = list()
         db = self.possibilities_query_description(field.description)
         must_body.append(db)
@@ -213,6 +228,11 @@ class Algorithm(object):
             value = 'No'
         if field.in_values('Nee'):
             value = 'Nee'
+
+        if should_be_true:
+            # get patient reports to read them
+            not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
+
         field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
         assignment.add_field_assignment(field_assignment)
 
@@ -266,6 +286,9 @@ class Algorithm(object):
         return self.score_and_evidence(search_results)
 
     def pick_value_decision(self, assignment, field):
+
+        the_target = assignment.patient.golden_truth[field.id]
+
         values = field.get_values()
         values_scores = [None for value in values]
         values_best_hits = [None for value in values]
@@ -280,12 +303,16 @@ class Algorithm(object):
                 last_choice.append(value)  # the ones w
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
+            if values[idx] != the_target and the_target != u'':
+                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx], all_comments)
             assignment.add_field_assignment(field_assignment)
             return
         if last_choice and len(last_choice) == 1:
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
             all_comments[last_choice[0]] = value_comment
+            if last_choice[0] != the_target and the_target != u'':
+                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
             field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment, all_comments)
             assignment.add_field_assignment(field_assignment)
             return
@@ -295,6 +322,8 @@ class Algorithm(object):
             # field_assignment = FieldAssignment(field.id, '', assignment.patient, comment='nothing matched')
             # assignment.add_field_assignment(field_assignment)
             idx = random.choice(range(len(values)))
+            if values[idx] != the_target and the_target != u'':
+                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, comment='nothing matched. random assignment', all_comments=all_comments)
             assignment.add_field_assignment(field_assignment)
 
