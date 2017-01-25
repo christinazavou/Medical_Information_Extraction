@@ -3,13 +3,10 @@ import os
 import yaml
 
 
-print "os.getcwd() in settings is {}".format(os.getcwd())
 this_dir = os.path.dirname(os.path.realpath(__file__))
 dir_name = os.path.basename(os.path.dirname(__file__))
 RUN_CONFIG_PATH = this_dir.replace(dir_name, 'aux_config')
-print "RUN_CONFIG_PATH: {}".format(RUN_CONFIG_PATH)
 CONFIGURATIONS_PATH = this_dir.replace(dir_name, 'Configurations')
-print "CONFIGURATIONS_PATH: {}".format(CONFIGURATIONS_PATH)
 
 
 class RunConfiguration(object):
@@ -25,13 +22,9 @@ class RunConfiguration(object):
         self.DATA_PATH = data_path
         self.RESULTS_PATH = results_path
         if not os.path.isdir(self.RESULTS_PATH):
-            print 'path ', self.RESULTS_PATH, ' did not exist. I create it.'
             os.mkdir(self.RESULTS_PATH)
-        else:
-            print 'path ', self.RESULTS_PATH, ' is the results path'
         self.SPECIFIC_RESULTS_PATH = os.path.join(self.RESULTS_PATH, 'conf'+self.NUM)
         if not os.path.isdir(self.SPECIFIC_RESULTS_PATH):
-            print 'path ', self.SPECIFIC_RESULTS_PATH, ' did not exist. I create it.'
             os.mkdir(self.SPECIFIC_RESULTS_PATH)
         for key, value in configurations_dict.items():
             self.settings[key] = self.translate_path(value)
