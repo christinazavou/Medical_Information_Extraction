@@ -1638,8 +1638,8 @@
                 "palliatief Chemoradiatie"
             ],
             "values":{
-                "Nee":[],
-                "Ja":[]
+                "No":[],
+                "Yes":[]
             }
         }
 }
