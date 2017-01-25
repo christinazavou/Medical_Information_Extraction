@@ -116,6 +116,8 @@ class Algorithm(object):
         else:
             return None, None, "no hits"
 
+    # def why_not_found(self, patient, ):
+
     def possibilities_query_description(self, possible_strings):
         """Description is a list of possible descriptions to the field.
         Return a bool query that returns results if at least one of the possible descriptions is found"""
