@@ -48,6 +48,8 @@ def index_dataset_patients(forms):
 
 
 if __name__ == "__main__":
+
+    print 'THE ARGS: ', sys.argv
     # todo: put reports in csv files with date sort... so that smaller ids give older reports !
 
     if len(sys.argv) < 4:
@@ -88,6 +90,7 @@ if __name__ == "__main__":
             algorithm.assign(form, es_index)
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
 
+    print 'THE PATH IS ', os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')
     x_js, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
 
     ev = Evaluation()

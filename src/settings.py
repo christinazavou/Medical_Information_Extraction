@@ -25,9 +25,13 @@ class RunConfiguration(object):
         self.DATA_PATH = data_path
         self.RESULTS_PATH = results_path
         if not os.path.isdir(self.RESULTS_PATH):
+            print 'path ', self.RESULTS_PATH, ' did not exist. I create it.'
             os.mkdir(self.RESULTS_PATH)
-        self.SPECIFIC_RESULTS_PATH = os.path.join(results_path, 'conf'+self.NUM)
+        else:
+            print 'path ', self.RESULTS_PATH, ' is the results path'
+        self.SPECIFIC_RESULTS_PATH = os.path.join(self.RESULTS_PATH, 'conf'+self.NUM)
         if not os.path.isdir(self.SPECIFIC_RESULTS_PATH):
+            print 'path ', self.SPECIFIC_RESULTS_PATH, ' did not exist. I create it.'
             os.mkdir(self.SPECIFIC_RESULTS_PATH)
         for key, value in configurations_dict.items():
             self.settings[key] = self.translate_path(value)
