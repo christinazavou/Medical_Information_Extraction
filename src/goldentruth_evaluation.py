@@ -41,5 +41,8 @@ class FieldEvaluation:
 
     def add_value(self, value):
         self.number_of_occurrences += 1
-        field_values_idx = self.extended_values.index(value)
-        self.real_counts[field_values_idx] += 1
+        try:
+            field_values_idx = self.extended_values.index(value)
+            self.real_counts[field_values_idx] += 1
+        except:
+            print 'value=', value, ' field=', self.name
