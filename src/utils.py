@@ -41,11 +41,9 @@ def condition_satisfied(golden_truth, condition):
         return True
     conditioned_field, condition_expression = re.split(u' !?= ', condition)
     if u'!=' in condition:
-        print u'!='
         if golden_truth[conditioned_field] != condition_expression:
             return True
     elif u'=' in condition:
-        print u'='
         if golden_truth[conditioned_field] == condition_expression:
             return True
     else:

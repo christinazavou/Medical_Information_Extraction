@@ -25,6 +25,14 @@ this_dir = os.path.dirname(os.path.realpath(__file__))
 main_file = os.path.join(this_dir, "main.py")
 
 start_time = time.time()
+configuration = 31
+main_file = os.path.join(this_dir, "golden_truth.py")
+run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configuration, dataPath, resultsPath)
+os.system(run_cmd)
+print "Finished configuration {} after {} minutes.".format(configuration, (time.time() - start_time) / 60.0)
+
+exit()
+start_time = time.time()
 configuration = 24
 run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(main_file, configuration, dataPath, resultsPath)
 os.system(run_cmd)
