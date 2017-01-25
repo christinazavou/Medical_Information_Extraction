@@ -1,7 +1,8 @@
 # THIS IS TO FIND THE GOLDEN TRUTH DISTRIBUTIONS OF ALL FIELDS AND PRINT.
 # THE FILE ALL_INIT_.. HAS WROND DESCRIPTION AND VALUES (FORM+EXPERT)
 
-json_form_file: "CONFIGURATIONS_PATH\\important_fields\\all_init_fields_DECEASE.json"
+#json_form_file: "CONFIGURATIONS_PATH\\important_fields\\all_init_fields_DECEASE.json"
+json_form_file: "CONFIGURATIONS_PATH\\important_fields\\important_fields_DECEASE.json"
 csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
 form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
 

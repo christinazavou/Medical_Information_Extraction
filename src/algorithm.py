@@ -90,7 +90,7 @@ class Algorithm(object):
             relevant_reports_ids = [hit['_id'] for hit in hits]
             scores_reports_ids = [hit['_score'] for hit in hits]
             word_distributions_ids = [Counter() for hit in hits]
-            for i, hit in enumerate(hits):
+            for i, hit in enumerate(hits):  # check all reports found
                 highlights = hit['highlight'] if 'highlight' in hit.keys() else []
                 if highlights:
                     comment += " highlights found " if 'highlights' not in comment else ''
@@ -99,8 +99,6 @@ class Algorithm(object):
                         for sentence in highlight:
                             words += find_highlighted_words(sentence)
                         break  # take only first found
-                    # if random.random < 0.3:
-                    #     print "words: ", words, '\nw: ', words
                     word_distributions_ids[i] = find_word_distribution(words)
                     if self.patient_relevance_test:
                         report = hit['_source']['description']  # always take the description field to check ;)
@@ -113,7 +111,8 @@ class Algorithm(object):
                 score, idx = pick_score_and_index(scores_reports_ids)
                 return score, relevant_reports_ids[idx], "{}. word distribution = {}".format(comment, word_distributions_ids[idx])
             else:
-                return None, None, comment+"no relevant reports"
+                # return None, None, comment+"no relevant reports"
+                return None, None, comment+"no relevant reports. words found: {}".format(word_distributions_ids)
         else:
             return None, None, "no hits"
 
