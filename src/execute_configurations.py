@@ -3,6 +3,7 @@ import os
 import sys
 import time
 
+print 'the first args: ', sys.argv
 
 RESULTS_IDX = 1
 
