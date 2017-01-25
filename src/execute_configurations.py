@@ -17,7 +17,7 @@ if len(sys.argv) < 2:
     resultsPath = "..\\results"
 else:
     if len(sys.argv) == 3 and 'Christina' in sys.argv[1] and 'Zavou' in sys.argv[2]:  # my user name is problematic
-        resultsPath = os.path.join(sys.argv[1], sys.argv[2])
+        resultsPath = sys.argv[1] + sys.argv[2]
     elif len(sys.argv) == 2:  # for other users
         resultsPath = sys.argv[1]
 
