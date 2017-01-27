@@ -1,4 +1,6 @@
-json_form_file: "CONFIGURATIONS_PATH\\important_fields\\important_fields_DECEASE.json"
+# USES NEW VALUES !!
+
+json_form_file: "CONFIGURATIONS_PATH\\important_fields\\myfields_DECEASE.json"
 csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
 form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
 
@@ -22,11 +24,11 @@ patients_pct: 1
 
 patient_relevant: false
 search_fields: ["description.dutch_tf_description","description.tf_description"]
-slop: 3
+slop: 2
 min_score: 0
-description_as_phrase: false
-value_as_phrase: false
-use_description_1ofk: 0 # if 0 no use of description in multi.., if 1 then just use, if 2 use 'value description'
+description_as_phrase: False
+value_as_phrase: False
+use_description_1ofk: 1 # if 0 no use of description in multi.., if 1 then just use, if 2 use 'value description'
 
 unknowns: "exclude"
 forms: ["colorectaal"]

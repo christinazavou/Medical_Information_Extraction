@@ -71,17 +71,10 @@ class Algorithm(object):
             self.make_patient_form_assignment(current_assignment)
             self.assignments.append(current_assignment)
 
-    def print_not_found(self, dataset_form, f):
-        to_print = {}
-        for patient in dataset_form.patients:
-            if patient.id in not_found.keys():
-                if patient.id not in to_print:
-                    to_print[patient.id] = {}
-                    to_print[patient.id]['not_found'] = []
-                    to_print[patient.id]['reports'] = patient.read_report_csv()
-                to_print[patient.id]['not_found'].append(not_found[patient.id])
+    def print_not_found(self, f):
         with open(f, 'w') as af:
-            json.dump(to_print, af, encoding='utf-8', indent=2)
+            for patient in not_found.keys():
+                af.write('{} : {}\n'.format(patient, not_found[patient]))
 
     def save_assignments(self, f):
         with open(f, 'w') as af:
@@ -214,7 +207,7 @@ class Algorithm(object):
         qb = bool_body(must_body=must_body)
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
         search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
-        if random.uniform(0, 1) < print_freq: #or field.description == ["restagering CT THORAX ABDOMEN"]:
+        if random.uniform(0, 1) < print_freq:
             print "the_current_body: {}".format(json.dumps(the_current_body))
             print "SEARCH_RESULTS: {}".format(json.dumps(search_results))
         best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
@@ -230,8 +223,10 @@ class Algorithm(object):
             value = 'Nee'
 
         if should_be_true:
-            # get patient reports to read them
-            not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
+            if not assignment.patient.id in not_found.keys():
+                not_found[assignment.patient.id] = [(field.id, assignment.patient.golden_truth[field.id])]
+            else:
+                not_found[assignment.patient.id].append((field.id, assignment.patient.golden_truth[field.id]))
 
         field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
         assignment.add_field_assignment(field_assignment)
@@ -304,7 +299,10 @@ class Algorithm(object):
         score, idx = pick_score_and_index(values_scores)
         if score > self.min_score:
             if values[idx] != the_target and the_target != u'':
-                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
+                if not assignment.patient.id in not_found.keys():
+                    not_found[assignment.patient.id] = [(field.id, assignment.patient.golden_truth[field.id])]
+                else:
+                    not_found[assignment.patient.id].append((field.id, assignment.patient.golden_truth[field.id]))
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, score, values_best_hits[idx], values_comments[idx], all_comments)
             assignment.add_field_assignment(field_assignment)
             return
@@ -312,7 +310,10 @@ class Algorithm(object):
             value_score, value_best_hit, value_comment = self.assign_last_choice(assignment, field)
             all_comments[last_choice[0]] = value_comment
             if last_choice[0] != the_target and the_target != u'':
-                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
+                if not assignment.patient.id in not_found.keys():
+                    not_found[assignment.patient.id] = [(field.id, assignment.patient.golden_truth[field.id])]
+                else:
+                    not_found[assignment.patient.id].append((field.id, assignment.patient.golden_truth[field.id]))
             field_assignment = FieldAssignment(field, last_choice[0], assignment.patient, value_score, value_best_hit, value_comment, all_comments)
             assignment.add_field_assignment(field_assignment)
             return
@@ -323,7 +324,10 @@ class Algorithm(object):
             # assignment.add_field_assignment(field_assignment)
             idx = random.choice(range(len(values)))
             if values[idx] != the_target and the_target != u'':
-                not_found[assignment.patient.id] = (field.id, assignment.patient.golden_truth[field.id])
+                if not assignment.patient.id in not_found.keys():
+                    not_found[assignment.patient.id] = [(field.id, assignment.patient.golden_truth[field.id])]
+                else:
+                    not_found[assignment.patient.id].append((field.id, assignment.patient.golden_truth[field.id]))
             field_assignment = FieldAssignment(field, values[idx], assignment.patient, comment='nothing matched. random assignment', all_comments=all_comments)
             assignment.add_field_assignment(field_assignment)
 

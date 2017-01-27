@@ -54,10 +54,13 @@ if __name__ == "__main__":
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\Documents\\'):
             settings = RunConfiguration(24, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
+            # settings = RunConfiguration(
+            #     34, 'C:\Users\Christina\Documents\Ads_Ra_0\\All_Data', 'C:\Users\Christina\Documents\Ads_Ra_0\\All_Data_Results').settings
         else:
             settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
-        settings = RunConfiguration(sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
+        settings = RunConfiguration(
+            sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 
     data = None
     es_index = None
@@ -76,7 +79,6 @@ if __name__ == "__main__":
         es_index = EsIndex(settings['index_name'])
         es_index.index(settings['index_body_file'])
         index_dataset_patients(data.dataset_forms)
-        # ensure_reports(data.dataset_forms)
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
         data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
 
@@ -88,7 +90,7 @@ if __name__ == "__main__":
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
 
-            algorithm.print_not_found(form, os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'not_found.json'))
+            algorithm.print_not_found(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'not_found.txt'))
 
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
 
