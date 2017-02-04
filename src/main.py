@@ -7,6 +7,7 @@ from es_index import EsIndex
 from algorithm import Algorithm
 import sys
 from evaluation import Evaluation
+import time
 
 
 FREQ = 1
@@ -52,10 +53,11 @@ if __name__ == "__main__":
     # todo: put reports in csv files with date sort... so that smaller ids give older reports !
 
     if len(sys.argv) < 4:
-        if os.path.isdir('C:\\Users\\Christina\\Documents\\'):
-            settings = RunConfiguration(24, 'C:\\Users\\Christina\\Documents\\Ads_Ra_0\\Data', '..\\results').settings
-            # settings = RunConfiguration(
-            #     34, 'C:\Users\Christina\Documents\Ads_Ra_0\\All_Data', 'C:\Users\Christina\Documents\Ads_Ra_0\\All_Data_Results').settings
+        if os.path.isdir('C:\\Users\\Christina\\') or os.path.isdir('C:\\Users\\ChristinaZ\\'):
+            configuration = 14
+            datapath = 'D:\All_Data'
+            resultspath = 'D:\All_Data_results_test'
+            settings = RunConfiguration(configuration, datapath, resultspath).settings
         else:
             settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
@@ -65,22 +67,26 @@ if __name__ == "__main__":
     data = None
     es_index = None
 
-    if os.path.isfile(os.path.join(settings['RESULTS_PATH'], 'dataset.p')):
-        data = DataSet(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
+    if os.path.isfile(os.path.join(settings['RESULTS_PATH'], settings['dataset'])):
+        data = DataSet(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
     else:
+        print 'not existing dataset'
+        time.sleep(6)
         data = DataSet()
         data.dataset_forms = init_data_set_forms(settings['json_form_file'], settings['csv_form_file'], settings['form_dossiers_path'])
         init_dataset_patients(data.dataset_forms)
-        data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
+        data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
 
     if os.path.isfile(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p')):
         es_index = EsIndex(f=os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
     else:
+        print 'not existing index'
+        time.sleep(6)
         es_index = EsIndex(settings['index_name'])
         es_index.index(settings['index_body_file'])
         index_dataset_patients(data.dataset_forms)
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
-        data.save(os.path.join(settings['RESULTS_PATH'], 'dataset.p'))
+        data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
 
     if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
         algorithm = Algorithm(
@@ -91,6 +97,7 @@ if __name__ == "__main__":
             algorithm.assign(form, es_index)
 
             algorithm.print_not_found(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'not_found.txt'))
+            algorithm.print_queries(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'queries.json'))
 
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
 

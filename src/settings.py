@@ -44,7 +44,8 @@ class RunConfiguration(object):
             path = path.replace('RESULTS_PATH', self.RESULTS_PATH)
         if 'NUM' in str(path):
             path = path.replace('NUM', self.NUM)
-        if 'v5' in str(path) and os.path.isdir('C:\\Users\\Christina Zavou\\'):
+        if 'v5' in str(path) and \
+                (os.path.isdir('C:\\Users\\Christina Zavou\\') or os.path.isdir('C:\\Users\\ChristinaZ\\')):
             path = path.replace('v5', 'v2')
         elif 'v2' in str(path) and os.path.isdir('C:\\Users\\Christina\\'):
             path = path.replace('v2', 'v5')
