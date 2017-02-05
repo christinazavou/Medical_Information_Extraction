@@ -28,14 +28,26 @@ class Evaluation:
                     assignment_dict[field_name]['value'], assignment_dict[field_name]['target']
                 )
                 self.fields_evaluations[f_e_key].add_word_distribution(assignment_dict[field_name]['comment'])
+                self.fields_evaluations[f_e_key].find_random_cases(
+                    assignment_dict[field_name]['target'],
+                    assignment_dict[field_name]['value'],
+                    assignment_dict[field_name]['comment']
+                )
         for f_e_key in self.fields_evaluations.keys():
             self.fields_evaluations[f_e_key].calculate_accuracy()
 
     def print_accuracies(self, accuracy_file):
         print "Printing accuracies ..."
         with open(accuracy_file, 'w') as f:
+            f.write('Accuracies:\n')
             for f_e in self.fields_evaluations:
                 f.write('{}: {}\n'.format(f_e, self.fields_evaluations[f_e].accuracy))
+            f.write('\n\nRandom_assignments:\n')
+            for f_e in self.fields_evaluations:
+                f.write('{}: '.format(f_e))
+                for key, value in self.fields_evaluations[f_e].random_assignments.items():
+                    f.write('{}: {}, '.format(key, value))
+                f.write('\n')
 
     def print_heat_maps(self, heat_maps_folder):
         print "Printing heat maps ..."
@@ -96,6 +108,9 @@ class FieldEvaluation:
         self.real_counts = np.zeros(len(self.extended_values))
         self.word_distribution = Counter()
         self.number_of_occurrences = 0
+        self.random_assignments = {}
+        for value_name in field.get_values():
+            self.random_assignments[value_name] = np.zeros(2)  # correct, incorrect
 
     def add_assignment(self, value, target):
 
@@ -141,3 +156,9 @@ class FieldEvaluation:
                 except:
                     print "error when wd={}".format(wd)
 
+    def find_random_cases(self, target, value, comment):
+        if comment == 'nothing matched. random assignment':
+            if target == value:
+                self.random_assignments[value][0] += 1
+            else:
+                self.random_assignments[value][1] += 1

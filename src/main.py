@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\') or os.path.isdir('C:\\Users\\ChristinaZ\\'):
-            configuration = 14
+            configuration = 47
             datapath = 'D:\All_Data'
-            resultspath = 'D:\All_Data_results_test'
+            resultspath = 'D:\AllDatav2addedvalues'
             settings = RunConfiguration(configuration, datapath, resultspath).settings
         else:
             settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings

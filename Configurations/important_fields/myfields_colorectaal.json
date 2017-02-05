@@ -66,7 +66,10 @@
                 "sigmoid resectie"
             ],
             "Abdomino-perianale resectie":[
-                "Abdomino perianaleresectie"
+                "Abdomino perianaleresectie",
+                "Abdomino perirectale resectie",
+                "abdominoperineale resectie",
+                "abdominoperineale operatie"
             ],
             "Ileocoecaal (+appendectomie)":[
                 "Ileocoecaal resectie"
@@ -83,7 +86,10 @@
                 "Transanaal endoscopisch"
             ],
             "Transanaal endoscopische procedure gevolgd door abdomino-perineale resectie":[
-                "Transanaal endoscopische abdomino perinealeresectie"
+                "Transanaal endoscopische abdomino perinealeresectie",
+                "Transanaal endoscopische abdomino perirectale resectie",
+                "Transanaal endoscopische abdominoperineale resectie",
+                "Transanaal endoscopische abdominoperineale operatie"
             ],
             "Transanaal endoscopische procedure gevolgd door anterior resectie":[
                 "Transanaal endoscopisch low anteriorresectie",
@@ -395,7 +401,7 @@
     },
     "klachten_klacht4":{
         "condition":"",
-        "description":["Anemie"],
+        "description":["Anemie", "Anemic", "anemia"],
         "values":{
             "Yes":[],
             "": []

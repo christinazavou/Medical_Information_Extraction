@@ -146,10 +146,8 @@
                 "restagering CT THORAX ABDOMEN"
             ],
             "values":{
-                "Nee":[
-                ],
-                "Ja":[
-                ]
+                "Nee":[],
+                "Ja":[]
             }
         },
         "RESTAG_SCORECT2_1":{
@@ -1574,8 +1572,8 @@
             "description":[
             ],
             "values":{
-                "Yes":[
-                ]
+                "Yes":[],
+                "": []
             }
         },
         "mdo_chir":{
@@ -1589,10 +1587,8 @@
                 "resectie carcinoom"
             ],
             "values":{
-                "Ja":[
-                ],
-                "Nee":[
-                ]
+                "Ja":[],
+                "Nee":[]
             }
         },
         "pallther_RT":{
@@ -1604,10 +1600,8 @@
                 "palliatieve bestraling"
             ],
             "values":{
-                "No":[
-                ],
-                "Yes":[
-                ]
+                "No":[],
+                "Yes":[]
             }
         },
         "pallther_chemo":{
@@ -1619,10 +1613,8 @@
                 "palliatief chemo therapie"
             ],
             "values":{
-                "No":[
-                ],
-                "Yes":[
-                ]
+                "No":[],
+                "Yes":[]
             }
         },
         "pallther_chemoRT":{
