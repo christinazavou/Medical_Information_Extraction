@@ -146,8 +146,8 @@
                 "restagering CT THORAX ABDOMEN"
             ],
             "values":{
-                "Nee":[],
-                "Ja":[]
+                "No":[],
+                "Yes":[]
             }
         },
         "RESTAG_SCORECT2_1":{

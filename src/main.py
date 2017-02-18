@@ -54,9 +54,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\') or os.path.isdir('C:\\Users\\ChristinaZ\\'):
-            configuration = 47
+            configuration = 60
             datapath = 'D:\All_Data'
-            resultspath = 'D:\AllDatav2addedvalues'
+            resultspath = 'D:\AllDataResultsNgram'
             settings = RunConfiguration(configuration, datapath, resultspath).settings
         else:
             settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
@@ -102,7 +102,7 @@ if __name__ == "__main__":
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
 
     x_js, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-
+    exit()
     ev = Evaluation()
     ev.evaluate(x_js, data.dataset_forms)
     ev.print_results(

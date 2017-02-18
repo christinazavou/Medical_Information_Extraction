@@ -1,4 +1,18 @@
 import json
+f = "D:\AllDatav2addedvalues\conf50\queries.json"
+d = json.load(open(f, 'r'))
+for i in d:
+    print d[i]
+exit()
+
+
+import yaml
+f = '..\\aux_config\\conf60.yml'
+d = yaml.load(open(f, 'r'))
+print d['ngram_trial'] == True
+exit()
+
+
 
 f = "..\\results\\conf24\\base_assign.json"
 with open(f, 'r') as f:
