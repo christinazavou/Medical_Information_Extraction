@@ -12,7 +12,7 @@ else:
         resultsPath = sys.argv[1] + ' ' + sys.argv[2]
     elif len(sys.argv) == 2:  # for other users
         resultsPath = sys.argv[1]
-        
+
 if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
     dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
     dataPath = os.path.join(resultsPath, 'dataset.p')

@@ -131,6 +131,9 @@ else:
     results_folder = os.path.join(sys.argv[3], sys.argv[1])
     datasetfile = sys.argv[2]
 
+if not os.path.isdir(results_folder):
+    print 'making folder ', results_folder
+
 model_name = os.path.join(results_folder, "myW2V")
 if os.path.isfile(model_name):
     model = gensim.models.Word2Vec.load(model_name)
