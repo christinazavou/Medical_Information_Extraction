@@ -7,8 +7,8 @@ print 'the first args: ', sys.argv
 
 if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
     dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
-elif os.path.isdir('D:\All_Data'):
-    dataPath = 'D:\All_Data'
+elif os.path.isdir('C:\\Users\\ChristinaZ\\Desktop\\All_Data'):
+    dataPath = 'C:\\Users\\ChristinaZ\\Desktop\\All_Data'
 else:
     print "no data folder found"
     exit(1)
