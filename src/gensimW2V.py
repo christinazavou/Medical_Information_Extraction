@@ -96,7 +96,7 @@ def find_vocab(voc_list):
 #     return unigrams_bigrams
 
 
-def get_interesting_words(jfile='..\Configurations\important_fields\important_fields_colorectaal.json'):
+def get_interesting_words(jfile):
     n_grams = set()
     fields_dicts = json.load(open(jfile, 'r'), encoding='utf8')
     interesting_words = set()
@@ -110,7 +110,9 @@ def get_interesting_words(jfile='..\Configurations\important_fields\important_fi
     return list(n_grams)
 
 
-ngrams = get_interesting_words()
+this_dir = os.path.dirname(os.path.realpath(__file__))
+dir_name = os.path.basename(os.path.dirname(__file__))
+ngrams = get_interesting_words(os.path.join(this_dir.replace(dir_name, 'Configurations'), 'important_fields', 'important_fields_colorectaal.json'))
 
 num_features = 256    # Word vector dimensionality
 min_word_count = 10   # Minimum word count
@@ -141,12 +143,12 @@ else:
 vocab = list(model.vocab.keys())
 vocab = find_vocab(vocab)
 
-with open(os.path.join(results_folder, 'results.txt', 'w')) as f:
+with open(os.path.join(results_folder, 'results.txt'), 'w') as f:
     for i in ngrams:
         if i in vocab:
             f.write('word {}:\n'.format(i))
             synonyms = [find_vocab([w]) for w, p in model.most_similar(i, topn=10)]
-            f.write(' similar to {}'.format(u', '.join([s[0] for s in synonyms])))
+            f.write('similar to {}\n'.format(u', '.join([s[0] for s in synonyms])))
 
 
 # print 'overplaatsing' in model.vocab
