@@ -10,6 +10,7 @@ from gensim.models import Word2Vec
 import json
 from gensim.models import word2vec
 from gensim.models import Phrases
+import sys
 
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -18,7 +19,7 @@ tokenizer = nltk.data.load('nltk:tokenizers/punkt/dutch.pickle')
 
 class IterSent:
 
-    def __init__(self, data_set_file='..\\results\\new_values_dataset.p', formId='colorectaal', size=None):
+    def __init__(self, data_set_file, formId='colorectaal', size=None):
         data = DataSet(data_set_file)
         for form in data.dataset_forms:
             if form.id == formId:
@@ -118,13 +119,20 @@ context = 4           # Context window size
 downsampling = 1e-2   # Downsample setting for frequent words
 
 
-model_name = "myW2V"
+if len(sys.argv) < 3:
+    results_folder = '..\\results'
+    datasetfile = '..\\results\\new_values_dataset.p'
+else:
+    results_folder = sys.argv[1]
+    datasetfile = sys.argv[2]
+
+model_name = os.path.join(results_folder, "myW2V")
 if os.path.isfile(model_name):
     model = gensim.models.Word2Vec.load(model_name)
 else:
-    bigramer = gensim.models.Phrases(IterSent())
+    bigramer = gensim.models.Phrases(IterSent(datasetfile))
     # trigram = Phrases(bigram[sentence_stream])
-    model = Word2Vec(bigramer[IterSent()], workers=num_workers, size=num_features, min_count=min_word_count,
+    model = Word2Vec(bigramer[IterSent(datasetfile)], workers=num_workers, size=num_features, min_count=min_word_count,
                      window=context, sample=downsampling)
     # model = word2vec.Word2Vec(IterSent(), workers=num_workers, size=num_features, min_count=min_word_count,
     #                           window=context, sample=downsampling)
@@ -133,11 +141,12 @@ else:
 vocab = list(model.vocab.keys())
 vocab = find_vocab(vocab)
 
-for i in ngrams:
-    if i in vocab:
-        print i
-        synonyms = [find_vocab([w]) for w, p in model.most_similar(i, topn=10)]
-        print u', '.join([s[0] for s in synonyms])
+with open(os.path.join(results_folder, 'results.txt', 'w')) as f:
+    for i in ngrams:
+        if i in vocab:
+            f.write('word {}:\n'.format(i))
+            synonyms = [find_vocab([w]) for w, p in model.most_similar(i, topn=10)]
+            f.write(' similar to {}'.format(u', '.join([s[0] for s in synonyms])))
 
 
 # print 'overplaatsing' in model.vocab

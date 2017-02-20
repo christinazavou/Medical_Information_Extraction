@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\') or os.path.isdir('C:\\Users\\ChristinaZ\\'):
-            configuration = 60
+            configuration = 70
             datapath = 'D:\All_Data'
             resultspath = 'D:\AllDataResultsNgram'
             settings = RunConfiguration(configuration, datapath, resultspath).settings
@@ -92,17 +92,18 @@ if __name__ == "__main__":
         algorithm = Algorithm(
             'baseline', settings['patient_relevant'], settings['min_score'], settings['search_fields'],
             settings['use_description_1ofk'], settings['description_as_phrase'], settings['value_as_phrase'],
-            settings['slop'])
+            settings['slop'], settings['ngram_trial'], settings['substring_trial'])
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
 
             algorithm.print_not_found(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'not_found.txt'))
             algorithm.print_queries(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'queries.json'))
+            algorithm.print_ngrams(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ngrams.json'))
 
         algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
 
     x_js, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-    exit()
+
     ev = Evaluation()
     ev.evaluate(x_js, data.dataset_forms)
     ev.print_results(

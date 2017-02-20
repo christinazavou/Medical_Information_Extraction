@@ -1,6 +1,6 @@
-# USES NEW VALUES AND NGRAMS SEARCH
+# THIS IS WITH ALL_DATA IN DESKTOP ... SO NEW INDEX !
 
-json_form_file: "CONFIGURATIONS_PATH\\important_fields\\myfields_DECEASE.json"
+json_form_file: "CONFIGURATIONS_PATH\\important_fields\\important_fields_DECEASE.json"
 csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
 form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
 
@@ -26,10 +26,10 @@ substring_trial: True
 
 forms: ["colorectaal"]
 
-dataset: "new_values_dataset.p"
+dataset: "important_dataset.p"
 # ---------------------------------------------------------------------------------------------------------------------#
 connection: {"host": "localhost", "port": 9200}
-index_name: "all_mie_new_ngrams"
+index_name: "important_mie_ngrams"
 type_name_p: "patient"
 type_name_f: "form"
 type_name_p: "patient_report"

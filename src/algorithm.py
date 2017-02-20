@@ -10,12 +10,43 @@ from patient_relevant_utils import PatientRelevance
 import pickle
 from form import Form
 from collections import Counter
+from nltk.metrics import edit_distance
+
 
 print_freq = 0.001  # .0010
 fragments = 10
 
 not_found = {}  # {32223: ('procok':t1), ('locprim': x), '444': ...}
 per_field_per_value_search = {}
+ngram_possibilities = {}
+
+
+def accepted_words(words, possible_words):
+    words = [word.lower() for word in words]
+    possible_words = [word.lower() for word in possible_words]
+    for possible_word in possible_words:
+        sub_words = possible_word.split(' ')
+        if len(sub_words) > 1:
+            okays = [0 for i in sub_words]
+            acc_w = []
+            for i, sub_word in enumerate(sub_words):
+                for word in words:
+                    if edit_distance(sub_word, word) < 4:
+                        okays[i] = 1
+                        acc_w += [word]
+                        ngram_possibilities.setdefault(sub_word, set())
+                        ngram_possibilities[sub_word].update([word])
+            if not 0 in okays:
+                ngram_possibilities.setdefault(possible_word, set())
+                ngram_possibilities[possible_word].update(acc_w)
+                return acc_w
+        else:
+            for word in words:
+                if edit_distance(possible_word, word) < 4:
+                    ngram_possibilities.setdefault(possible_word, set())
+                    ngram_possibilities[possible_word].update([word])
+                    return [word]
+    return None
 
 
 def pick_score_and_index(scores, verbose=False):
@@ -42,7 +73,8 @@ def pick_score_and_index(scores, verbose=False):
 
 class Algorithm(object):
     def __init__(self, name, patient_relevant=False, min_score=0, search_fields=None,
-                 use_description1ofk=0, description_as_phrase=None, value_as_phrase=None, slop=10):
+                 use_description1ofk=0, description_as_phrase=None, value_as_phrase=None, slop=10,
+                 ngram_trial=False, substring_trial=False):
         self.name = name
         self.con = None
         self.index = None
@@ -56,6 +88,8 @@ class Algorithm(object):
         self.parent_type = 'patient'
         self.search_type = 'report'
         self.slop = slop
+        self.ngram_trial = ngram_trial
+        self.substring_trial = substring_trial
 
     def assign(self, dataset_form, es_index):
         self.con = es_index.es.con  # directly to ElasticSearch connection establishment API class
@@ -73,7 +107,12 @@ class Algorithm(object):
                 af.write('{} : {}\n'.format(patient, not_found[patient]))
 
     def print_queries(self, f):
-        json.dump(per_field_per_value_search, f)
+        json.dump(per_field_per_value_search, open(f, 'w'), indent=2)
+
+    def print_ngrams(self, f):
+        with open(f, 'w') as af:
+            for key in ngram_possibilities.keys():
+                af.write('{} : {}\n'.format(key, ngram_possibilities[key]))
 
     def save_assignments(self, f):
         with open(f, 'w') as af:
@@ -90,8 +129,6 @@ class Algorithm(object):
         comment = ""
         hits = search_results['hits']['hits']
         if hits:
-            if random.random() < print_freq:
-                print "search_resutls: {}".format(search_results)
             comment += "hits found"
             relevant_reports_ids = [hit['_id'] for hit in hits]
             scores_reports_ids = [hit['_score'] for hit in hits]
@@ -123,6 +160,49 @@ class Algorithm(object):
                 return None, None, comment + "no relevant reports. words found: {}".format(word_distributions_ids)
         else:
             return None, None, "no hits"
+
+    def check_ngrams_results(self, search_results, possible_words):
+        comment = ""
+        hits = search_results['hits']['hits']
+        if hits:
+            # if random.random() < print_freq:
+            #     print "search_resutls: {}".format(search_results)
+            comment += "hits found (ngrams)"
+            relevant_reports_ids = [hit['_id'] for hit in hits]
+            scores_reports_ids = [hit['_score'] for hit in hits]
+            word_distributions_ids = [Counter() for hit in hits]
+            for i, hit in enumerate(hits):  # check all reports found
+                highlights = hit['highlight'] if 'highlight' in hit.keys() else []
+                if highlights:
+                    comment += " highlights found (ngrams) " if 'highlights' not in comment else ''
+                    words = []
+                    for field_searched, highlight in highlights.items():
+                        for sentence in highlight:
+                            words += find_highlighted_words(sentence)
+                        break  # take only first found
+                    acc_w = accepted_words(words, possible_words)
+                    if acc_w:
+                        word_distributions_ids[i] = Counter(acc_w)
+                        if self.patient_relevance_test:
+                            report = hit['_source']['description']  # always take the description field to check ;)
+                            is_relevant, _ = self.patient_relevance_test.check_report_relevance(report, words)
+                            if not is_relevant:
+                                idx = relevant_reports_ids.index(hit['_id'])
+                                del relevant_reports_ids[idx]
+                                del scores_reports_ids[idx]
+                    else:
+                        idx = relevant_reports_ids.index(hit['_id'])
+                        del relevant_reports_ids[idx]
+                        del scores_reports_ids[idx]
+            if scores_reports_ids:
+                score, idx = pick_score_and_index(scores_reports_ids)
+                return score, relevant_reports_ids[idx], \
+                       "{}. word distribution = {}".format(comment,word_distributions_ids[idx])
+            else:
+                # return None, None, comment+"no relevant reports"
+                return None, None, comment + "no relevant reports (ngrams). words found: {}".format(word_distributions_ids)
+        else:
+            return None, None, "no hits (ngrams)"
 
     def possibilities_query_description(self, possible_strings):
         """Description is a list of possible descriptions to the field.
@@ -175,8 +255,11 @@ class Algorithm(object):
         body = bool_body(should_body=should_body, min_should_match=1)
         return body
 
-    def highlight_body(self):
-        highlight_body = highlight_query(self.search_fields, ["<em>"], ['</em>'], frgm_num=fragments)
+    def highlight_body(self, fields=None):
+        if not fields:
+            highlight_body = highlight_query(self.search_fields, ["<em>"], ['</em>'], frgm_num=fragments)
+        else:
+            highlight_body = highlight_query(fields, ["<em>"], ['</em>'], frgm_num=fragments)
         return highlight_body
 
     def has_parent_body(self, parent_id):
@@ -208,8 +291,6 @@ class Algorithm(object):
         qb = bool_body(must_body=must_body)
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
         search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
-        if random.random() < print_freq:
-            print "the current body ", the_current_body
         if field.id not in per_field_per_value_search.keys():
             per_field_per_value_search[field.id] = the_current_body
         best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
@@ -218,6 +299,24 @@ class Algorithm(object):
             field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
             assignment.add_field_assignment(field_assignment)
             return
+
+        if self.ngram_trial:
+            must_body = list()
+            must_body.append({"query_string": {"default_field": "description.ngram_description", "query": disjunction_of_conjunctions(field.description)}})
+            must_body.append(self.has_parent_body(assignment.patient.id))
+            hb = self.highlight_body("description.ngram_description")
+            qb = bool_body(must_body=must_body)
+            the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+            search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
+            if random.random() < print_freq:
+                print "the current body ", the_current_body
+            best_hit_score, best_hit, comment = self.check_ngrams_results(search_results, field.description)
+            if best_hit_score:
+                value = 'Yes' if field.in_values('Yes') else 'Ja'
+                field_assignment = FieldAssignment(field, value, assignment.patient, best_hit_score, best_hit, comment)
+                assignment.add_field_assignment(field_assignment)
+                return
+
         value = ''
         if field.in_values('No'):
             value = 'No'
@@ -234,6 +333,7 @@ class Algorithm(object):
         assignment.add_field_assignment(field_assignment)
 
     def assign_last_choice(self, assignment, field):
+        # NO NGRAMS SEARCHED !!!
         """To assign anders check if description can be found and return the score and evidence of such a query"""
         if field.description:
             must_body = list()
@@ -245,8 +345,6 @@ class Algorithm(object):
             qb = bool_body(must_body=must_body)
             the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
             search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
-            if random.random() < print_freq:
-                print "the current body ", the_current_body
             if 'last_choice' not in per_field_per_value_search[field.id].keys():
                 per_field_per_value_search[field.id]['last_choice'] = the_current_body
             best_hit_score, best_hit, comment = self.score_and_evidence(search_results)
@@ -275,8 +373,6 @@ class Algorithm(object):
         the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
         try:
             search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
-            if random.random() < print_freq:
-                print "the current body ", the_current_body
             if field.id not in per_field_per_value_search.keys():
                 per_field_per_value_search[field.id] = {}
             if value not in per_field_per_value_search[field.id].keys():
@@ -285,6 +381,21 @@ class Algorithm(object):
             print "cause exception"
             print json.dumps(the_current_body)
             exit()
+
+        if self.score_and_evidence(search_results) == (None, None, "no hits") and self.ngram_trial:
+            must_body = list()
+            hb = self.highlight_body("description.ngram_description")
+            must_body.append(self.has_parent_body(assignment.patient.id))
+            if self.use_description1ofk == 1 and field.description != []:
+                must_body.append({"query_string": {"fields": self.search_fields, "query": disjunction_of_conjunctions(field.description)}})
+            must_body.append({"query_string": {"default_field": "description.ngram_description", "query": disjunction_of_conjunctions(field.get_value_possible_values(value))}})
+            qb = bool_body(must_body=must_body)
+            the_current_body = search_body(qb, highlight_body=hb, min_score=self.min_score)
+            search_results = self.con.search(index=self.index, body=the_current_body, doc_type=self.search_type)
+            if random.random() < print_freq:
+                print "the current body ", the_current_body
+            return self.check_ngrams_results(search_results, field.get_value_possible_values(value))
+
         return self.score_and_evidence(search_results)
 
     def pick_value_decision(self, assignment, field):
