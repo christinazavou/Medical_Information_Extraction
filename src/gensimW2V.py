@@ -51,6 +51,7 @@ class IterSent:
                 return my_parsed_sentences
             except:
                 print 'error for self.current ', self.current
+                print 'trying to open ', os.path.join(self.data.patients[self.current].dossier_path, 'report.csv')
                 return u''
 
 
