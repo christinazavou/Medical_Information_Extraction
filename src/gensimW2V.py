@@ -1,5 +1,7 @@
 import re
 import os
+import warnings
+warnings.filterwarnings(action='ignore', category=UserWarning, module='gensim')
 import pandas as pd
 import gensim
 from DataSet import DataSet
