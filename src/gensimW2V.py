@@ -119,11 +119,11 @@ context = 4           # Context window size
 downsampling = 1e-2   # Downsample setting for frequent words
 
 
-if len(sys.argv) < 3:
+if len(sys.argv) < 4:
     results_folder = '..\\results'
     datasetfile = '..\\results\\new_values_dataset.p'
 else:
-    results_folder = sys.argv[1]
+    results_folder = os.path.join(sys.argv[3], sys.argv[1])
     datasetfile = sys.argv[2]
 
 model_name = os.path.join(results_folder, "myW2V")
