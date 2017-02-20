@@ -27,6 +27,7 @@ word2Vec_file = os.path.join(this_dir, "gensimW2V.py")
 
 start_time = time.time()
 configuration = 100
+dataPath = os.path.join(resultsPath, 'dataset.p')
 run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(word2Vec_file, configuration, dataPath, resultsPath)
 os.system(run_cmd)
 print "Finished configuration {} after {} minutes.".format(configuration, (time.time() - start_time) / 60.0)
