@@ -128,8 +128,8 @@ if len(sys.argv) < 4:
     results_folder = '..\\results'
     datasetfile = '..\\results\\new_values_dataset.p'
 else:
-    results_folder = os.path.join(sys.argv[3], sys.argv[1])
-    datasetfile = sys.argv[2]
+    results_folder = os.path.join(sys.argv[2])
+    datasetfile = sys.argv[1]
 
 print 'results folder: ', results_folder
 if not os.path.isdir(results_folder):
