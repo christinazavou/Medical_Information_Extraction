@@ -25,7 +25,6 @@ else:
 
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
-main_file = os.path.join(this_dir, "main.py")
 word2Vec_file = os.path.join(this_dir, "gensimW2V.py")
 
 start_time = time.time()
