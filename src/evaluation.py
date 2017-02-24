@@ -144,7 +144,10 @@ class FieldEvaluation:
         self.real_counts[field_values_idx_target] += 1
 
     def calculate_accuracy(self):
-        self.accuracy /= self.number_of_occurrences
+        if self.number_of_occurrences == 0:
+            self.accuracy = 0
+        else:
+            self.accuracy /= self.number_of_occurrences
 
     def add_word_distribution(self, comment):
         if 'word distribution' in comment:

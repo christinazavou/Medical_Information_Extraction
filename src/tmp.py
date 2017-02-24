@@ -1,8 +1,23 @@
+from DataSet import DataSet
+data = DataSet('..\\results\\new_values_dataset_restag.p')
+for form in data.dataset_forms:
+    print form.patients
+    print form.fields
+
+exit()
+
 import json
 f = "D:\AllDatav2addedvalues\conf50\queries.json"
 d = json.load(open(f, 'r'))
 for i in d:
     print d[i]
+exit()
+
+from nltk.stem.snowball import SnowballStemmer
+LANG_STEMMER = SnowballStemmer('dutch')
+words = ['resectie', 'operatief', 'chirurgisch']
+stemmed_words = [LANG_STEMMER.stem(w) for w in words]
+print stemmed_words
 exit()
 
 

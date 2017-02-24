@@ -26,15 +26,19 @@ def init_data_set_forms(json_form_file, csv_form_file, form_dossier_path):
         if os.path.isfile(csv_file) and os.path.isfile(json_file):
             form = DataSetForm(decease, csv_file, json_file, form_dossier_path.replace('DECEASE', decease))
             form.put_fields()
+            print 'form fields: ', form.fields
             forms.append(form)
         else:
             print "missing form json or csv"
+            print 'json: ', json_file
+            print 'csv: ', csv_file
     return forms
 
 
 def init_dataset_patients(forms):
     for form in forms:
         form.find_patients()
+        print 'form patients: ', form.patients
 
 
 def index_dataset_patients(forms):
@@ -54,9 +58,9 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 4:
         if os.path.isdir('C:\\Users\\Christina\\') or os.path.isdir('C:\\Users\\ChristinaZ\\'):
-            configuration = 70
+            configuration = 50
             datapath = 'D:\All_Data'
-            resultspath = 'D:\AllDataResultsNgram'
+            resultspath = '..\\results'
             settings = RunConfiguration(configuration, datapath, resultspath).settings
         else:
             settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
@@ -92,7 +96,7 @@ if __name__ == "__main__":
         algorithm = Algorithm(
             'baseline', settings['patient_relevant'], settings['min_score'], settings['search_fields'],
             settings['use_description_1ofk'], settings['description_as_phrase'], settings['value_as_phrase'],
-            settings['slop'], settings['ngram_trial'], settings['substring_trial'])
+            settings['slop'], settings['ngram_trial'], settings['substring_trial'], settings['edit_distance'])
         for form in data.dataset_forms:
             algorithm.assign(form, es_index)
 

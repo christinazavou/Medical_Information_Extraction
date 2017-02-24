@@ -70,6 +70,18 @@ def sentence_to_wordlist(sentence):  # I THINK IS FINE
     return words
 
 
+def bigrams_sentence(sentences):
+    unigrams_bigrams = []
+    sentences = [sentence for sentence in sentences if sentence != u'']
+    for sentence in sentences:
+        tokens = list(sentence.split())
+        unigrams_bigrams += tokens
+        if len(tokens) > 1:
+            for i in range(0, len(tokens)-1):
+                unigrams_bigrams += [u'{}_{}'.format(tokens[i], tokens[i+1])]
+    return unigrams_bigrams
+
+
 # def sentences_generator(data_set_file='..\\results\\new_values_dataset.p', formId='colorectaal', size=None):
 #     data = DataSet(data_set_file)
 #     for form in data.dataset_forms:
@@ -89,16 +101,6 @@ def find_vocab(voc_list):
     return [token.replace('_', ' ') for token in voc_list]
 
 
-# def bigram_preprocess(sentence):
-#     unigrams_bigrams = []
-#     tokens = list(sentence.split(' '))
-#     unigrams_bigrams += tokens
-#     if len(tokens) > 1:
-#         for i in range(0, len(tokens)-1):
-#             unigrams_bigrams += [u'{}_{}'.format(tokens[i], tokens[i+1])]
-#     return unigrams_bigrams
-
-
 def get_interesting_words(jfile):
     n_grams = set()
     fields_dicts = json.load(open(jfile, 'r'), encoding='utf8')
@@ -113,8 +115,19 @@ def get_interesting_words(jfile):
     return list(n_grams)
 
 
+def get_interesting_bigrams(jfile):
+    unigrams_bigrams = set()
+    fields_dicts = json.load(open(jfile, 'r'), encoding='utf8')
+    for field, values in fields_dicts.iteritems():
+        unigrams_bigrams.update(bigrams_sentence(values['description']))
+        for value, possible_values in values['values'].iteritems():
+            unigrams_bigrams.update(bigrams_sentence([value] + possible_values))
+    return unigrams_bigrams
+
+
 this_dir = os.path.dirname(os.path.realpath(__file__))
 dir_name = os.path.basename(os.path.dirname(__file__))
+unigrams_bigrams = get_interesting_bigrams(os.path.join(this_dir.replace(dir_name, 'Configurations'), 'important_fields', 'important_fields_colorectaal.json'))
 ngrams = get_interesting_words(os.path.join(this_dir.replace(dir_name, 'Configurations'), 'important_fields', 'important_fields_colorectaal.json'))
 
 num_features = 256    # Word vector dimensionality
@@ -149,8 +162,14 @@ else:
     model.save(model_name)
 
 vocab = list(model.vocab.keys())
-vocab = find_vocab(vocab)
 
+for i in unigrams_bigrams:
+    if i in vocab:
+        print 'word {}:\n'.format(i)
+        synonyms = [find_vocab([w]) for w, p in model.most_similar(i, topn=10)]
+        print 'similar to {}\n'.format(u', '.join([s[0] for s in synonyms]))
+exit()
+vocab = find_vocab(vocab)
 with open(os.path.join(results_folder, 'results.txt'), 'w') as f:
     for i in ngrams:
         if i in vocab:

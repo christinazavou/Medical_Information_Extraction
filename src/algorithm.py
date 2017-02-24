@@ -21,7 +21,7 @@ per_field_per_value_search = {}
 ngram_possibilities = {}
 
 
-def accepted_words(words, possible_words):
+def accepted_words(words, possible_words, distance=4):
     words = [word.lower() for word in words]
     possible_words = [word.lower() for word in possible_words]
     for possible_word in possible_words:
@@ -31,7 +31,7 @@ def accepted_words(words, possible_words):
             acc_w = []
             for i, sub_word in enumerate(sub_words):
                 for word in words:
-                    if edit_distance(sub_word, word) < 4:
+                    if edit_distance(sub_word, word) < distance:
                         okays[i] = 1
                         acc_w += [word]
                         ngram_possibilities.setdefault(sub_word, set())
@@ -42,7 +42,7 @@ def accepted_words(words, possible_words):
                 return acc_w
         else:
             for word in words:
-                if edit_distance(possible_word, word) < 4:
+                if edit_distance(possible_word, word) < distance:
                     ngram_possibilities.setdefault(possible_word, set())
                     ngram_possibilities[possible_word].update([word])
                     return [word]
@@ -74,7 +74,7 @@ def pick_score_and_index(scores, verbose=False):
 class Algorithm(object):
     def __init__(self, name, patient_relevant=False, min_score=0, search_fields=None,
                  use_description1ofk=0, description_as_phrase=None, value_as_phrase=None, slop=10,
-                 ngram_trial=False, substring_trial=False):
+                 ngram_trial=False, substring_trial=False, editdistance=4):
         self.name = name
         self.con = None
         self.index = None
@@ -90,11 +90,14 @@ class Algorithm(object):
         self.slop = slop
         self.ngram_trial = ngram_trial
         self.substring_trial = substring_trial
+        self.editdistance = editdistance
 
     def assign(self, dataset_form, es_index):
         self.con = es_index.es.con  # directly to ElasticSearch connection establishment API class
         self.index = es_index.id
         for patient in dataset_form.patients:
+            if random.random() < 0.001:
+                print 'assigning patient ', patient.id, ' with ', dataset_form.fields
             current_form = Form(dataset_form.id, dataset_form.csv_file, dataset_form.config_file)
             current_form.fields = dataset_form.fields
             current_assignment = PatientFormAssignment(patient, current_form)
@@ -180,7 +183,7 @@ class Algorithm(object):
                         for sentence in highlight:
                             words += find_highlighted_words(sentence)
                         break  # take only first found
-                    acc_w = accepted_words(words, possible_words)
+                    acc_w = accepted_words(words, possible_words, self.editdistance)
                     if acc_w:
                         word_distributions_ids[i] = Counter(acc_w)
                         if self.patient_relevance_test:
@@ -441,17 +444,17 @@ class Algorithm(object):
         elif last_choice:
             print "oops. more than one last choice."
         else:
-            # field_assignment = FieldAssignment(field.id, '', assignment.patient, comment='nothing matched')
-            # assignment.add_field_assignment(field_assignment)
-            idx = random.choice(range(len(values)))
-            if values[idx] != the_target and the_target != u'':
-                if not assignment.patient.id in not_found.keys():
-                    not_found[assignment.patient.id] = [(field.id, assignment.patient.golden_truth[field.id])]
-                else:
-                    not_found[assignment.patient.id].append((field.id, assignment.patient.golden_truth[field.id]))
-            field_assignment = FieldAssignment(field, values[idx], assignment.patient,
-                                               comment='nothing matched. random assignment', all_comments=all_comments)
+            field_assignment = FieldAssignment(field, u'', assignment.patient, comment='nothing matched', all_comments=all_comments)
             assignment.add_field_assignment(field_assignment)
+            # idx = random.choice(range(len(values)))
+            # if values[idx] != the_target and the_target != u'':
+            #     if not assignment.patient.id in not_found.keys():
+            #         not_found[assignment.patient.id] = [(field.id, assignment.patient.golden_truth[field.id])]
+            #     else:
+            #         not_found[assignment.patient.id].append((field.id, assignment.patient.golden_truth[field.id]))
+            # field_assignment = FieldAssignment(field, values[idx], assignment.patient,
+            #                                    comment='nothing matched. random assignment', all_comments=all_comments)
+            # assignment.add_field_assignment(field_assignment)
 
     def save(self, f):
         pickle.dump(self, open(f, 'wb'))

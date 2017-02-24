@@ -95,7 +95,7 @@
     "RESTAG_CT":{
         "condition":"",
         "description":[
-            "restagering CT THORAX ABDOMEN"
+            "CT THORAX ABDOMEN"
         ],
         "values":{
             "Yes":[],
@@ -157,7 +157,8 @@
                 "T1N2",
                 "pT1Nx",
                 "cT1Nx",
-                "T1Nx"
+                "T1Nx",
+                "T1"
             ],
             "T2":[
                 "pT2N0M0",
@@ -207,7 +208,8 @@
                 "T2N2",
                 "pT2Nx",
                 "cT2Nx",
-                "T2Nx"
+                "T2Nx",
+                "T2"
             ],
             "T3":[
                 "pT3N0M0",
@@ -257,7 +259,8 @@
                 "T3N2",
                 "pT3Nx",
                 "cT3Nx",
-                "T3Nx"
+                "T3Nx",
+                "T3"
             ],
             "T4":[
                 "pT4N0M0",
@@ -307,7 +310,8 @@
                 "T4N2",
                 "pT4Nx",
                 "cT4Nx",
-                "T4Nx"
+                "T4Nx",
+                "T4"
             ],
             "Tx / onbekend":[
                 "pTxN0M0",
@@ -357,7 +361,8 @@
                 "TxN2",
                 "pTxNx",
                 "cTxNx",
-                "TxNx"
+                "TxNx",
+                "Tx / onbekend"
             ]
         }
     },
