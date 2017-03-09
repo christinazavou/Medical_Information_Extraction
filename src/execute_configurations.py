@@ -16,20 +16,19 @@ else:
 if os.path.isdir("C:\\Users\\Christina Zavou\\Documents\\Data"):
     dataPath = "C:\\Users\\Christina Zavou\\Documents\\Data"
     dataPath = os.path.join(resultsPath, 'dataset.p')
-elif os.path.isdir('C:\\Users\\ChristinaZ\\Desktop\\All_Data'):
-    # dataPath = 'C:\\Users\\ChristinaZ\\Desktop\\All_Data'
-    dataPath = os.path.join(resultsPath, 'new_values_datasetdell.p')
+elif os.path.isdir('D:\\All_Data'):
+    dataPath = 'D:\\All_Data'
 else:
     print "no data folder found"
     exit(1)
 
 
 this_dir = os.path.dirname(os.path.realpath(__file__))
-word2Vec_file = os.path.join(this_dir, "gensimW2V.py")
+clf_file = os.path.join(this_dir, 'supervision', "main_sup.py")
 
 start_time = time.time()
-configuration = 100
-run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(word2Vec_file, configuration, dataPath, resultsPath)
+configuration = 200
+run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(clf_file, configuration, dataPath, resultsPath)
 os.system(run_cmd)
 print "Finished configuration {} after {} minutes.".format(configuration, (time.time() - start_time) / 60.0)
 

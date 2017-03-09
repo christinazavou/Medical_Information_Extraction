@@ -56,6 +56,7 @@ if __name__ == "__main__":
         settings = RunConfiguration(
             sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
 
+    results_file = os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'clf_results.txt')
     data = None
 
     if os.path.isfile(os.path.join(settings['RESULTS_PATH'], settings['dataset'])):
@@ -69,10 +70,6 @@ if __name__ == "__main__":
         data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
 
     for form in data.dataset_forms:
-        # for p, text in iter_corpus_text(form.patients, False):
-        #     print p, text
-        # for p, val in iter_corpus_values(form.patients, 'klachten_klacht1'):
-        #     print p, val
         for field in form.fields:
-            FieldClassifier(form.patients, field)
-            exit()
+            fc = FieldClassifier(form.patients, field, boolean=True)
+            fc.run_cross_validation(results_file)
