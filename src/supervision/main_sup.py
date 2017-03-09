@@ -7,6 +7,7 @@ import time
 from field_classifier import iter_corpus_text, iter_corpus_values, FieldClassifier
 from src.DataSet import DataSet
 
+
 FREQ = 1
 
 
