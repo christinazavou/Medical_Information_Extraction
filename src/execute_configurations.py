@@ -29,6 +29,7 @@ clf_file = os.path.join(this_dir, 'supervision', "main_sup.py")
 start_time = time.time()
 configuration = 200
 run_cmd = "python \"{}\" \"{}\" \"{}\" \"{}\"".format(clf_file, configuration, dataPath, resultsPath)
+print 'run_cmd: ', run_cmd
 os.system(run_cmd)
 print "Finished configuration {} after {} minutes.".format(configuration, (time.time() - start_time) / 60.0)
 

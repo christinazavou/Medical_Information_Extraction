@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from src.DataSet import DataSet
 from src.settings import RunConfiguration
 import os
 from src.DatasetForm import DataSetForm
 import sys
 import time
 from field_classifier import iter_corpus_text, iter_corpus_values, FieldClassifier
-
+from src.DataSet import DataSet
 
 FREQ = 1
 
