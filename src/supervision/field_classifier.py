@@ -56,7 +56,7 @@ class FieldClassifier:
         le = preprocessing.LabelEncoder()
 
         le.fit(self.field_values)
-        print 'classes: ', list(le.classes_)
+        # print 'classes: ', list(le.classes_)
 
         self.le_targets = le.transform(targets)
         # print 'inverse transform: ', list(le.inverse_transform([0, 1]))
@@ -80,6 +80,7 @@ class FieldClassifier:
             confusion += self.calculate_confusion_matrix(test_output, self.clf.predict(test_input))
         with open(out_file, 'a') as f:
             f.write('Training {}\n'.format(self.name))
+            f.write('Classes: {}\n'.format(self.field_values))
             f.write('Accuracy scores: {} Score: {}\n'.format(accuracies, (sum(accuracies)/len(accuracies))))
             f.write('Confusion matrix: {}\n'.format(confusion))
 
