@@ -63,7 +63,7 @@ if __name__ == "__main__":
             resultspath = '..\\results'
             settings = RunConfiguration(configuration, datapath, resultspath).settings
         else:
-            settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
+            settings = RunConfiguration(70, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(
             sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
@@ -92,6 +92,7 @@ if __name__ == "__main__":
         es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
         data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
 
+    exit()
     if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
         algorithm = Algorithm(
             'baseline', settings['patient_relevant'], settings['min_score'], settings['search_fields'],
