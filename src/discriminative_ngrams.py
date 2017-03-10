@@ -59,8 +59,6 @@ def build_frame(patients):
         for field in patient.golden_truth:
             df.set_value(patient.id, field, patient.golden_truth[field])
         df.fillna(u'')
-    for field in list(df.columns):
-        print len(df[df[field] == u''])
     return df
 
 
@@ -98,7 +96,6 @@ if __name__ == "__main__":
         data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
 
 
-    vectorizer = CountVectorizer(max_df=1, min_df=0)
     ngrams_possibilities = {}
     with open(n_grams_file, 'r') as f:
         r = f.readlines()
@@ -131,30 +128,73 @@ if __name__ == "__main__":
                     values_df.set_value(idx_, 'reports', text_)
 
                 values_df.to_csv(field_data_frame_file, encoding='utf8', index_label='Index')
+                print values_df.head(5)
 
-            tf = vectorizer.fit_transform(values_df['reports'].tolist())
-
+            ngram_info = {}
             for idx_, val in values_df['value'].iteritems():
-
-                tokens = []
+                ngram_info[val] = {}
                 for token in field_.get_value_possible_values(val):
-                    tokens += [token] + token.split(' ')
-                for token in field_.description:
-                    tokens += [token] + token.split(' ')
-                tokens = [token.lower() for token in tokens]
-                print field_.id, ' tokens: ', tokens
-
-                ngrams_info = {}
-
-                for token in tokens:
+                    ngram_info[val][token.lower()] = {'in': 0, 'out': 0}
                     if token in ngrams_possibilities:
                         for ngram in ngrams_possibilities[token]:
-                            if ngram in vectorizer.vocabulary_:
-                                ngrams_info[ngram] = {'id': vectorizer.vocabulary_[ngram]}
-                                ngrams_info[ngram]['tf'] = tf[idx_, vectorizer.vocabulary_[ngram]]
-                            else:
-                                print ngram, ' not in vocab'
-                values_df.set_value(idx_, 'ngrams', unicode(ngrams_info))
+                            ngram_info[val][ngram.lower()] = {'in': 0, 'out': 0}
+                    for tok in token.split(' '):
+                        ngram_info[val][tok.lower()] = {'in': 0, 'out': 0}
+                        if tok in ngrams_possibilities:
+                            for ngram in ngrams_possibilities[tok]:
+                                ngram_info[val][ngram.lower()] = {'in': 0, 'out': 0}
+                for token in field_.description:
+                    ngram_info[val][token.lower()] = {'in': 0, 'out': 0}
+                    if token in ngrams_possibilities:
+                        for ngram in ngrams_possibilities[token]:
+                            ngram_info[val][ngram.lower()] = {'in': 0, 'out': 0}
+                    for tok in token.split(' '):
+                        ngram_info[val][tok.lower()] = {'in': 0, 'out': 0}
+                        if tok in ngrams_possibilities:
+                            for ngram in ngrams_possibilities[tok]:
+                                ngram_info[val][ngram.lower()] = {'in': 0, 'out': 0}
+            for idx_, row in values_df.iterrows():
+                for val in ngram_info:
+                    for token in ngram_info[val]:
+                        tf = len([word for word in row['reports'].split(' ') if word == token])
+                        if val == row['value']:
+                            ngram_info[val][token]['in'] += tf
+                        else:
+                            ngram_info[val][token]['out'] += tf
+
+            for idx_, row in values_df.iterrows():
+                values_df.set_value(idx_, 'ngrams', unicode(ngram_info[row['value']]))
+            # vectorizer = CountVectorizer(max_df=1, min_df=0)
+            # tf = vectorizer.fit_transform(values_df['reports'].tolist())
+            # print 'tf shape: ', tf.shape
+            # print 'len voc: ', len(vectorizer.vocabulary_)
+
+            # for idx_, val in values_df['value'].iteritems():
+            #
+            #     tokens = []
+            #     for token in field_.get_value_possible_values(val):
+            #         tokens += [token] + token.split(' ')
+            #     for token in field_.description:
+            #         tokens += [token] + token.split(' ')
+            #     tokens = [token.lower() for token in tokens]
+            #     print field_.id, ' tokens: ', tokens
+            #
+            #     ngrams_info = {}
+            #
+            #     for token in tokens:
+            #         if token in ngrams_possibilities:
+            #             for ngram in ngrams_possibilities[token]:
+            #                 if ngram in vectorizer.vocabulary_:
+            #                     ngrams_info[ngram] = {'id': vectorizer.vocabulary_[ngram]}
+            #                     ngrams_info[ngram]['tf'] = tf[idx_, vectorizer.vocabulary_[ngram]]
+            #                 else:
+            #                     print ngram, ' not in vocab'
+            #                     print values_df.ix[idx_]['reports']
+            #                     print ngram in values_df.ix[idx_]['reports']
+            #                     exit()
+            #     values_df.set_value(idx_, 'ngrams', unicode(ngrams_info))
+            #
+            # del vectorizer
 
             values_df.to_csv(field_data_frame_file, encoding='utf8')
 
