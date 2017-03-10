@@ -55,10 +55,12 @@ def build_frame(patients):
     for patient in patients:
         text = u' '.join(report[u'description'] for report in patient.read_report_csv())
         df.set_value(patient.id, 'reports', text)
-        df.set_value(patient.id, 'preprocessed_reports', unicode(prepair_text(text, None, 'dutch', as_list=False)))
+        df.set_value(patient.id, 'preprocessed_reports', unicode(prepair_text(text, None, None, as_list=False)))
         for field in patient.golden_truth:
             df.set_value(patient.id, field, patient.golden_truth[field])
         df.fillna(u'')
+    for field in list(df.columns):
+        print len(df[df[field] == u''])
     return df
 
 
@@ -74,7 +76,7 @@ if __name__ == "__main__":
         if os.path.isdir('C:\\Users\\Christina\\') or os.path.isdir('C:\\Users\\ChristinaZ\\'):
             configuration = 200
             datapath = 'D:\All_Data'
-            resultspath = '..\\..\\results'
+            resultspath = '..\\results'
             settings = RunConfiguration(configuration, datapath, resultspath).settings
         else:
             settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\..\\results').settings
@@ -96,7 +98,7 @@ if __name__ == "__main__":
         data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
 
 
-    vectorizer = CountVectorizer(max_df=1, min_df=1)
+    vectorizer = CountVectorizer(max_df=1, min_df=0)
     ngrams_possibilities = {}
     with open(n_grams_file, 'r') as f:
         r = f.readlines()
@@ -125,7 +127,7 @@ if __name__ == "__main__":
                 for idx_, row_ in values_df.iterrows():
                     value_ = field_.get_values()[idx_]
                     values_df.set_value(idx_, 'value', value_)
-                    text_ = u' '.join([t for t in iter_instances(data_frame, field_.id, value_)])
+                    text_ = u' '.join([unicode(t) for t in iter_instances(data_frame, field_.id, value_)])
                     values_df.set_value(idx_, 'reports', text_)
 
                 values_df.to_csv(field_data_frame_file, encoding='utf8', index_label='Index')
@@ -137,7 +139,10 @@ if __name__ == "__main__":
                 tokens = []
                 for token in field_.get_value_possible_values(val):
                     tokens += [token] + token.split(' ')
+                for token in field_.description:
+                    tokens += [token] + token.split(' ')
                 tokens = [token.lower() for token in tokens]
+                print field_.id, ' tokens: ', tokens
 
                 ngrams_info = {}
 
@@ -147,7 +152,8 @@ if __name__ == "__main__":
                             if ngram in vectorizer.vocabulary_:
                                 ngrams_info[ngram] = {'id': vectorizer.vocabulary_[ngram]}
                                 ngrams_info[ngram]['tf'] = tf[idx_, vectorizer.vocabulary_[ngram]]
-
+                            else:
+                                print ngram, ' not in vocab'
                 values_df.set_value(idx_, 'ngrams', unicode(ngrams_info))
 
             values_df.to_csv(field_data_frame_file, encoding='utf8')
