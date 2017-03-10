@@ -33,7 +33,9 @@ class FieldClassifier:
 
     def __init__(self, patients, field, boolean=True, tf=False, tfidf=False):
 
-        self.field_values = field.get_values()+[u'']
+        self.field_values = field.get_values()
+        if u'' not in self.field_values:
+            self.field_values += [u'']
         self.name = field.id
 
         if boolean:

@@ -64,7 +64,7 @@ if __name__ == "__main__":
             resultspath = 'D:\AllDataResultsNgram'
             settings = RunConfiguration(configuration, datapath, resultspath).settings
         else:
-            settings = RunConfiguration(24, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
+            settings = RunConfiguration(300, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
     else:
         settings = RunConfiguration(
             sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
