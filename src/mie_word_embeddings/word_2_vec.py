@@ -68,6 +68,7 @@ class W2VModel(object):
     downsampling = 1e-2  # Downsample setting for frequent words
 
     def __init__(self, filename, form):
+        print 'building / loading W2V model for {}'.format(form.id)
         if os.path.isfile(filename):
             self.model = gensim.models.Word2Vec.load(filename)
         else:
@@ -81,6 +82,7 @@ class W2VModel(object):
         return list(self.model.vocab.keys())
 
     def store_similar(self, uni_grams_bi_grams, filename):
+        print 'storing similar words in {}'.format(filename)
         vocab = self.get_vocab()
         with open(filename, 'w') as f:
             for i in uni_grams_bi_grams:

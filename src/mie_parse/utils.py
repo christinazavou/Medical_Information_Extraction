@@ -33,11 +33,13 @@ def var_to_utf(s):
             return s.decode('utf-8')
     elif isinstance(s, unicode):
         return s
-    elif isinstance(s, int) or isinstance(s, float):
+    elif isinstance(s, int) or isinstance(s, float) or isinstance(s, long):
+        # or import number
+        # isinstance(s, numbers.Number)
         return s
     else:
-        print "s:"
-        print s
+        print "s:", s
+        print "type(s):", type(s)
         raise Exception("unknown type to encode ...")
 
 
