@@ -1,0 +1,137 @@
+{
+  "settings":{
+    "number_of_shards": 5,
+    "number_of_replicas": 1,
+    "analysis": {
+      "filter": {
+          "dutch_stop": {
+            "type":  "stop", "stopwords":  "_dutch_"
+          },
+          "dutch_stemmer": {
+            "type":  "stemmer", "language":   "dutch"
+          },
+          "four_grams_filter": {
+              "type":     "ngram",
+              "min_gram": 4,
+              "max_gram": 4
+          },
+          "three_grams_filter": {
+              "type":     "ngram",
+              "min_gram": 3,
+              "max_gram": 3
+          },
+          "two_grams_filter": {
+              "type":     "ngram",
+              "min_gram": 2,
+              "max_gram": 2
+          }
+        },
+        "analyzer": {
+          "dutch": {
+            "tokenizer":  "standard",
+            "filter": [
+              "lowercase",
+              "dutch_stop",
+              "dutch_stemmer",
+              "asciifolding"
+            ]
+          },
+          "dutch_four_grams": {
+              "type":      "custom",
+              "tokenizer": "standard",
+              "filter":   [
+                  "lowercase",
+                  "four_grams_filter",
+                  "dutch_stop",
+                  "dutch_stemmer",
+                  "asciifolding"
+              ]
+          },
+          "dutch_three_grams": {
+              "type":      "custom",
+              "tokenizer": "standard",
+              "filter":   [
+                  "lowercase",
+                  "three_grams_filter",
+                  "dutch_stop",
+                  "dutch_stemmer",
+                  "asciifolding"
+              ]
+          },
+          "dutch_two_grams": {
+              "type":      "custom",
+              "tokenizer": "standard",
+              "filter":   [
+                  "lowercase",
+                  "two_grams_filter",
+                  "dutch_stop",
+                  "dutch_stemmer",
+                  "asciifolding"
+              ]
+          }
+        }
+      },
+   "similarity": {
+      "no_idf_bm25": {
+          "type": "BM25",
+          "b":    0
+          }
+      }
+  },
+  "mappings":{
+    "patient":{},
+    "report":
+      {"_parent": {
+        "type": "patient"
+      },
+      "properties": {
+        "patient":{
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "term_vector": "with_positions_offsets",
+          "fields": {
+            "dutch_tf_description": {
+              "type": "string",
+              "analyzer": "dutch",
+              "similarity": "no_idf_bm25",
+              "term_vector": "with_positions_offsets"
+            },
+            "dutch_description": {
+              "type": "string",
+              "analyzer": "dutch",
+              "term_vector": "with_positions_offsets"
+            },
+            "tf_description": {
+              "type": "string",
+              "similarity": "no_idf_bm25",
+              "term_vector": "with_positions_offsets"
+            },
+            "4_gram_description": {
+              "type": "string",
+              "analyzer": "dutch_four_grams",
+              "term_vector": "with_positions_offsets"
+            },
+            "3_gram_description": {
+              "type": "string",
+              "analyzer": "dutch_three_grams",
+              "term_vector": "with_positions_offsets"
+            },
+            "2_gram_description": {
+              "type": "string",
+              "analyzer": "dutch_two_grams",
+              "term_vector": "with_positions_offsets"
+            }
+          }
+        }
+      }
+    }
+  }
+}

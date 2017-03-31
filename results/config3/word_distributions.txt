@@ -1,0 +1,24 @@
+form_colorectaal_field_klachten_klacht1: 
+Counter({u'bloedverlies': 849, u'rectaal': 674, u'Rectaal': 179, u'Bloedverlies': 23, u'RECTAAL': 1})
+
+form_colorectaal_field_klachten_klacht2: 
+Counter({u'veranderd': 220, u'defaecatiepatroon': 219, u'Veranderd': 38, u'defaecatie': 25, u'veranderde': 4, u'Veranderde': 1, u'Defaecatie': 1})
+
+form_colorectaal_field_klachten_klacht4: 
+Counter({u'anemie': 626, u'Anemie': 49})
+
+form_colorectaal_field_LOCPRIM: 
+Counter({u'tumor': 2046, u'colon': 1386, u'carcinoom': 656, u'rectum': 484, u'ascendens': 441, u'Tumor': 404, u'rectumcarcinoom': 334, u'transversum': 261, u'descendens': 241, u'primaire': 178, u'sigmoid': 161, u'hepatica': 145, u'flexura': 135, u'appendix': 110, u'sigmoidcarcinoom': 84, u'primair': 69, u'Colon': 64, u'Rectumcarcinoom': 53, u'Rectum': 49, u'sigmoidtumor': 19, u'Sigmoidcarcinoom': 18, u'Primaire': 15, u'Carcinoom': 12, u'COLON': 9, u'RECTUM': 8, u'Sigmoid': 8, u'Flexura': 5, u'Primair': 5, u'sigmoideum': 5, u'Sigmoidtumor': 3, u'SIGMOIDEUM': 3, u'caecum': 2, u'DESCENDENS': 2, u'ASCENDENS': 2, u'Ascendens': 1, u'TUMOR': 1, u'Appendix': 1, u'Transversum': 1})
+
+form_colorectaal_field_SCORECT: 
+Counter({u'tumor': 1041, u'carcinoom': 309, u'Tumor': 172, u'pT3N0': 73, u'cT3N1M0': 63, u'pT3N0Mx': 48, u'cT3N0M0': 46, u'cT3N2M0': 37, u'pT3N1': 37, u'pT3N2': 27, u'pT3N1Mx': 24, u'cT2N0M0': 24, u'pT3N2Mx': 23, u'T3N1': 21, u'pT1N0': 20, u'T3N0': 18, u'pT2N0': 17, u'T3N2': 17, u'pT1NxMx': 16, u'cT3N1M1': 14, u'pT3N0M0': 13, u'cT3N2': 13, u'cT3N1': 13, u'pT4N2': 12, u'cT2N1M0': 12, u'pT4N0': 11, u'pT2N0Mx': 11, u'pT4N0Mx': 11, u'pT1N0Mx': 9, u'cT1N0M0': 9, u'T3N0M0': 9, u'pT4N1': 8, u'pT3N1M0': 8, u'T3N1M0': 8, u'T3N2M0': 7, u'pT3N1M1': 7, u'pT3N2M1': 6, u'pT1N0M0': 6, u'pT4N1Mx': 6, u'T4N1': 6, u'T2N0M0': 6, u'pT4N2M1': 5, u'cT4N2M1': 5, u'T4N2': 5, u'cT3N2M1': 5, u'Carcinoom': 5, u'cT4N1M1': 5, u'cT3N2Mx': 5, u'cT2N0': 5, u'pT3N2M0': 4, u'pT2N1': 4, u'T1N0': 4, u'T3N2M1': 4, u'T3N0Mx': 4, u'cT3N0': 4, u'T1N0M0': 4, u'pT3N0M1': 3, u'T3N2Mx': 3, u'T4N1M0': 3, u'pT2N0M0': 3, u'T1NxMx': 3, u'cT4N1M0': 3, u'T3N1M1': 3, u'CT4N1M0': 2, u'pT4N1M1': 2, u'cT3N0M1': 2, u'pT4N0M0': 2, u'T3NxM0': 2, u'pT2N1Mx': 2, u'pT4N1M0': 2, u'T2N0': 2, u'cT4N2M0': 2, u'pT2N1M0': 2, u'cT3N0Mx': 2, u'pT1Nx': 2, u'T4N2M1': 2, u'T3N0M1': 2, u'cT1NxMx': 2, u'PT3N2M1': 2, u'cT3N1Mx': 2, u'cT4N2': 2, u'cTxNxM1': 2, u'pT2NxMx': 2, u'cT1N0': 2, u'pT4N2M0': 1, u'cT1N1Mx': 1, u'cT4NxMx': 1, u'T4N0M0': 1, u'cT2N1Mx': 1, u'CT4N2Mx': 1, u'T4N1M1': 1, u'pT4N2Mx': 1, u'pT2N2': 1, u'cT4NxM0': 1, u'T3NxMx': 1, u'PT3N0': 1, u'pT3n0': 1, u'PT3N1': 1, u'T1N1': 1, u'pT3Nx': 1, u'T2N2': 1, u'pT2N1M1': 1, u'cT2N2M1': 1, u'cT2N2M0': 1, u'T4NxMx': 1, u'T4N2M0': 1, u'pT2N2Mx': 1, u'T1N0Mx': 1, u'pt1nxmx': 1, u'pT2N2M0': 1, u'T4N2Mx': 1, u'PT1N0M0': 1, u'cT4N0M0': 1, u'cT2N2': 1, u'cT2N0Mx': 1, u'T3N1MX': 1, u'cTxN0M0': 1, u'PT1N0MX': 1, u'T3N1Mx': 1, u'cT3N0MX': 1})
+
+form_colorectaal_field_RESTAG_CT: 
+Counter({u'CT': 43, u'abdomen': 27, u'thorax': 27, u'restagering': 24, u'Abdomen': 4, u'Thorax': 3, u'Restagering': 2, u'Ct': 1})
+
+form_colorectaal_field_mdo_chir: 
+Counter({u'tumor': 1428, u'resectie': 651, u'carcinoom': 478, u'Operatie': 351, u'operatie': 333, u'OPERATIE': 249, u'Tumor': 177, u'Resectie': 30, u'chirurgisch': 16, u'Carcinoom': 10, u'TUMOR': 2, u'RESECTIE': 1, u'Chirurgisch': 1})
+
+form_colorectaal_field_PROCOK: 
+Counter()
+

@@ -1,0 +1,20 @@
+
+dataset: dataset_allfields_form.p
+
+json_form_file: "CONFIGURATIONS_PATH\\important_fields_form\\tmp_important_fields_DECEASE.json"
+csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
+form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
+
+mapping_file: "CONFIGURATIONS_PATH\\mapping_v2.json"
+
+host: {"host": "localhost", "port": 9200}
+
+es_index_name: dataset_allfields_form
+
+forms: {
+  'colorectaal': []
+}
+
+# how to search one-of-k fields:
+with_description: 1
+

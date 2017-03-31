@@ -1,0 +1,20 @@
+Accuracies:
+form_colorectaal_field_klachten_klacht1: 0.754649499285 on 1398 samples.
+form_colorectaal_field_klachten_klacht2: 0.721745350501 on 1398 samples.
+form_colorectaal_field_klachten_klacht4: 0.807582260372 on 1398 samples.
+form_colorectaal_field_LOCPRIM: 0.374821173104 on 1398 samples.
+form_colorectaal_field_SCORECT: 0.469241773963 on 1398 samples.
+form_colorectaal_field_RESTAG_CT: 0.0 on 1398 samples.
+form_colorectaal_field_mdo_chir: 0.231759656652 on 1398 samples.
+form_colorectaal_field_PROCOK: 0.507153075823 on 1398 samples.
+
+
+# of random_assignments (correct prediction, wrong prediction):
+form_colorectaal_field_klachten_klacht1: : [ 0.  0.], Yes: [ 0.  0.], 
+form_colorectaal_field_klachten_klacht2: : [ 0.  0.], Yes: [ 0.  0.], 
+form_colorectaal_field_klachten_klacht4: : [ 0.  0.], Yes: [ 0.  0.], 
+form_colorectaal_field_LOCPRIM: Flexura hepatica: [ 0.  0.], Colon sigmoideum: [ 0.  0.], Colon transversum: [ 0.  0.], Colon ascendens: [ 0.  0.], Caecum: [ 0.  0.], Appendix: [ 0.  0.], Flexura splenica: [ 0.  0.], Anders: [ 0.  0.], Rectum: [ 0.  0.], Colon descendens: [ 0.  0.], 
+form_colorectaal_field_SCORECT: T4: [ 0.  0.], T2: [ 0.  0.], T3: [ 0.  0.], Tx / onbekend: [ 0.  0.], T1: [ 0.  0.], 
+form_colorectaal_field_RESTAG_CT: Yes: [ 0.  0.], No: [ 0.  0.], 
+form_colorectaal_field_mdo_chir: Nee: [ 0.  0.], Ja: [ 0.  0.], 
+form_colorectaal_field_PROCOK: Ileocoecaal (+appendectomie): [ 0.  0.], Panproctocolectomie: [ 0.  0.], Transanaal endoscopische procedure gevolgd door anterior resectie: [ 0.  0.], (Extended) Hemicolectomie links: [ 0.  0.], (Extended) Hemicolectomie rechts: [ 0.  0.], Transversum resectie: [ 0.  0.], Overig (niet-resectieve procedure): [ 0.  0.], Transanaal endoscopische procedure: [ 0.  0.], Transanaal endoscopische procedure gevolgd door abdomino-perineale resectie: [ 0.  0.], Subtotale colectomie (coecum tot rectum): [ 0.  0.], (Low) anterior-resectie/sigmoidresectie: [ 0.  0.], Abdomino-perianale resectie: [ 0.  0.], 

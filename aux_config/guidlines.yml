@@ -1,0 +1,17 @@
+
+dataset: necessary
+
+json_form_file: necessary (replace the form name with 'DECEASE')
+csv_form_file: necessary (replace the form name with 'DECEASE')
+form_dossiers_path: necessary (replace the form name with 'DECEASE')
+
+mapping_file: necessary
+
+host: {"host": "localhost", "port": 9200}
+
+forms: {
+  name of form: list of fields to consider in assignment. use the empty list to consider all fields
+}
+
+with_description: if 0-> only value is searched in the report, if 1-> both value and description should appear in the report, if 2-> value and description should appear next to each other in the report
+

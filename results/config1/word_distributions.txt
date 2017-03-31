@@ -1,0 +1,6 @@
+form_colorectaal_field_klachten_klacht1: 
+Counter({u'bloedverlies': 849, u'rectaal': 674, u'Rectaal': 179, u'Bloedverlies': 23, u'RECTAAL': 1})
+
+form_colorectaal_field_LOCPRIM: 
+Counter({u'tumor': 2047, u'colon': 1386, u'carcinoom': 656, u'rectum': 483, u'ascendens': 441, u'Tumor': 403, u'rectumcarcinoom': 334, u'transversum': 261, u'descendens': 241, u'primaire': 178, u'sigmoid': 161, u'hepatica': 145, u'flexura': 135, u'appendix': 110, u'sigmoidcarcinoom': 84, u'primair': 68, u'Colon': 64, u'Rectumcarcinoom': 53, u'Rectum': 50, u'sigmoidtumor': 19, u'Sigmoidcarcinoom': 18, u'Primaire': 15, u'Carcinoom': 12, u'COLON': 9, u'RECTUM': 8, u'Sigmoid': 8, u'Flexura': 5, u'Primair': 5, u'sigmoideum': 5, u'Sigmoidtumor': 3, u'SIGMOIDEUM': 3, u'caecum': 2, u'DESCENDENS': 2, u'ASCENDENS': 2, u'Ascendens': 1, u'TUMOR': 1, u'Appendix': 1, u'Transversum': 1})
+

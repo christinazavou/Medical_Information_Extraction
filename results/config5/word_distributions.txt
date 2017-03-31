@@ -1,0 +1,24 @@
+form_colorectaal_field_klachten_klacht1: 
+Counter({u'rectaal bloedverlies': 598, u'Rectaal bloedverlies': 130, u'bloedverlies': 6, u'rectaal': 5, u'Rectaal': 1})
+
+form_colorectaal_field_klachten_klacht2: 
+Counter({u'veranderd defaecatiepatroon': 181, u'Veranderd defaecatiepatroon': 31, u'veranderd': 2, u'veranderde defaecatie': 2, u'defaecatiepatroon': 2, u'Veranderde defaecatie': 1})
+
+form_colorectaal_field_klachten_klacht4: 
+Counter({u'anemie': 622, u'Anemie': 50})
+
+form_colorectaal_field_LOCPRIM: 
+Counter({u'tumor': 1912, u'carcinoom': 597, u'rectum': 440, u'Tumor': 380, u'colon ascendens': 357, u'rectumcarcinoom': 319, u'colon descendens': 231, u'colon transversum': 200, u'sigmoid': 183, u'flexura hepatica': 168, u'primaire tumor': 101, u'sigmoidcarcinoom': 97, u'appendix': 92, u'Rectumcarcinoom': 53, u'Rectum': 46, u'Colon ascendens': 27, u'Sigmoidcarcinoom': 21, u'sigmoidtumor': 20, u'Sigmoid': 14, u'Colon descendens': 9, u'Primaire tumor': 8, u'colon sigmoideum': 7, u'Carcinoom': 6, u'RECTUM': 6, u'Flexura hepatica': 5, u'Colon transversum': 5, u'primair': 5, u'COLON SIGMOIDEUM': 4, u'flexura Hepatica': 3, u'colon': 3, u'Sigmoidtumor': 3, u'primaire': 3, u'caecum': 3, u'COLON DESCENDENS': 2, u'colon (ascendens': 2, u'primair) carcinoom': 2, u'COLON ASCENDENS': 2, u'transversum': 2, u'Colon sigmoideum': 1, u'Primaire': 1, u'primair carcinoom': 1, u'colon: ascendens': 1, u'TUMOR': 1, u'ascendens': 1, u'flexura': 1, u'Appendix': 1, u'hepatica': 1, u'Colon Transversum': 1, u'descendens': 1, u'colon + transversum': 1, u'Colon': 1})
+
+form_colorectaal_field_SCORECT: 
+Counter({u'tumor': 1080, u'carcinoom': 345, u'Tumor': 196, u'pT3N0': 68, u'cT3N1M0': 68, u'cT3N0M0': 44, u'pT3N0Mx': 41, u'pT3N1': 36, u'cT3N2M0': 35, u'pT3N2': 26, u'cT2N0M0': 25, u'pT3N1Mx': 21, u'pT3N2Mx': 18, u'T3N1': 18, u'pT2N0': 17, u'pT1N0': 17, u'T3N2': 16, u'pT1NxMx': 15, u'pT4N2': 13, u'pT3N0M0': 13, u'cT2N1M0': 13, u'cT3N2': 13, u'pT4N0': 12, u'cT3N1M1': 11, u'pT2N0Mx': 10, u'pT4N0Mx': 10, u'pT1N0Mx': 10, u'cT1N0M0': 10, u'T3N0': 10, u'cT3N1': 10, u'T3N0M0': 9, u'pT4N1': 8, u'T3N2M0': 7, u'pT3N1M1': 7, u'pT1N0M0': 7, u'cT4N2M1': 6, u'cT3N2M1': 6, u'T3N1M0': 6, u'pT4N2M1': 5, u'pT3N1M0': 5, u'T1N0': 5, u'pT3N2M1': 5, u'T4N2': 5, u'Carcinoom': 5, u'cT3N2Mx': 5, u'cT2N0': 5, u'T2N0M0': 5, u'pT2N0M0': 4, u'pT4N1Mx': 4, u'T4N1': 4, u'cT3N0': 4, u'T1N0M0': 4, u'pT3N0M1': 3, u'T3N2Mx': 3, u'pT3N2M0': 3, u'pT4N1M1': 3, u'pT2N1Mx': 3, u'T1NxMx': 3, u'T3N2M1': 3, u'cT4N2M0': 3, u'cT4N1M1': 3, u'T3N0Mx': 3, u'cT3N1Mx': 3, u'T4N1M0': 2, u'pT2N1': 2, u'pT4N0M0': 2, u'T3NxM0': 2, u'pT4N1M0': 2, u'T2N0': 2, u'cT3N0Mx': 2, u'cT4N1M0': 2, u'pT1Nx': 2, u'T4N2M1': 2, u'T3N0M1': 2, u'cT1NxMx': 2, u'PT3N2M1': 2, u'T3N1M1': 2, u'cTxNxM1': 2, u'pT2NxMx': 2, u'pT4N2M0': 1, u'cT1N1Mx': 1, u'cT4NxMx': 1, u'T4N0M0': 1, u'cT2N1Mx': 1, u'CT4N1M0': 1, u'T4N1M1': 1, u'pT4N2Mx': 1, u'cT3N0M1': 1, u'cT4NxM0': 1, u'pT2N2': 1, u'T3NxMx': 1, u'PT3N0': 1, u'pT3n0': 1, u'PT3N1': 1, u'T1N1': 1, u'T2N1': 1, u'T2N2': 1, u'pT2N1M1': 1, u'cT2N2M1': 1, u'cT3N0MX': 1, u'T4NxMx': 1, u'T4N2M0': 1, u'pT2N2Mx': 1, u't3n0': 1, u'T1N0Mx': 1, u'pt1nxmx': 1, u'pT2N2M0': 1, u'T4N2Mx': 1, u'PT1N0M0': 1, u'cT4N0M0': 1, u'cT4N1': 1, u'cT2N2': 1, u'cT2N1': 1, u'cT2N0Mx': 1, u'T3N1MX': 1, u'cT1N0': 1, u'cTxN0M0': 1, u'PT1N0MX': 1, u'T3N1Mx': 1})
+
+form_colorectaal_field_RESTAG_CT: 
+Counter({u'restagering': 4, u'abdomen': 2, u'CT-thorax/abdomen': 1, u'Restagering': 1, u'CT thorax/abdomen': 1, u'CT thorax': 1, u'CT-thorax': 1, u'CT thorax-abdomen': 1})
+
+form_colorectaal_field_mdo_chir: 
+Counter({u'tumor': 128, u'resectie': 83, u'OPERATIE': 54, u'carcinoom': 48, u'Operatie': 31, u'operatie': 8, u'resectie tumor': 8, u'Tumor': 6, u'Resectie': 4, u'Resectie tumor': 3, u'chirurgisch': 2, u'operatie tumor': 1})
+
+form_colorectaal_field_PROCOK: 
+Counter({u'hemicolectomie rechts': 376, u'sigmoidresectie': 180, u'low anterior resectie': 150, u'hemicolectomie links': 110, u'Hemicolectomie rechts': 93, u'Low anterior resectie': 61, u'sigmoid resectie': 43, u'Sigmoidresectie': 42, u'low anteriorresectie': 35, u'subtotale colectomie': 30, u'Hemicolectomie links': 24, u'ileocoecaal resectie': 21, u'transversum resectie': 19, u'low-anterior resectie': 12, u'Sigmoid resectie': 10, u'resectie': 7, u'Low anteriorresectie': 7, u'Hemicolectomie (Rechts': 6, u'Subtotale colectomie': 5, u'sigmoid': 4, u'low-anteriorresectie': 4, u'Ileocoecaal resectie': 3, u'Low Anterior Resectie': 3, u'hemicolectomie, rechts': 2, u'Low-anterior resectie': 2, u'transversum': 2, u'Hemicolectomie (Links': 1, u'low anterior': 1, u'low-Anterior resectie': 1, u'Low-anteriorresectie': 1, u'Low-Anterior resectie': 1, u'hemicolectomie Rechts': 1, u'hemicolectomie: rechts': 1})
+

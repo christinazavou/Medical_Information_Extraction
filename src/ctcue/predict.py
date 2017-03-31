@@ -1,4 +1,4 @@
-#encoding: utf-8
+# -*- coding: utf-8 -*-
 """
 Tests the classifier on a given file.
 
@@ -11,15 +11,13 @@ Options:
     -h,--help       Shows usage instructions.
 """
 from features import extract_features
-
-
-
 import os
-import cPickle as pickle
+import pickle
 
 # Load trained model for disease classification
-thisdir = os.path.dirname(os.path.realpath(__file__))
-pickle_path = os.path.join(thisdir, "trained.model")
+this_dir = os.path.dirname(os.path.realpath(__file__))
+src_dir = os.path.dirname(this_dir)
+pickle_path = os.path.join(src_dir, 'ctcue', "trained.model")
 
 clf = None
 
@@ -33,10 +31,6 @@ except ImportError:
 
 
 def predict_prob(clf, text, print_features=False):
-    # if args["-e"]:
-    #     X = extract_features_en(patient)
-    # else:
-    #     X = extract_features(patient)
 
     X = extract_features(text)
 
@@ -61,8 +55,8 @@ if __name__ == "__main__":
         u'<DIS> waarvoor\nmeermaals stentplaatsing.', u'1995: mogelijk stil <DIS>\n\n2000: <DIS>, onderwand, waarvoor primaire PTCA RCA + stent bij\ndrietakslijden, ejectiefractie 46%\n\n2008: myocardscintigrafie: persisterend dun\naspect inferior.'
     ]
 
-    X, result = predict_prob(clf, text)
-    # print result
+    X, res = predict_prob(clf, text)
+    # print res
 
     text = ["19 oktober 2009 Mevr. , geboren  , Geachte collega, Uw bovengenoemde patiënte was van 22-08-2011 tot " \
            "25-08-2011 opgenomen op de afdeling van de Isala, locatie blaat. Reden van opname: Stoornis en " \
@@ -88,18 +82,18 @@ if __name__ == "__main__":
             ]
 
     # get prediction of weather this concept is actually related to the patient or not
-    X, result = predict_prob(clf, text)
-    # print result
+    X, res = predict_prob(clf, text)
+    # print res
 
     text = [
         u'<DIS> : nee.'
     ]
 
     # get prediction of weather this concept is actually related to the patient or not
-    X, result = predict_prob(clf, text)
-    # print result
+    X, res = predict_prob(clf, text)
+    # print res
 
     text = ["Sociale anamnese: woont in <DIS>", "<DIS> atig zieke patiënt,"]
     text = [u'Sociale anamnese: woont in <DIS>", "<DIS> atig zieke patiënt,']
-    X, result = predict_prob(clf, text)
-    print result
+    X, res = predict_prob(clf, text)
+    print res

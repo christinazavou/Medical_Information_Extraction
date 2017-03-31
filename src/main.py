@@ -1,121 +1,68 @@
-# -*- coding: utf-8 -*-
-from DataSet import DataSet
-from settings import RunConfiguration
 import os
-from DatasetForm import DataSetForm
-from es_index import EsIndex
-from algorithm import Algorithm
+import json
 import sys
-from evaluation import Evaluation
-import time
+from src.mie_parse.mie_data_set import DataSet
+from src.mie_index.mie_index import EsIndex
+from src.mie_algortithms.algorithm import Algorithm
+from src.mie_evaluation.evaluation import Evaluation
+from settings import ConfigurationParser
 
+CONFIGURATION_IDX, DATA_PATH_IDX, RESULTS_PATH_IDX, ES_VERSION_IDX = 1, 2, 3, 4
 
-FREQ = 1
+if len(sys.argv) < 5:
+    if os.path.isdir('C:\\Users\\ChristinaZ\\'):
+        configuration = 6
+        data_path = 'D:\All_Data'
+        results_path = '..\\results'
+        cp = ConfigurationParser(configuration, data_path, results_path, 2)
+    else:
+        cp = ConfigurationParser(1, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results', 2)
+else:
+    cp = ConfigurationParser(
+        sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX], sys.argv[ES_VERSION_IDX])
 
+forms = DataSet(
+    cp.get_file(['RESULTS_PATH', 'dataset']),
+    cp.get_file(['CONFIGURATIONS_PATH', 'json_form_file']),
+    cp.get_file(['DATA_PATH', 'csv_form_file']),
+    cp.get_file(['DATA_PATH', 'form_dossiers_path']),
+    cp.settings['forms'].keys()
+).data_set_forms
+# note: in each data_set_form a patient has a dict of pairs (field, value) for the golden truth of the specific form
 
-CONFIGURATION_IDX = 1
-DATA_PATH_IDX = 2
-RESULTS_PATH_IDX = 3
+es_index = EsIndex(cp.settings['es_index_name'])
 
+es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
+for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
+    es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
 
-def init_data_set_forms(json_form_file, csv_form_file, form_dossier_path):
-    forms = list()
-    for decease in settings['forms']:
-        json_file = json_form_file.replace('DECEASE', decease)
-        csv_file = csv_form_file.replace('DECEASE', decease)
-        if os.path.isfile(csv_file) and os.path.isfile(json_file):
-            form = DataSetForm(decease, csv_file, json_file, form_dossier_path.replace('DECEASE', decease))
-            form.put_fields()
-            print 'form fields: ', form.fields
-            forms.append(form)
-        else:
-            print "missing form json or csv"
-            print 'json: ', json_file
-            print 'csv: ', csv_file
-    return forms
+a = Algorithm(
+    patient_relevant=cp.settings['patient_relevant'], search_fields=None,
+    use_description1ofk=cp.settings['use_description_1ofk'], description_as_phrase=cp.settings['description_as_phrase'],
+    value_as_phrase=cp.settings['value_as_phrase'], slop=cp.settings['slop'], n_gram_field=cp.settings['n_gram_field'],
+    edit_dist=cp.settings['edit_distance']
+)
 
-
-def init_dataset_patients(forms):
+assignments_file = cp.get_file(['SPECIFIC_RESULTS_PATH', 'assignments.json'])
+if not os.path.isfile(assignments_file):
     for form in forms:
-        form.find_patients()
-        print 'form patients: ', form.patients
+        a.assign(es_index.index, form, cp.settings['forms'][form.id], host=cp.settings['host'])
+    a.save(cp.get_file(['SPECIFIC_RESULTS_PATH', 'assignments.json']),
+           cp.get_file(['SPECIFIC_RESULTS_PATH', 'incorrect.json']),  # comment it to skip printing of incorrect cases
+           cp.get_file(['SPECIFIC_RESULTS_PATH', 'queries.json']),  # comment it to skip printing the queries used
+           cp.get_file(['SPECIFIC_RESULTS_PATH', 'n_grams.json'])  # comment it to skip printing the possible n_grams
+           )
 
+assignments = json.load(open(assignments_file, 'r'))
 
-def index_dataset_patients(forms):
-    for form in forms:  # todo: is only for one report !! if already patient is indexed should not be indexed again !
-        form_dataframe = form.get_dataframe()
-        for patient in form.patients:
-            print "patient {} ...".format(patient.id)
-            golden_truth = {form.id: patient.read_golden_truth(form_dataframe, form)}
-            patient_reports = patient.read_report_csv()  # list of dicts i.e. reports
-            es_index.put_doc('patient', patient.id, golden_truth)  # index patient doc
-            es_index.put_doc('report', patient.id, patient_reports)  # index reports docs
+e = Evaluation()
+e.evaluate(assignments, forms)
+e.save(
+    cp.get_file(['SPECIFIC_RESULTS_PATH', 'accuracies.txt']),
+    heat_maps_folder=cp.get_file(['SPECIFIC_RESULTS_PATH', 'heat_maps']),
+    predictions_folder=cp.get_file(['SPECIFIC_RESULTS_PATH', 'predicted_distributions']),
+    real_folder=cp.get_file(['SPECIFIC_RESULTS_PATH', 'real_distributions']),
+    word_distribution_file=cp.get_file(['SPECIFIC_RESULTS_PATH', 'word_distributions.txt']),
+    confusion_matrices_file=cp.get_file(['SPECIFIC_RESULTS_PATH', 'confusion_matrices.txt'])
+)
 
-
-if __name__ == "__main__":
-
-    # todo: put reports in csv files with date sort... so that smaller ids give older reports !
-
-    if len(sys.argv) < 4:
-        if os.path.isdir('C:\\Users\\Christina\\') or os.path.isdir('C:\\Users\\ChristinaZ\\'):
-            configuration = 50
-            datapath = 'D:\All_Data'
-            resultspath = '..\\results'
-            settings = RunConfiguration(configuration, datapath, resultspath).settings
-        else:
-            settings = RunConfiguration(70, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results').settings
-    else:
-        settings = RunConfiguration(
-            sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX]).settings
-
-    data = None
-    es_index = None
-
-    if os.path.isfile(os.path.join(settings['RESULTS_PATH'], settings['dataset'])):
-        data = DataSet(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
-    else:
-        print 'not existing dataset'
-        time.sleep(6)
-        data = DataSet()
-        data.dataset_forms = init_data_set_forms(settings['json_form_file'], settings['csv_form_file'], settings['form_dossiers_path'])
-        init_dataset_patients(data.dataset_forms)
-        data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
-
-    if os.path.isfile(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p')):
-        es_index = EsIndex(f=os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
-    else:
-        print 'not existing index'
-        time.sleep(6)
-        es_index = EsIndex(settings['index_name'])
-        es_index.index(settings['index_body_file'])
-        index_dataset_patients(data.dataset_forms)
-        es_index.save(os.path.join(settings['RESULTS_PATH'], settings['index_name']+'.p'))
-        data.save(os.path.join(settings['RESULTS_PATH'], settings['dataset']))
-
-    exit()
-    if not os.path.isfile(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json')):
-        algorithm = Algorithm(
-            'baseline', settings['patient_relevant'], settings['min_score'], settings['search_fields'],
-            settings['use_description_1ofk'], settings['description_as_phrase'], settings['value_as_phrase'],
-            settings['slop'], settings['ngram_trial'], settings['substring_trial'], settings['edit_distance'])
-        for form in data.dataset_forms:
-            algorithm.assign(form, es_index)
-
-            algorithm.print_not_found(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'not_found.txt'))
-            algorithm.print_queries(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'queries.json'))
-            algorithm.print_ngrams(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'ngrams.json'))
-
-        algorithm.save_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-
-    x_js, x = Algorithm.load_assignments(os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'base_assign.json'))
-
-    ev = Evaluation()
-    ev.evaluate(x_js, data.dataset_forms)
-    ev.print_results(
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'accuracies.txt'),
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'heat_maps'),
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'predictions'),
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'real'),
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'word_distribution.txt'),
-        os.path.join(settings['SPECIFIC_RESULTS_PATH'], 'confusion_matrices.txt')
-    )
