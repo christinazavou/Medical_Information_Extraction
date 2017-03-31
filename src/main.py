@@ -34,10 +34,10 @@ forms = DataSet(
 
 es_index = EsIndex(cp.settings['es_index_name'])
 
-es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
-for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
-    es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
-exit()
+# es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
+# for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
+#     es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
+
 a = Algorithm(
     patient_relevant=cp.settings['patient_relevant'], search_fields=None,
     use_description1ofk=cp.settings['use_description_1ofk'], description_as_phrase=cp.settings['description_as_phrase'],
@@ -55,7 +55,7 @@ if not os.path.isfile(assignments_file):
         cp.get_file(['SPECIFIC_RESULTS_PATH', 'queries.json']),  # comment it to skip printing the queries used
         cp.get_file(['SPECIFIC_RESULTS_PATH', 'n_grams.json'])  # comment it to skip printing the possible n_grams
     )
-exit()
+
 assignments = json.load(open(assignments_file, 'r'), encoding='utf8')
 
 e = Evaluation()

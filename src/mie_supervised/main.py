@@ -12,8 +12,8 @@ CONFIGURATION_IDX, DATA_PATH_IDX, RESULTS_PATH_IDX, ES_VERSION_IDX = 1, 2, 3, 4
 if len(sys.argv) < 5:
     if os.path.isdir('C:\\Users\\ChristinaZ\\'):
         configuration = 1
-        data_path = 'D:\All_Data'
-        results_path = '..\\results\\supervised'
+        data_path = 'C:\\Users\\ChristinaZ\\Desktop\\All_Data'
+        results_path = '..\\..\\results\\supervised'
         cp = ConfigurationParser(configuration, data_path, results_path, 2)
     else:
         cp = ConfigurationParser(1, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\..\\results\\supervised', 2)
