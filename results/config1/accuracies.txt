@@ -1,8 +1,0 @@
-Accuracies:
-form_colorectaal_field_klachten_klacht1: 0.736766809728 on 1398 samples.
-form_colorectaal_field_LOCPRIM: 0.377682403433 on 1398 samples.
-
-
-# of random_assignments (correct prediction, wrong prediction):
-form_colorectaal_field_klachten_klacht1: : [ 0.  0.], Yes: [ 0.  0.], 
-form_colorectaal_field_LOCPRIM: Flexura hepatica: [ 0.  0.], Colon sigmoideum: [ 0.  0.], Colon transversum: [ 0.  0.], Colon ascendens: [ 0.  0.], Caecum: [ 0.  0.], Appendix: [ 0.  0.], Flexura splenica: [ 0.  0.], Anders: [ 0.  0.], Rectum: [ 0.  0.], Colon descendens: [ 0.  0.], 
