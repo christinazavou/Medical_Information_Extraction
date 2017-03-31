@@ -23,6 +23,7 @@ class Field(object):
 
     def get_value_possible_values(self, value):
         """returns all the possible of values to be search for assigning a value"""
+        # print 'pos val ', self.values[value]
         return self.values[value]
 
     def in_values(self, value):

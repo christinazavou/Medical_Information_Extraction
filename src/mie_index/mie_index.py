@@ -99,6 +99,7 @@ class EsIndex:
             }
 
         """
+        print 'indexing form ', form.id
         all_indexed = True
         s_time = time.time()
         for patient in form.patients:

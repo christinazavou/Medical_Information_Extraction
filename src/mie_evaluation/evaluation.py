@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 import numpy as np
 from collections import Counter
 import ast
@@ -6,7 +6,7 @@ from src.mie_evaluation.utils import print_heat_map, plot_distribution, recall_p
 
 
 def combine_name(form, field):
-    return 'form_{}_field_{}'.format(form, field)
+    return u'form_{}_field_{}'.format(form, field)
 
 
 class Evaluation:
@@ -18,22 +18,22 @@ class Evaluation:
             for field in form.fields:
                 self.fields_evaluations[combine_name(form.id, field.id)] = FieldEvaluation(form, field)
         for result_dict in results:
-            for assignment_dict in result_dict['assignments']:
+            for assignment_dict in result_dict[u'assignments']:
 
-                form_name = result_dict['form']
+                form_name = result_dict[u'form']
                 field_name = assignment_dict.keys()[0]
                 f_e_key = combine_name(form_name, field_name)
 
                 self.fields_evaluations[f_e_key].add_assignment(
-                    assignment_dict[field_name]['value'], assignment_dict[field_name]['target']
+                    assignment_dict[field_name][u'value'], assignment_dict[field_name][u'target']
                 )
 
-                self.fields_evaluations[f_e_key].add_word_distribution(assignment_dict[field_name]['comment'])
+                self.fields_evaluations[f_e_key].add_word_distribution(assignment_dict[field_name][u'comment'])
 
                 self.fields_evaluations[f_e_key].find_random_cases(
-                    assignment_dict[field_name]['target'],
-                    assignment_dict[field_name]['value'],
-                    assignment_dict[field_name]['comment']
+                    assignment_dict[field_name][u'target'],
+                    assignment_dict[field_name][u'value'],
+                    assignment_dict[field_name][u'comment']
                 )
 
         for f_e_key in self.fields_evaluations.keys():
@@ -42,17 +42,18 @@ class Evaluation:
     def save_accuracies(self, accuracy_file):
         print "Storing accuracies ..."
         with open(accuracy_file, 'w') as f:
-            f.write('Accuracies:\n')
+            f.write(u'Accuracies:\n'.encode('utf8'))
             for f_e in self.fields_evaluations:
                 if self.fields_evaluations[f_e].number_of_occurrences > 0:
-                    f.write('{}: {} on {} samples.\n'.format(f_e, self.fields_evaluations[f_e].accuracy,
-                                                             self.fields_evaluations[f_e].number_of_occurrences))
-            f.write('\n\n# of random_assignments (correct prediction, wrong prediction):\n')
+                    f.write(u'{}: {} on {} samples.\n'.format(
+                        f_e, self.fields_evaluations[f_e].accuracy, self.fields_evaluations[f_e].number_of_occurrences
+                    ).encode('utf8'))
+            f.write(u'\n\n# of random_assignments (correct prediction, wrong prediction):\n'.encode('utf8'))
             for f_e in self.fields_evaluations:
                 if self.fields_evaluations[f_e].number_of_occurrences > 0:
-                    f.write('{}: '.format(f_e))
+                    f.write(u'{}: '.format(f_e).encode('utf8'))
                     for key, value in self.fields_evaluations[f_e].random_assignments.items():
-                        f.write('{}: {}, '.format(key, value))
+                        f.write(u'{}: {}, '.format(key, value).encode('utf8'))
                     f.write('\n')
 
     def save_heat_maps(self, heat_maps_folder):
@@ -82,7 +83,7 @@ class Evaluation:
         with open(word_distribution_file, 'w') as f:
             for f_e in self.fields_evaluations:
                 if self.fields_evaluations[f_e].number_of_occurrences > 0:
-                    f.write('{}: \n{}\n\n'.format(f_e, self.fields_evaluations[f_e].word_distribution))
+                    f.write(u'{}: \n{}\n\n'.format(f_e, self.fields_evaluations[f_e].word_distribution).encode('utf8'))
 
     def save_confusion_matrices(self, confusion_matrices_file):
         print "Storing confusion matrices ..."
@@ -91,10 +92,10 @@ class Evaluation:
             for f_e in self.fields_evaluations:
                 if self.fields_evaluations[f_e].number_of_occurrences > 0:
                     for value_name in self.fields_evaluations[f_e].confusion_matrices:
-                        f.write("{}: value: {}\n".format(f_e, value_name))
+                        f.write(u"{}: value: {}\n".format(f_e, value_name).encode('utf8'))
                         np.savetxt(f, self.fields_evaluations[f_e].confusion_matrices[value_name].astype(int), fmt='%i')
                         recall, precision = recall_precision(self.fields_evaluations[f_e].confusion_matrices[value_name])
-                        f.write("recall: {}, precision: {}\n".format(round(recall, 3), round(precision, 3)))
+                        f.write(u"recall: {}, precision: {}\n".format(round(recall, 3), round(precision, 3)).encode('utf8'))
                         f.write('\n')
 
     def save(self, accuracy_file, heat_maps_folder=None, predictions_folder=None, real_folder=None,

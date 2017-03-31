@@ -78,7 +78,7 @@ class Algorithm(object):
         self.current_index = None
         self.current_patient = None
         self.current_form = None
-        self.current_assignments = None
+        self.current_assignments = list()
         self.es = None
         self.queries = dict()  # can be removed
         self.incorrect = dict()  # can be removed
@@ -102,19 +102,18 @@ class Algorithm(object):
     def save(self, assignments_file, incorrect_file=None, queries_file=None, n_grams_file=None):
         json.dump([ass.to_voc() for ass in self.current_assignments], open(assignments_file, 'w'), indent=2)
         if incorrect_file:
-            json.dump(self.incorrect, open(incorrect_file, 'w'), indent=2)
+            json.dump(self.incorrect, open(incorrect_file, 'w'), encoding='utf8', indent=2)
         if queries_file:
-            json.dump(self.queries, open(queries_file, 'w'), indent=2)
+            json.dump(self.queries, open(queries_file, 'w'),  encoding='utf8', indent=2)
         if n_grams_file:
             for key, value in self.n_gram_possibilities.iteritems():
                 self.n_gram_possibilities[key] = list(value)
-            json.dump(self.n_gram_possibilities, open(n_grams_file, 'w'), indent=2)
+            json.dump(self.n_gram_possibilities, open(n_grams_file, 'w'),  encoding='utf8', indent=2)
 
     def assign(self, es_index, form, fields_ids=None, host=None):
         s_time = time.time()
         self.current_index = es_index
         self.current_form = form
-        self.current_assignments = list()
 
         if not host:
             host = {"host": "localhost", "port": 9200}
@@ -127,7 +126,7 @@ class Algorithm(object):
             for field_id in fields_ids:
                 fields.append(self.current_form.get_field(field_id))
 
-        for patient in form.patients:
+        for patient in form.patients[0:5]:  # todo: remove range
             self.current_patient = patient
             if random.random() < print_freq:
                 print 'assigning patient: ', patient.id, ' for fields: ', [field.id for field in fields]
@@ -138,6 +137,8 @@ class Algorithm(object):
     def make_patient_form_assignments(self, fields):
         pf_assignment = PatientFormAssignment(self.current_patient.id, self.current_form.id)
         for field in fields:
+            if self.current_patient not in field.patients:
+                continue
             if condition_satisfied(self.current_patient.golden_truth, field.condition):
                 if field.is_binary():
                     self.assign_binary(pf_assignment, field)
@@ -146,6 +147,7 @@ class Algorithm(object):
                 else:
                     self.pick_value_decision(pf_assignment, field)
             else:
+                # print 'not condition sat'
                 pass  # don't consider cases with unsatisfied condition
         self.current_assignments.append(pf_assignment)
 
@@ -395,6 +397,10 @@ class Algorithm(object):
         the_current_body = search_body(query_body, highlight_body=self.highlight_body(), min_score=self.min_score)
         search_results = self.es.search(index=self.current_index, body=the_current_body, doc_type=self.search_type)
         self.save_query(field.id, value, the_current_body)
+
+        self.score_and_evidence(search_results)  # todo: remove
+        print 'prin get_value_score_n_gram: ', field.get_value_possible_values(value)
+
         if self.score_and_evidence(search_results) == (None, None, "no hits") and self.n_gram_field:
             return self.get_value_score_n_gram(field, value)
         return self.score_and_evidence(search_results)
@@ -406,9 +412,10 @@ class Algorithm(object):
         if self.use_description1ofk != 0 and field.description != []:  # last chance => don't search combination/phrase
             must_body.append(
                 {"query_string": {
-                    "fields": self.search_fields,
+                    "default_field": self.n_gram_field,
                     "query": disjunction_of_conjunctions(field.description)}})
-            possible_words.append(field.description)
+            possible_words += field.description
+        print 'possible words ', possible_words
         must_body.append(
             {"query_string": {
                 "default_field": self.n_gram_field,
@@ -418,7 +425,9 @@ class Algorithm(object):
         the_current_body = search_body(
             query_body, highlight_body=self.highlight_body(self.n_gram_field), min_score=self.min_score
         )
+        print 'the current body ', the_current_body
         search_results = self.es.search(index=self.current_index, body=the_current_body, doc_type=self.search_type)
+        print 'search_results ', search_results
         self.save_query(field.id+'_n_gram', value, the_current_body)
         return self.check_n_grams_results(search_results, possible_words)
 

@@ -65,11 +65,14 @@ class DataSetForm(Form):
         for idx, row in data_frame.iterrows():
             patient_id = row[u'PatientNr']
             patient_folder = os.path.join(self.form_patients_folder, patient_id)
-            new_patient = Patient(patient_id, patient_folder)
-            golden_truth = {case: row[case] for case in list(data_frame) if case != u'PatientNr'}
-            new_patient.golden_truth = golden_truth
-            # print 'new patient ', new_patient
-            self.patients.append(new_patient)
+            if os.path.isdir(patient_folder) and os.path.isfile(os.path.join(patient_folder, 'report.csv')):
+                new_patient = Patient(patient_id, patient_folder)
+                golden_truth = {case: row[case] for case in list(data_frame) if case != u'PatientNr'}
+                new_patient.golden_truth = golden_truth
+                # print 'new patient ', new_patient
+                self.patients.append(new_patient)
+            else:
+                print 'patient folder ', patient_folder, ' does not exist or patient has no reports'
         for field in self.fields:
             field.find_patients()
 

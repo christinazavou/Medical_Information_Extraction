@@ -533,8 +533,8 @@
         "description": ["Radiotherapie in studieverband"],
         "condition": "",
         "values": {
-            "Nee": ["Nee"],
-            "Ja": ["Ja"]
+            "No": ["No"],
+            "Yes": ["Yes"]
         }
    }
 }

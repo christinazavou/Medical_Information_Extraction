@@ -1,8 +1,7 @@
 
+dataset: dataset_allfields_form.p
 
-dataset: dataset_allfields_expert.p
-
-json_form_file: "CONFIGURATIONS_PATH\\important_fields_expert\\important_fields_DECEASE.json"
+json_form_file: "CONFIGURATIONS_PATH\\important_fields_form\\important_fields_DECEASE.json"
 csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
 form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
 
@@ -10,16 +9,17 @@ mapping_file: "CONFIGURATIONS_PATH\\mapping_v2.json"
 
 host: {"host": "localhost", "port": 9200}
 
-es_index_name: dataset_allfields_expert
+es_index_name: dataset_allfields_form
 
 forms: {
-  'colorectaal': []
+  'colorectaal': [],
+  'mamma': []
 }
 
 use_description_1ofk: 1
 patient_relevant: True # will become false if sklearn version is not 0.17.1
-description_as_phrase: True
-value_as_phrase: True
+description_as_phrase: False
+value_as_phrase: False
 slop: 5
 n_gram_field: "description.4_gram_description"
 edit_distance: 3

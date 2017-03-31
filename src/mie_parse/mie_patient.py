@@ -33,9 +33,12 @@ class Patient(object):
         return os.path.isfile(os.path.join(self.dossier_path, filename))
 
     def read_report_csv(self):
-        reports = csv2list_of_dicts(os.path.join(self.dossier_path, 'report.csv'))
-        self.num_of_reports = len(reports)
-        return var_to_utf(reports)
+        if os.path.isfile(os.path.join(self.dossier_path, 'report.csv')):
+            reports = csv2list_of_dicts(os.path.join(self.dossier_path, 'report.csv'))
+            self.num_of_reports = len(reports)
+            return var_to_utf(reports)
+        else:
+            return None
 
     def get_from_data_frame(self, data_frame, field_name):
         result = data_frame[data_frame[u'PatientNr'] == self.id]

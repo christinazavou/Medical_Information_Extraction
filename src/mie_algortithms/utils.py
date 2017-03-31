@@ -2,33 +2,34 @@ import re
 from collections import Counter
 
 
-def prepare_meaning(phrase):
-    phrase = re.sub(r'(:|\^)', u' ', phrase)
-    new_phrases = list()
-    if ' / ' in phrase:
-        words = re.sub(r' / ', u'/', phrase).split(' ')
-        for word in words:
-            if '/' in word:
-                x1, x2 = word.split('/')
-                new_phrases.append(phrase.replace(word, x1))
-                new_phrases.append(phrase.replace(word, x2))
-    else:
-        new_phrases.append(phrase)
-    return new_phrases
-
-
 def disjunction_of_conjunctions(phrases, skip_length=5):
+    print 'phrases ', phrases
     if not phrases:
         return ""
     query = ""
     new_phrases = list()
     for i, phrase in enumerate(phrases):
-        new_phrases += prepare_meaning(phrase)
+        if ':' in phrase:
+            phrase = phrase.replace(':', ' ')
+        if '^' in phrase:
+            phrase = phrase.replace('^', ' ')
+        if ' / ' in phrase:
+            phrase = phrase.replace(' / ', '/')
+        if '/' in phrase:
+            words = phrase.split(' ')
+            for word in words:
+                if '/' in word:
+                    x1, x2 = word.split('/')
+                    new_phrases.append(phrase.replace(word, x1))
+                    new_phrases.append(phrase.replace(word, x2))
+            continue
+        new_phrases.append(phrase)
     for i, phrase in enumerate(new_phrases):
         txt = " AND ".join([j for j in phrase.split()])
         if i > 0:
             query += " OR "
         query += " (" + txt + ") "
+    print 'query ', query
     return query
 
 

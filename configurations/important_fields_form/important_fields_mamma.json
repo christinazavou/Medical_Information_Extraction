@@ -1,0 +1,44 @@
+{
+  "anamn_MENOPSTATUS":{
+        "condition":"",
+        "description": ["Menopausale status"],
+        "values": {
+          "Premenopausaal": ["Premenopausaal"],
+          "Perimenopausaal": ["Perimenopausaal"],
+          "Postmenopausaal (door chemotherapie)":["Postmenopausaal (door chemotherapie)"],
+          "Postmenopausaal (natuurlijk)": ["Postmenopausaal (natuurlijk)"],
+          "n.v.t. (man)": ["n.v.t. (man)"],
+          "Onbekend": []
+        }
+      },
+  "VOORGESCH_answer0":{
+        "condition":"",
+        "description": ["Heeft er eerder chirurgie plaatsgevonden aan deze mamma Niet oncologisch: benigne exsicie, augmentatie etc."],
+        "values": {
+          "Yes": ["Yes"],
+          "": []
+        }
+   },
+  "anamn_TNMCT":{
+        "condition":"",
+        "description": ["TNM cT"],
+        "values": {
+          "cTX": ["cTX"],
+          "cT0": ["cT0"],
+          "cTis": ["cTis"],
+          "cT1": ["cT1"],
+          "cT1m": ["cT1m"],
+          "cT1a": ["cT1a"],
+          "cT1b": ["cT1b"],
+          "cT1c": ["cT1c"],
+          "cT2": ["cT2"],
+          "cT3": ["cT3"],
+          "cT4": ["cT4"],
+          "cT4a": ["cT4a"],
+          "cT4b": ["cT4b"],
+          "cT4c": ["cT4c"],
+          "cT4d": ["cT4d"],
+          "Onbekend": []
+        }
+   }
+}
