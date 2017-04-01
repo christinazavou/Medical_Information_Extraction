@@ -4,7 +4,9 @@ from src.mie_parse.mie_form import DataSetForm, Form
 
 
 class DataSet(object):
-
+    """
+    Contains a list with DataSetForm objects
+    """
     def __init__(self, filename, json_form_file=None, csv_form_file=None, form_dossier_path=None, deceases=None):
         self.filename = filename
         if os.path.isfile(filename):
@@ -26,7 +28,6 @@ class DataSet(object):
             if os.path.isfile(csv_file) and os.path.isfile(json_file):
                 form = Form(decease, csv_file, json_file)
                 form.put_fields()
-                # print 'form fields: ', form.fields
 
                 data_set_form = DataSetForm(form, form_dossier_path.replace('DECEASE', decease))
                 data_set_form.find_patients()
@@ -42,6 +43,9 @@ class DataSet(object):
         self.__dict__.update(tmp_dict)
 
     def get_form(self, form_id):
+        """
+        :return: the DataSetForm object in self.data_set_forms with id form_id
+        """
         for form in self.data_set_forms:
             if form.id == form_id:
                 return form

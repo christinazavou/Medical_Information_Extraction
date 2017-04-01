@@ -5,31 +5,32 @@ from src.mie_parse.mie_data_set import DataSet
 from src.mie_index.mie_index import EsIndex
 from src.mie_algortithms.algorithm import Algorithm
 from src.mie_evaluation.evaluation import Evaluation
-from settings import ConfigurationParser
+from src.settings import ConfigurationParser
 
-CONFIGURATION_IDX, DATA_PATH_IDX, RESULTS_PATH_IDX, ES_VERSION_IDX = 1, 2, 3, 4
+CONFIGURATION_IDX, DATA_PATH_IDX, RESULTS_PATH_IDX, SUB_FOLDER_IDX = 1, 2, 3, 4
 
 if len(sys.argv) < 5:
     if os.path.isdir('C:\\Users\\ChristinaZ\\'):
-        configuration = 8
+        configuration = 1
         data_path = 'C:\\Users\\ChristinaZ\\Desktop\\All_Data'
         results_path = '..\\results'
-        cp = ConfigurationParser(configuration, data_path, results_path, 2)
+        sub_folder = 'form'
+        cp = ConfigurationParser(configuration, data_path, results_path, sub_folder=sub_folder)
     else:
-        cp = ConfigurationParser(9, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results', 2)
+        cp = ConfigurationParser(9, 'C:\\Users\\Christina Zavou\\Documents\\Data', '..\\results', sub_folder='form')
 else:
     cp = ConfigurationParser(
-        sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX], sys.argv[ES_VERSION_IDX])
+        sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX], sys.argv[SUB_FOLDER_IDX]
+    )
 
 forms = DataSet(
     cp.get_file(['RESULTS_PATH', 'dataset']),
-    cp.get_file(['CONFIGURATIONS_PATH', 'json_form_file']),
-    cp.get_file(['DATA_PATH', 'csv_form_file']),
-    cp.get_file(['DATA_PATH', 'form_dossiers_path']),
+    cp.settings['json_form_file'],
+    cp.settings['csv_form_file'],
+    cp.settings['form_dossiers_path'],
     cp.settings['forms'].keys()
 ).data_set_forms
-# note: in each data_set_form a patient has a dict of pairs (field, value) for the golden truth of the specific form
-
+exit()
 # print 'patients in both forms = ', set(forms[1].patients) & set(forms[0].patients)
 
 es_index = EsIndex(cp.settings['es_index_name'])

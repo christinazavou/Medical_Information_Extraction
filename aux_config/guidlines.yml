@@ -1,3 +1,6 @@
+# -------------------- GUIDLINES ON COMPLETING THE CONFIGURATION YAML FILE TO PARSE SETTINGS --------------------------
+# ------------------ FOR THE ALGORITHM THAT USES ELASTICSEARCH QUERIES ( IR ) TO ASSIGN FIELDS ------------------------
+# ---------------------------------------------------------------------------------------------------------------------
 
 dataset: necessary
 
@@ -10,8 +13,21 @@ mapping_file: necessary
 host: {"host": "localhost", "port": 9200}
 
 forms: {
-  name of form: list of fields to consider in assignment. use the empty list to consider all fields
+  name of form: list of fields to consider in assignment. (use the empty list to consider all fields)
 }
 
-with_description: if 0-> only value is searched in the report, if 1-> both value and description should appear in the report, if 2-> value and description should appear next to each other in the report
+es_index_name: necessary
 
+use_description1ofk: 0:only value is searched in the report, 1:both value and description should appear in the report, 2:value and description should appear next to each other in the report (default value is 0)
+
+patient_relevant: Optional field, and only used if sklearn version is 0.17.1. True or False.  On default is unused.
+
+description_as_phrase: True or False (default is False). Determines if description of field will be searched with the phrase_querey in elasticsearch
+value_as_phrase: True or False (default is False). Determines if each possible value of a field will be searched with the phrase_querey in elasticsearch
+slop: integer (default is 5). Used only if description_as_phrase is True or value_as_phrase is True
+
+n_gram_field: Optional. The default mapping_v2.json can support one of:[description.4_gram_description, description.3_gram_description, description.2_gram_description]
+
+edit_distance: integer (default is 0). In case of the n_grams search, define the maximum edit distance of a word matched with the word searched
+
+search_fields: Optional. (If not set, the queries will use the description field.) Accepts a list with the fields to search on. The default mapping_v2.json supports the fields:description, description.dutch_tf_description, description.dutch_description, description.tf_description, description.4_gram_description, description.3_gram_description and description.2_gram_description

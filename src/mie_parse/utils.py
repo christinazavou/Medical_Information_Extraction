@@ -4,8 +4,12 @@ import copy
 
 
 def condition_satisfied(golden_truth, condition):
-    # for a given patient(the golden truth) check whether the field to be field satisfies its condition(if exist) or not
-    if condition == u'':
+    """
+    :param golden_truth: the golden truth (of one patient in one form)
+    :param condition: the condition of some field
+    :return: whether condition is satisfied.
+    """
+    if condition == u'':  # no condition => satisfied
         return True
     conditioned_field, condition_expression = re.split(u' !?= ', condition)
     if u'!=' in condition:
@@ -14,7 +18,7 @@ def condition_satisfied(golden_truth, condition):
     elif u'=' in condition:
         if golden_truth[conditioned_field] == condition_expression:
             return True
-    else:
+    else:  # condition exists but it's unsatisfied
         return False
 
 
