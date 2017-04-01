@@ -30,14 +30,14 @@ forms = DataSet(
     cp.settings['form_dossiers_path'],
     cp.settings['forms'].keys()
 ).data_set_forms
-exit()
-# print 'patients in both forms = ', set(forms[1].patients) & set(forms[0].patients)
+
+# print 'patients in both forms = ', set(forms[1].patients) & set(forms[0].patients)  # => no common patient !!
 
 es_index = EsIndex(cp.settings['es_index_name'])
 
-# es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
-# for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
-#     es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
+es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
+for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
+    es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
 
 a = Algorithm(
     patient_relevant=cp.settings['patient_relevant'], search_fields=None,
@@ -58,7 +58,7 @@ if not os.path.isfile(assignments_file):
     )
 
 assignments = json.load(open(assignments_file, 'r'), encoding='utf8')
-
+exit()
 e = Evaluation()
 e.evaluate(assignments, forms)
 e.save(

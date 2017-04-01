@@ -23,6 +23,9 @@ def condition_satisfied(golden_truth, condition):
 
 
 def var_to_utf(s):
+    """
+    Converts the variable s into a utf representation
+    """
     if isinstance(s, list):
         return [var_to_utf(i) for i in s]
     if isinstance(s, dict):

@@ -15,8 +15,12 @@ host: {"host": "localhost", "port": 9200}
 forms: {
   name of form: list of fields to consider in assignment. (use the empty list to consider all fields)
 }
+# note: each of the forms appeared here should be in the dataset as well and should be indexed(there patients should be)
+# in es_indexed_name. also, fields appeared here should be in the dataset and in the index
 
 es_index_name: necessary
+# note: es_index_name and dataset can vary. The only limitation is that fields appeared in the dataset should be indexed
+# in the es_index_name as part of the patients
 
 use_description1ofk: 0:only value is searched in the report, 1:both value and description should appear in the report, 2:value and description should appear next to each other in the report (default value is 0)
 
