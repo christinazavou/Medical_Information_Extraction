@@ -2,6 +2,11 @@
 import types
 
 
+"""
+functions for building ES queries
+"""
+
+
 def match_query_with_operator(query_field, query_text, operator='OR', boost=1, min_pct='0%'):
     """
     default boost in a clause (for should/must..) is 1.

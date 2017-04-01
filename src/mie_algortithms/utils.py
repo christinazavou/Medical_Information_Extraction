@@ -1,9 +1,12 @@
-import re
 from collections import Counter
 
 
 def disjunction_of_conjunctions(phrases, skip_length=5):
-    print 'phrases ', phrases
+    """
+    e.g. ['my cat', 'my dog'] will become ' (my AND cat) OR (my AND dog) '
+    e.g. ['my CT / thorax'] will become ' (my AND ct) OR (my AND thorax) '
+    This is to be used by the query_String ES queries
+    """
     if not phrases:
         return ""
     query = ""
@@ -29,11 +32,15 @@ def disjunction_of_conjunctions(phrases, skip_length=5):
         if i > 0:
             query += " OR "
         query += " (" + txt + ") "
-    print 'query ', query
     return query
 
 
 def find_highlighted_words(txt):
+    """
+    Scans a sentence and returns words appeared between '<em>' and '</em>'
+    :param txt: the highlighted sentence returned by an ES query
+    :return: the words found to support the query score
+    """
     i = 0
     occurrences = []
     while i < len(txt):
@@ -54,6 +61,9 @@ def find_word_distribution(words):
 
 
 def description_value_combo(possible_descriptions, possible_values):
+    """
+    Returns all the combinations of one possible description and one possible value of a field
+    """
     phrases = []
     for value in possible_values:
         for description in possible_descriptions:
@@ -62,6 +72,10 @@ def description_value_combo(possible_descriptions, possible_values):
 
 
 def big_phrases_small_phrases(phrases, max_words=6):
+    """
+    Given a list of phrases split them into small and big ones, based on the upper bound of max_words -1 defining
+    a small phrase
+    """
     big_set = set()
     small_set = set()
     for phrase in phrases:

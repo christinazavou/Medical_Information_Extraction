@@ -4,7 +4,9 @@ import json
 
 
 class PatientFormAssignment(object):
-
+    """
+    Keeps the patient id, form id and fields assignments for easier manipulation and printing
+    """
     def __init__(self, patient_id, form_id):
         self.patient_id = patient_id
         self.form_id = form_id
@@ -14,7 +16,8 @@ class PatientFormAssignment(object):
         voc = {
             'patient': self.patient_id,
             'form': self.form_id,
-            'assignments': [ass.to_voc() for ass in self.assignments]}
+            'assignments': [ass.to_voc() for ass in self.assignments]
+        }
         return voc
 
     def to_json(self):

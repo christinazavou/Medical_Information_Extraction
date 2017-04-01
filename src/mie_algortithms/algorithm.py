@@ -73,33 +73,46 @@ def highlighted_words_n_distributions(words, highlights):
 
 class Algorithm(object):
 
+    """
+    Information Retrieval algorithm to search an ElasticSearch index and assign values to forms' fields.
+    """
+
     def __init__(self, patient_relevant=None, search_fields=None, use_description1ofk=0, description_as_phrase=False,
                  value_as_phrase=False, slop=5, n_gram_field=None, edit_dist=0):
-        self.current_index = None
-        self.current_patient = None
-        self.current_form = None
-        self.current_assignments = list()
-        self.es = None
-        self.queries = dict()  # can be removed
-        self.incorrect = dict()  # can be removed
-        self.n_gram_possibilities = dict()  # can be removed
+        self.current_index = None  # ElasticSearch index name
+        self.current_patient = None  # patient to be assigned
+        self.current_form = None  # DataSetForm whose patients will be assigned
 
-        self.min_score = 0  # no reason to give it another value
+        self.current_assignments = list()
+
+        self.es = None  # client connection to ElasticSearch
+
+        self.queries = dict()  # to save the queries sent in ElasticSearch for searching each value of each field
+        self.incorrect = dict()  # to save the wrong assignments made
+        self.n_gram_possibilities = dict()  # to save the possible returned n-grams of words searched
+
+        self.min_score = 0  # minimum score of accepted ES results.
         self.search_fields = ['description'] if not search_fields else search_fields
         self.search_type = "report"  # no other possibility currently
 
-        # currently trained.model only works for 0.17 version
+        # currently src.ctcue.trained.model only works for scikit-learn 0.17.1 version
         self.patient_relevance_test = PatientRelevance() if patient_relevant and sklearn.__version__ == '0.17.1' else None
-        self.use_description1ofk = use_description1ofk
 
+        self.use_description1ofk = use_description1ofk  # how to use description of 1-of-k fields
+
+        # when phrase queries will be used
         self.description_as_phrase = description_as_phrase
         self.value_as_phrase = value_as_phrase
         self.slop = slop
 
+        # when search is done on n-grams
         self.n_gram_field = n_gram_field
         self.edit_dist = edit_dist
 
     def save(self, assignments_file, incorrect_file=None, queries_file=None, n_grams_file=None):
+        """
+        Accepts and stores json files
+        """
         json.dump([ass.to_voc() for ass in self.current_assignments], open(assignments_file, 'w'), indent=2)
         if incorrect_file:
             json.dump(self.incorrect, open(incorrect_file, 'w'), encoding='utf8', indent=2)
@@ -107,10 +120,13 @@ class Algorithm(object):
             json.dump(self.queries, open(queries_file, 'w'),  encoding='utf8', indent=2)
         if n_grams_file:
             for key, value in self.n_gram_possibilities.iteritems():
-                self.n_gram_possibilities[key] = list(value)
+                self.n_gram_possibilities[key] = list(value)  # convert set to list for json serialization
             json.dump(self.n_gram_possibilities, open(n_grams_file, 'w'),  encoding='utf8', indent=2)
 
     def assign(self, es_index, form, fields_ids=None, host=None):
+        """
+        :param fields_ids: fields of the form to be assigned. If not given, assigns all the form's fields
+        """
         s_time = time.time()
         self.current_index = es_index
         self.current_form = form
@@ -119,6 +135,7 @@ class Algorithm(object):
             host = {"host": "localhost", "port": 9200}
         self.es = Elasticsearch(hosts=[host])
 
+        # Retrieve the DataSetField objects from the fields names
         if not fields_ids or fields_ids == []:
             fields = form.fields
         else:
@@ -126,32 +143,40 @@ class Algorithm(object):
             for field_id in fields_ids:
                 fields.append(self.current_form.get_field(field_id))
 
-        for patient in form.patients[0:5]:  # todo: remove range
+        for patient in form.patients:
             self.current_patient = patient
             if random.random() < print_freq:
                 print 'assigning patient: ', patient.id, ' for fields: ', [field.id for field in fields]
-
             self.make_patient_form_assignments(fields)
+
         print 'finished assigning patients after {} seconds'.format(time.time()-s_time)
 
     def make_patient_form_assignments(self, fields):
+        """
+        :param fields: the fields of the current form to assign the current patient
+        """
         pf_assignment = PatientFormAssignment(self.current_patient.id, self.current_form.id)
         for field in fields:
             if self.current_patient not in field.patients:
-                continue
+                continue  # current_patient is in current_form patients but is inconsistent with this field
             if condition_satisfied(self.current_patient.golden_truth, field.condition):
                 if field.is_binary():
                     self.assign_binary(pf_assignment, field)
                 elif field.is_open_question():
-                    pass
+                    pass  # currently assignment of open question fields is not supported
                 else:
                     self.pick_value_decision(pf_assignment, field)
             else:
-                # print 'not condition sat'
-                pass  # don't consider cases with unsatisfied condition
+                print 'patient {} does not satisfy condition of field {}'.format(self.current_patient.id, field.id)
+                print 'patient {} in field {} patients ? {}'.format(self.current_patient.id, field.id,
+                                                                    self.current_patient in field.patients)
+                pass  # don't consider cases where condition is unsatisfied
         self.current_assignments.append(pf_assignment)
 
     def assign_binary(self, pf_assignment, field):
+        """
+        :param pf_assignment: the current PatientFormAssignment to add the field assignment to
+        """
         must_body = list()
         must_body.append(self.possibilities_query(field.description, self.description_as_phrase))
         must_body.append(has_parent_query(self.current_patient.id, "patient"))
@@ -177,6 +202,11 @@ class Algorithm(object):
         self.save_incorrect(field, value)
 
     def accepted_words(self, words, possible_words):
+        """
+        :param words: the highlighted words returned by ES queries on n-grams
+        :param possible_words: the words to find similar to
+        :return: subset of words that are accepted
+        """
         # n_grams for all three words in a phrase should exist, but a lot of possible phrases, and at least one needed
         words = [word.lower() for word in words]
         possible_words = [word.lower() for word in possible_words]
@@ -201,6 +231,9 @@ class Algorithm(object):
         return None
 
     def assign_binary_n_gram(self, field):
+        """
+        Search in ES on a field with n-gram analysis.
+        """
         must_body = list()
         must_body.append(
             {"query_string": {
@@ -217,9 +250,15 @@ class Algorithm(object):
         return self.check_n_grams_results(search_results, field.description)
 
     def should_as_phrase(self, should_body, small, strict=False):
+        """
+        :param should_body: the current list of queries to add in a 'should' clause of an ES bool query
+        :param small: the list of strings to search for, each one in a different 'should' query
+        :param strict: whether to use phrase_query even if the string is one word (currently is never called as True)
+        :return: the should body with the added queries
+        """
         for phrase in small:
             if len(phrase.split(' ')) == 1 and not strict:
-                # gives better results for one word than the phrase_query
+                # the query_string gives better results than those of the phrase query, when searching for one word
                 should_body.append(query_string(self.search_fields, phrase))
             else:
                 should_body.append(
@@ -228,13 +267,20 @@ class Algorithm(object):
         return should_body
 
     def possibilities_query(self, possible_strings, as_phrase):
+        """
+        Given some possible strings to search for, create and return a boolean ES query to account for each of those
+        :param as_phrase: to search each string as a phrase or not
+        """
         should_body = list()
         if possible_strings:
             phrases_lengths = [len(phrase.split(' ')) for phrase in possible_strings]
             if max(phrases_lengths) == 1:
+                # if each possible string is one single word then use a query_string ES query
+                # independent of as_phrase param, because phrase_query would give lower scores
                 should_body.append(query_string(self.search_fields, disjunction_of_conjunctions(possible_strings)))
                 return bool_body(should_body=should_body, min_should_match=1)
-        # in case of description as in form we have some big text to search => should use 40% matching
+        # in case of a description as appeared in the form, it could be a large detailed string, and it is
+        # better to use a multi_match ES query to match a percentage of it, therefore we split into small & big strings
         big, small = big_phrases_small_phrases(possible_strings)
         if as_phrase:
             should_body = self.should_as_phrase(should_body, small, strict=False)
@@ -247,6 +293,10 @@ class Algorithm(object):
         return bool_body(should_body=should_body, min_should_match=1)
 
     def highlight_body(self, fields=None):
+        """
+        :param fields: the fields that ES query was searching on
+        :return: ES query to return highlights on those fields
+        """
         if not fields:
             highlight_body = highlight_query(self.search_fields, ["<em>"], ['</em>'], frgm_num=fragments)
         else:
@@ -273,7 +323,9 @@ class Algorithm(object):
         self.n_gram_possibilities[key].update(values)
 
     def score_and_evidence(self, search_results):
-        """Returns score, hit, word_distribution"""
+        """
+        Returns score of the best report matched, id of that report and word_distribution found on each matching report
+        """
         comment = ""
         hits = search_results['hits']['hits']
         if hits:
@@ -302,6 +354,11 @@ class Algorithm(object):
             return None, None, "no hits"
 
     def check_n_grams_results(self, search_results, possible_words):
+        """
+        Given the search_results returned by ES queries on a field with n-gram analysis and a list of words
+        defining the possible assignment (i.e. description of field and value to assign),
+        check whether the found n-grams are accepted as similar to words to accept or reject the results
+        """
         comment = ""
         hits = search_results['hits']['hits']
         if hits:
@@ -336,6 +393,9 @@ class Algorithm(object):
             return None, None, "no hits (ngrams)"
 
     def pick_value_decision(self, pf_assignment, field):
+        """
+        Makes a 1-of-k assignment
+        """
         values = field.get_values()
         values_scores = [None for value in values]
         values_best_hits = [None for value in values]
@@ -357,7 +417,7 @@ class Algorithm(object):
             pf_assignment.assignments.append(assignment)
             self.save_incorrect(field, values[idx])
         else:
-            if last_choice and len(last_choice) == 1:
+            if last_choice and len(last_choice) == 1:  # last choice is for example 'Onbekend': [] in values
                 value_score, value_best_hit, value_comment = self.assign_last_choice(field)
                 all_comments[last_choice[0]] = value_comment
                 assignment = Assignment(
@@ -376,6 +436,11 @@ class Algorithm(object):
                 pf_assignment.assignments.append(assignment)
 
     def look_for_in_1ofk(self, must_body, field, value):
+        """
+        Adds queries to search for, i.e. search only the value, or the value and the description
+        :param must_body: list of the queries needed to be matched
+        :return: must_body with added queries
+        """
         if self.use_description1ofk == 0 or self.use_description1ofk == 1:
             must_body.append(self.possibilities_query(field.get_value_possible_values(value), self.value_as_phrase))
             if self.use_description1ofk == 1:
@@ -397,10 +462,6 @@ class Algorithm(object):
         the_current_body = search_body(query_body, highlight_body=self.highlight_body(), min_score=self.min_score)
         search_results = self.es.search(index=self.current_index, body=the_current_body, doc_type=self.search_type)
         self.save_query(field.id, value, the_current_body)
-
-        self.score_and_evidence(search_results)  # todo: remove
-        print 'prin get_value_score_n_gram: ', field.get_value_possible_values(value)
-
         if self.score_and_evidence(search_results) == (None, None, "no hits") and self.n_gram_field:
             return self.get_value_score_n_gram(field, value)
         return self.score_and_evidence(search_results)
