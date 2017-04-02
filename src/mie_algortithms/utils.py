@@ -64,6 +64,8 @@ def description_value_combo(possible_descriptions, possible_values):
     """
     Returns all the combinations of one possible description and one possible value of a field
     """
+    if not possible_descriptions:
+        return possible_values
     phrases = []
     for value in possible_values:
         for description in possible_descriptions:

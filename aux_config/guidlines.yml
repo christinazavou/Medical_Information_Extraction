@@ -2,6 +2,9 @@
 # ------------------ FOR THE ALGORITHM THAT USES ELASTICSEARCH QUERIES ( IR ) TO ASSIGN FIELDS ------------------------
 # ---------------------------------------------------------------------------------------------------------------------
 
+# note: ElasticSearch service has to be running otherwise connection errors will be raised!
+# note: in algorithm.py you can set print_freq to zero to stop printings
+
 dataset: necessary
 
 json_form_file: necessary (replace the form name with 'DECEASE')
@@ -35,3 +38,30 @@ n_gram_field: Optional. The default mapping_v2.json can support one of:[descript
 edit_distance: integer (default is 0). In case of the n_grams search, define the maximum edit distance of a word matched with the word searched
 
 search_fields: Optional. (If not set, the queries will use the description field.) Accepts a list with the fields to search on. The default mapping_v2.json supports the fields:description, description.dutch_tf_description, description.dutch_description, description.tf_description, description.4_gram_description, description.3_gram_description and description.2_gram_description
+
+# note on fields
+#  unconditional fields on 'colorectaal':
+#  [
+#  'klachten_klacht1', 'klachten_klacht2', 'klachten_klacht3', 'klachten_klacht4', 'klachten_klacht88','klachten_klacht99',
+#  'LOCPRIM',
+#  'mdo_chir',
+#  'pallther_RTstudie',
+#  'COMORBNEU', 'COMORBPUL',
+#  'SCORECT', 'RESTAG_SCORECT_1', 'SCORECN', 'RESTAG_SCORECN_1','SCORECM', 'RESTAG_SCORECM_1',
+#  'RESTAG_CT',
+#  'COMORB', 'COMORBVAS', 'COMORBMDA',
+#  'PROCOK'
+#  ]
+#  unconditional fields on 'mamma':
+#  [
+#  'anamn_MENOPSTATUS', 'VOORGESCH_answer0', 'anamn_TNMCT'
+#  ]
+#  selected fields on 'colorectaal':
+#  [
+#  'klachten_klacht1', 'klachten_klacht2', 'klachten_klacht4',
+#  'LOCPRIM',
+#  'mdo_chir',
+#  'SCORECT',
+#  'RESTAG_CT',
+#  'PROCOK'
+#  ]

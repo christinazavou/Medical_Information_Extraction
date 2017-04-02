@@ -13,7 +13,7 @@ from src.mie_word_embeddings.utils import find_vocab
 from src.mie_word_embeddings.utils import sentence_to_word_list, remove_newlines, get_sentences_uni_grams_bi_grams
 
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+# logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)  # uncomment for printings
 tokenizer = nltk.data.load('nltk:tokenizers/punkt/dutch.pickle')
 
 

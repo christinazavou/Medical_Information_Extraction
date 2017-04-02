@@ -1,0 +1,34 @@
+
+dataset: dataset_important_fields_expert.p
+
+json_form_file: "CONFIGURATIONS_PATH\\important_fields_expert\\important_fields_DECEASE.json"
+csv_form_file: "DATA_PATH\\DECEASE\\selection_DECEASE.csv"
+form_dossiers_path: "DATA_PATH\\DECEASE\\patients_selection_DECEASE"
+
+mapping_file: "CONFIGURATIONS_PATH\\mapping_v2.json"
+
+host: {"host": "localhost", "port": 9200}
+
+es_index_name: dataset_important_fields_expert
+
+forms: {
+  'colorectaal':
+  [
+  'klachten_klacht1', 'klachten_klacht2', 'klachten_klacht4',
+  'LOCPRIM',
+  'mdo_chir',
+  'SCORECT',
+  'RESTAG_CT',
+  'PROCOK'
+  ]
+}
+
+search_fields: ['description.dutch_description']
+use_description_1ofk: 0
+patient_relevant:
+description_as_phrase: False
+value_as_phrase: False
+slop:
+n_gram_field:
+edit_distance:
+

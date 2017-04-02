@@ -13,19 +13,16 @@ es_index_name: dataset_important_fields_form
 
 forms: {
   'colorectaal': [
-  'klachten_klacht1', 'klachten_klacht2', 'klachten_klacht3', 'klachten_klacht4', 'klachten_klacht88','klachten_klacht99',
+  'klachten_klacht1', 'klachten_klacht2', 'klachten_klacht4',
   'LOCPRIM',
   'mdo_chir',
-  'pallther_RTstudie',
-  'COMORBNEU', 'COMORBPUL',
-  'SCORECT', 'RESTAG_SCORECT_1', 'SCORECN', 'RESTAG_SCORECN_1','SCORECM', 'RESTAG_SCORECM_1',
+  'SCORECT',
   'RESTAG_CT',
-  'COMORB', 'COMORBVAS', 'COMORBMDA',
   'PROCOK'
   ]
 }
 
-search_fields:
+search_fields: ['description.dutch_tf_description']
 use_description_1ofk: 0
 patient_relevant:
 description_as_phrase: False

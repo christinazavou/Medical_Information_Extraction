@@ -1,5 +1,16 @@
 
 
-dataset: dataset_allfields_form.p
+dataset: expert\dataset_important_fields_expert.p
 
 vectorizer: boolean
+
+forms: {
+  'colorectaal': [
+  'klachten_klacht1', 'klachten_klacht2', 'klachten_klacht4',
+  'LOCPRIM',
+  'mdo_chir',
+  'SCORECT',
+  'RESTAG_CT',
+  'PROCOK'
+  ]
+}

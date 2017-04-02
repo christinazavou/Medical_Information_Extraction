@@ -17,7 +17,7 @@ if sklearn.__version__ == '0.17.1':
 
 
 random.seed(100)
-print_freq = 0.02
+print_freq = 0.02  # set it to the frequency you want to see the current patient
 fragments = 5
 
 
@@ -103,11 +103,11 @@ class Algorithm(object):
         # when phrase queries will be used
         self.description_as_phrase = description_as_phrase
         self.value_as_phrase = value_as_phrase
-        self.slop = slop
+        self.slop = slop if slop else 5
 
         # when search is done on n-grams
         self.n_gram_field = n_gram_field
-        self.edit_dist = edit_dist
+        self.edit_dist = edit_dist if edit_dist else 0
 
     def save(self, assignments_file, incorrect_file=None, queries_file=None, n_grams_file=None):
         """
@@ -167,9 +167,8 @@ class Algorithm(object):
                 else:
                     self.pick_value_decision(pf_assignment, field)
             else:
+                # normally it shouldn't come to this point since every field has only satisfied patients currently
                 print 'patient {} does not satisfy condition of field {}'.format(self.current_patient.id, field.id)
-                print 'patient {} in field {} patients ? {}'.format(self.current_patient.id, field.id,
-                                                                    self.current_patient in field.patients)
                 pass  # don't consider cases where condition is unsatisfied
         self.current_assignments.append(pf_assignment)
 
@@ -269,6 +268,7 @@ class Algorithm(object):
     def possibilities_query(self, possible_strings, as_phrase):
         """
         Given some possible strings to search for, create and return a boolean ES query to account for each of those
+        as a should clause with a minimum should match of 1
         :param as_phrase: to search each string as a phrase or not
         """
         should_body = list()
@@ -339,7 +339,7 @@ class Algorithm(object):
                     comment += " highlights found " if 'highlights' not in comment else ''
                     words, word_distributions_ids[i] = highlighted_words_n_distributions([], highlights)
                     if self.patient_relevance_test:
-                        # remove indices of un-relevant reports
+                        # remove indices of un-relevant reports from relevant_reports_ids and scores_reports_ids lists
                         relevant_reports_ids, scores_reports_ids = keep_only_relevant_results(
                             hit, self.patient_relevance_test, words, relevant_reports_ids, scores_reports_ids
                         )
@@ -443,7 +443,7 @@ class Algorithm(object):
         """
         if self.use_description1ofk == 0 or self.use_description1ofk == 1:
             must_body.append(self.possibilities_query(field.get_value_possible_values(value), self.value_as_phrase))
-            if self.use_description1ofk == 1:
+            if self.use_description1ofk == 1 and field.description != []:
                 must_body.append(self.possibilities_query(field.description, self.description_as_phrase))
         else:
             must_body.append(
@@ -455,6 +455,10 @@ class Algorithm(object):
         return must_body
 
     def get_value_score(self, field, value):
+        """
+        Return whether there is a report that match the field requirements i.e. contains the value phrase (and
+        description phrase)
+        """
         must_body = list()
         must_body.append(has_parent_query(self.current_patient.id))
         must_body = self.look_for_in_1ofk(must_body, field, value)
@@ -467,6 +471,10 @@ class Algorithm(object):
         return self.score_and_evidence(search_results)
 
     def get_value_score_n_gram(self, field, value):
+        """
+        Check whether the value (and description) words match with n-grams of some report by quering ES on
+        a field analyzed with n-grams
+        """
         must_body = list()
         must_body.append(has_parent_query(self.current_patient.id, "patient"))
         possible_words = field.get_value_possible_values(value)
@@ -476,7 +484,6 @@ class Algorithm(object):
                     "default_field": self.n_gram_field,
                     "query": disjunction_of_conjunctions(field.description)}})
             possible_words += field.description
-        print 'possible words ', possible_words
         must_body.append(
             {"query_string": {
                 "default_field": self.n_gram_field,
@@ -486,9 +493,7 @@ class Algorithm(object):
         the_current_body = search_body(
             query_body, highlight_body=self.highlight_body(self.n_gram_field), min_score=self.min_score
         )
-        print 'the current body ', the_current_body
         search_results = self.es.search(index=self.current_index, body=the_current_body, doc_type=self.search_type)
-        print 'search_results ', search_results
         self.save_query(field.id+'_n_gram', value, the_current_body)
         return self.check_n_grams_results(search_results, possible_words)
 

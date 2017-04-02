@@ -78,7 +78,6 @@ class DataSetField(Field):
         """
         Reads the patients of the form that contains this field, and keeps the patients whose values are consistent
         with the field definition, i.e. condition is fulfilled if exists, NaN is only accepted if field is unary
-        :return:
         """
         for patient in self.form.patients:
             if self.patient_consistent_with_field(patient.golden_truth) and patient not in self.patients:
@@ -90,7 +89,8 @@ class DataSetField(Field):
             # if no condition then either a value or a NaN are accepted
             return True
         else:
-            # if condition is satisfied the field value shouldn't be nan (except if field i unary)
-            if condition_satisfied(golden_truth, self.condition) and not self.in_values(golden_truth[self.id]):
-                return False
-            return True
+            # if condition is satisfied the field value shouldn't be nan (except if field is unary)
+            if condition_satisfied(golden_truth, self.condition):
+                if self.in_values(golden_truth[self.id]):
+                    return True
+            return False
