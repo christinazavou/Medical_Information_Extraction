@@ -35,8 +35,8 @@ class DataSet(object):
                 self.data_set_forms.append(data_set_form)
             else:
                 print "missing form json or csv"
-                print 'json: ', json_file
-                print 'csv: ', csv_file
+                print os.path.isfile(json_file), json_file
+                print os.path.isfile(csv_file), csv_file
 
     def load(self):
         tmp_dict = pickle.load(open(self.filename, 'rb'))

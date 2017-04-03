@@ -1,0 +1,176 @@
+{
+  "LOCPRIM": {
+    "values": {
+      "Flexura hepatica": [
+        "flexure hepatic", 
+        "flexura hepatica"
+      ], 
+      "Colon sigmoideum": [
+        "colon sigmoideum", 
+        "sigmoid", 
+        "sigmo\u00efdtumor", 
+        "sigmoidtumor", 
+        "sigmo\u00efd", 
+        "sigmoidcarcinoom"
+      ], 
+      "Colon transversum": [
+        "colon transversum"
+      ], 
+      "Colon ascendens": [
+        "colon ascendens"
+      ], 
+      "Caecum": [
+        "caecum", 
+        "caecumtumor", 
+        "caecumcarcinoom"
+      ], 
+      "Appendix": [
+        "appendix"
+      ], 
+      "Flexura splenica": [
+        "flexure splenica", 
+        "flexura splenica"
+      ], 
+      "Anders": [], 
+      "Rectum": [
+        "rectum carcinoom", 
+        "rectum", 
+        "recumtumor", 
+        "rectumcarcinoom"
+      ], 
+      "Colon descendens": [
+        "colon descendens"
+      ]
+    }, 
+    "description": [
+      "tumor", 
+      "primair carcinoom", 
+      "primaire carcinoom", 
+      "carcinoom", 
+      "primaire tumor"
+    ], 
+    "condition": ""
+  }, 
+  "mdo_chir": {
+    "values": {
+      "Nee": [
+        "Nee"
+      ], 
+      "Ja": [
+        "Ja"
+      ]
+    }, 
+    "description": [
+      "chirurgisch tumor", 
+      "operatie carcinoom", 
+      "operatie tumor", 
+      "resectie tumor", 
+      "resectie carcinoom", 
+      "chirurgisch carcinoom"
+    ], 
+    "condition": ""
+  }, 
+  "klachten_klacht2": {
+    "values": {
+      "": [], 
+      "Yes": [
+        "Yes"
+      ]
+    }, 
+    "description": [
+      "veranderde defaecatie", 
+      "veranderd defaecatiepatroon"
+    ], 
+    "condition": ""
+  }, 
+  "PROCOK": {
+    "values": {
+      "Ileocoecaal (+appendectomie)": [
+        "ileocoecaal resectie"
+      ], 
+      "Panproctocolectomie": [
+        "panproctocolectomie"
+      ], 
+      "Transanaal endoscopische procedure gevolgd door anterior resectie": [
+        "sigmoid resectie", 
+        "transanaal endoscopisch low anterior resectie", 
+        "sigmo\u00efd resectie", 
+        "transanaal endoscopisch low anteriorresectie", 
+        "transanaal endoscopisch sigmoidresectie"
+      ], 
+      "(Extended) Hemicolectomie links": [
+        "hemicolectomie links"
+      ], 
+      "(Extended) Hemicolectomie rechts": [
+        "hemicolectomie rechts"
+      ], 
+      "Transversum resectie": [
+        "transversum resectie"
+      ], 
+      "Overig (niet-resectieve procedure)": [], 
+      "Transanaal endoscopische procedure": [
+        "transanaal endoscopische", 
+        "transanaal endoscopisch"
+      ], 
+      "Transanaal endoscopische procedure gevolgd door abdomino-perineale resectie": [
+        "transanaal endoscopische abdomino perinealeresectie"
+      ], 
+      "Subtotale colectomie (coecum tot rectum)": [
+        "subtotale colectomie"
+      ], 
+      "(Low) anterior-resectie/sigmoidresectie": [
+        "sigmoid resectie", 
+        "low anteriorresectie", 
+        "sigmoidresectie", 
+        "sigmo\u00efd resectie", 
+        "low anterior resectie"
+      ], 
+      "Abdomino-perianale resectie": [
+        "abdomino perianaleresectie"
+      ]
+    }, 
+    "description": [], 
+    "condition": ""
+  }, 
+  "klachten_klacht1": {
+    "values": {
+      "": [], 
+      "Yes": [
+        "Yes"
+      ]
+    }, 
+    "description": [
+      "rectal bloedverlies", 
+      "rectaal bloedverlies"
+    ], 
+    "condition": ""
+  }, 
+  "RESTAG_CT": {
+    "values": {
+      "Yes": [
+        "Yes"
+      ], 
+      "No": [
+        "No"
+      ]
+    }, 
+    "description": [
+      "restagering ct thorax abdomen"
+    ], 
+    "condition": ""
+  }, 
+  "klachten_klacht4": {
+    "values": {
+      "": [], 
+      "Yes": [
+        "Yes"
+      ]
+    }, 
+    "description": [
+      "anemie", 
+      "anemic", 
+      "anemia"
+    ], 
+    "condition": ""
+  }
+}

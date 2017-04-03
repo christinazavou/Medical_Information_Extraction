@@ -14,7 +14,7 @@ CONFIGURATION_IDX, DATA_PATH_IDX, RESULTS_PATH_IDX, SUB_FOLDER_IDX = 1, 2, 3, 4
 
 if len(sys.argv) < 5:
     configuration, data_path, results_path, sub_folder =\
-        0, 'C:\\Users\\ChristinaZ\\Desktop\\All_Data', '..\\results', 'expert'
+        9, 'C:\\Users\\ChristinaZ\\Desktop\\All_Data', '..\\results', 'expert'
 else:
     configuration, data_path, results_path, sub_folder = \
         sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX], sys.argv[SUB_FOLDER_IDX]
