@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import ast
+import json
 import pandas as pd
 from src.mie_supervised.utils import prepare_text
 from sklearn.feature_extraction.text import CountVectorizer
@@ -90,6 +91,7 @@ def possible_tokens(field, value):
     for token in field.description:
         tokens += [token] + token.split(' ')
     tokens = [token.lower() for token in tokens if token]
+    tokens = list(set(tokens))
     # print field.id, ' tokens: ', tokens
     return tokens
 
@@ -131,8 +133,8 @@ def num_of_patients_n_reports_on_value_n_gram(df, field_id, value, n_gram):
 def discriminate(df, values_df, field, n_grams_possibilities):
     """
     Given the words found by ES queries on n-gram analysis (n_grams_possibilities), check the occurrence on the
-    positive reports (the ones that should have the word) and the negative reports (reports of patients that are
-    negative on the word) to choose whether the word is accepted as a synonym of the initial word
+    positive reports (reports of patients that should have the word) and the negative reports (reports of patients
+    that are negative on the word) and save on the values_df information (counts) on those n_gram words
     :param df: form dataframe as made in get_frame()
     :param values_df: field dataframe as made in find_texts_on_value()
     :param n_grams_possibilities a dictionary having as keys some words searched for filling the forms' fields and
@@ -176,9 +178,15 @@ def n_gram_acceptance(values_df, num_of_patients, positives_pct=0.8, support_pct
     for value in values:
         n_grams_positives.setdefault(value, dict())
         n_grams_negatives.setdefault(value, dict())
+        all_current_n_grams = set()
+        for idx, row in values_df.iterrows():
+            tmp_n_grams = ast.literal_eval(row['n_grams'])
+            all_current_n_grams.update(tmp_n_grams.keys())
         for idx, row in values_df.iterrows():
             val = row['value']
             n_grams_info = ast.literal_eval(row['n_grams'])
+            for n_gram in all_current_n_grams:
+                n_grams_info.setdefault(n_gram, {'tf': 0, 'pc': 0, 'rc': 0})  # since not all n-grams are in all values
             for n_gram, n_gram_info in n_grams_info.items():
                 if val == value:
                     n_grams_positives[value].setdefault(n_gram, {'tf': 0, 'pc': 0, 'rc': 0})
@@ -190,31 +198,46 @@ def n_gram_acceptance(values_df, num_of_patients, positives_pct=0.8, support_pct
                     n_grams_negatives[value][n_gram]['tf'] += n_gram_info['tf']
                     n_grams_negatives[value][n_gram]['pc'] += n_gram_info['pc']
                     n_grams_negatives[value][n_gram]['rc'] += n_gram_info['rc']
+    n_grams_accepted = dict()
     for value in n_grams_positives:
+        n_grams_accepted.setdefault(value, dict())
         for n_gram in n_grams_positives[value]:
+            # n_grams_accepted[value].setdefault(n_gram, {'positive_pct': 0, 'patient_support': 0, 'accepted': False})
             if (n_grams_positives[value][n_gram]['tf'] + n_grams_negatives[value][n_gram]['tf']) > 0:
                 positive_pct = float(n_grams_positives[value][n_gram]['tf']) / \
                                (n_grams_positives[value][n_gram]['tf'] + n_grams_negatives[value][n_gram]['tf'])
             else:
                 positive_pct = 0
-            support = float(n_grams_positives[value][n_gram]['pc']) / num_of_patients
+            if num_of_patients > 0:
+                patient_support = float(n_grams_positives[value][n_gram]['pc']) / num_of_patients
+            else:
+                patient_support = 0
             # THIS IS THE SUPPORT AND POSITIVE_PCT ? COULD USE OTHERS AS WELL! ..
-            print value, n_gram, positive_pct, support
-            print values_df[values_df['value'] == value]['num_of_patients']
-            if positive_pct >= positives_pct and support >= support_pct:
-                pass
+            # print values_df[values_df['value'] == value]['num_of_patients']
+            if positive_pct >= positives_pct and patient_support >= support_pct:
+                n_grams_accepted[value][n_gram] = {
+                    'positive_pct': positive_pct, 'patient_support': patient_support, 'accepted': True
+                }
+            else:
+                n_grams_accepted[value][n_gram] = {
+                    'positive_pct': positive_pct, 'patient_support': patient_support, 'accepted': False
+                }
+    return n_grams_accepted
 
 
-def form_discriminative_n_grams(form, filename, n_grams_possibilities):
+def form_discriminative_n_grams(form, filename, n_grams_possibilities, fields_ids):
     folder = os.path.dirname(filename)
     data_frame = get_frame(form, filename)
     num_of_patients = data_frame.shape[0]
     print 'num of patients ', num_of_patients
+    form_accepted_n_grams = dict()
     for field in form.fields:
-        filename = os.path.join(folder, 'data_frame_{}.csv'.format(field.id))
-        values_df = find_texts_on_value(field, filename, data_frame)
-        discriminate(data_frame, values_df, field, n_grams_possibilities)
-        exit()
-        values_df.to_csv(filename, encoding='utf8')
-        n_gram_acceptance(values_df, num_of_patients)
+        if field.id in fields_ids:
+            field_filename = os.path.join(folder, 'data_frame_{}.csv'.format(field.id))
+            values_df = find_texts_on_value(field, field_filename, data_frame)
+            discriminate(data_frame, values_df, field, n_grams_possibilities)
+            values_df.to_csv(field_filename, encoding='utf8')
+            form_accepted_n_grams[field.id] = n_gram_acceptance(values_df, num_of_patients, 0.8, 0)
+    json.dump(form_accepted_n_grams, open(filename.replace('data_frame', 'ngrams').replace('.csv', '.json'), 'w'),
+              encoding='utf8', indent=2)
 

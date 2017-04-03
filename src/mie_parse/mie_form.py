@@ -49,6 +49,7 @@ class Form(object):
         fields_list = [str(field) for field in fields_list]
         fields_types = {case: str for case in fields_list}
         data_frame = pd.read_csv(self.csv_file, usecols=fields_list, dtype=fields_types, encoding='utf-8').fillna(u'')
+        data_frame = data_frame.drop_duplicates(subset='PatientNr')  # some patients appear twice in the form => keep 1
         return data_frame
 
     def to_voc(self):

@@ -14,7 +14,7 @@ CONFIGURATION_IDX, DATA_PATH_IDX, RESULTS_PATH_IDX, SUB_FOLDER_IDX = 1, 2, 3, 4
 
 if len(sys.argv) < 5:
     configuration, data_path, results_path, sub_folder =\
-        1, 'C:\\Users\\ChristinaZ\\Desktop\\All_Data', '..\\results', 'n_grams'
+        0, 'C:\\Users\\ChristinaZ\\Desktop\\All_Data', '..\\results', 'expert'
 else:
     configuration, data_path, results_path, sub_folder = \
         sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX], sys.argv[SUB_FOLDER_IDX]
@@ -56,7 +56,7 @@ elif sub_folder == 'n_grams':
 
     for form in forms:
         form_df_file = cp.get_file(['SPECIFIC_RESULTS_PATH', 'data_frame_{}.csv'.format(form.id)])
-        form_discriminative_n_grams(form, form_df_file, n_grams_possibilities)
+        form_discriminative_n_grams(form, form_df_file, n_grams_possibilities, cp.settings['forms'][form.id])
 
 else:
 
@@ -72,9 +72,9 @@ else:
 
     es_index = EsIndex(cp.settings['es_index_name'])
 
-    # es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
-    # for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
-    #     es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
+    es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
+    for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
+        es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
 
     a = Algorithm(
         patient_relevant=cp.settings['patient_relevant'], search_fields=cp.settings['search_fields'],
