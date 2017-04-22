@@ -14,7 +14,7 @@ CONFIGURATION_IDX, DATA_PATH_IDX, RESULTS_PATH_IDX, SUB_FOLDER_IDX = 1, 2, 3, 4
 
 if len(sys.argv) < 5:
     configuration, data_path, results_path, sub_folder =\
-        9, 'C:\\Users\\ChristinaZ\\Desktop\\All_Data', '..\\results', 'expert'
+        14, 'C:\\Users\\ChristinaZ\\Desktop\\All_Data', '..\\results', 'expert'
 else:
     configuration, data_path, results_path, sub_folder = \
         sys.argv[CONFIGURATION_IDX], sys.argv[DATA_PATH_IDX], sys.argv[RESULTS_PATH_IDX], sys.argv[SUB_FOLDER_IDX]
@@ -60,6 +60,7 @@ elif sub_folder == 'n_grams':
 
 else:
 
+    # PARSING
     forms = DataSet(
         cp.get_file(['RESULTS_PATH', 'dataset']),
         cp.settings['json_form_file'],
@@ -70,12 +71,14 @@ else:
 
     # print 'patients in both forms = ', set(forms[1].patients) & set(forms[0].patients)  # => no common patient !!
 
+    # INDEXING
     es_index = EsIndex(cp.settings['es_index_name'])
 
     es_index.create(body=json.load(open(cp.get_file(['CONFIGURATIONS_PATH', 'mapping_file']), 'r')), if_exists='keep')
     for form in forms:  # comment it to avoid indexing if you are sure everything is indexed
         es_index.index_data_set(form)  # comment it to avoid indexing if you are sure everything is indexed
 
+    # INFORMATION RETRIEVAL
     a = Algorithm(
         patient_relevant=cp.settings['patient_relevant'], search_fields=cp.settings['search_fields'],
         use_description1ofk=cp.settings['use_description_1ofk'],
@@ -97,6 +100,7 @@ else:
 
     assignments = json.load(open(assignments_file, 'r'), encoding='utf8')
 
+    # EVALUATING
     e = Evaluation()
     e.evaluate(assignments, forms)
     e.save(

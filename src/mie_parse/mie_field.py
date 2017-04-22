@@ -94,3 +94,13 @@ class DataSetField(Field):
                 if self.in_values(golden_truth[self.id]):
                     return True
             return False
+
+    def to_voc(self):
+        return {
+            u'id': self.id,
+            u'condition': self.condition,
+            u'description': var_to_utf(self.description),
+            u'values': var_to_utf(self.values),
+            u'form_id': self.form_id,
+            u'patients': [patient.id for patient in self.patients]
+        }
