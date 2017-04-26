@@ -1,6 +1,11 @@
 # Medical_Information_Extraction
 
 #### usage
-call main.py configuration_number data_folder_path results_folder_path
+##### main.py <configuration_number> <data_path> <results_path> <sub_folder>
 
-or call execute_configurations.py results_folder_path
+##### sub_folder is one of the sub_folders under aux_config
+
+#### See aux_config/guidelines.yml to make a configuration file
+
+
+#### Check src/execute_mie on how others can run the code (need to configure execute_many.py)
