@@ -67,8 +67,6 @@ class FieldClassifier:
 
         self.clf = SVC(random_state=40)
 
-        # self.run_cross_validation()
-
     def run_cross_validation(self, out_file):  # normalize ?
         print 'running cross validation of classifier {} and writing results in {}'.format(self.name, out_file)
         k_fold = KFold(n=len(self.le_targets), n_folds=5)

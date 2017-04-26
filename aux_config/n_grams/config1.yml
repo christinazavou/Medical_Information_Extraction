@@ -1,5 +1,5 @@
 
-dataset: expert\dataset_important_fields_expert.p
+dataset: expert\dataset_important_fields_expert.p  # should exists
 
 n_grams_file: expert\config8\n_grams.json
 

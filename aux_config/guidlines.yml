@@ -37,7 +37,7 @@ n_gram_field: Optional. The default mapping_v2.json can support one of:[descript
 
 edit_distance: integer (default is 0). In case of the n_grams search, define the maximum edit distance of a word matched with the word searched
 
-search_fields: Optional. (If not set, the queries will use the description field.) Accepts a list with the fields to search on. The default mapping_v2.json supports the fields:description, description.dutch_tf_description, description.dutch_description, description.tf_description, description.4_gram_description, description.3_gram_description and description.2_gram_description
+search_fields: Optional. (If not set, the queries will use the description field.) Accepts a list with the fields to search on. The default mapping_v2.json supports the fields:description, description.dutch_tf_description, description.dutch_description, description.tf_description
 
 # note on fields
 #  unconditional fields on 'colorectaal':

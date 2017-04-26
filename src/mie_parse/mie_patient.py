@@ -38,6 +38,7 @@ class Patient(object):
             self.num_of_reports = len(reports)
             return var_to_utf(reports)
         else:
+            print os.path.join(self.dossier_path, 'report.csv'),' does not exists.'
             return None
 
     def get_from_data_frame(self, data_frame, field_name):
